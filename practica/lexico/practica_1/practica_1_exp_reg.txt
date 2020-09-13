@@ -1,0 +1,49 @@
+a) Códigos postales (ej 1234, 8366, etc. pero no 422 o 0027)
+
+    - [1-9][0-9]{3}
+
+b) Número de Patentes Mercosur (AAA-192. pero no AA-192 o A-19A)
+
+    - [A-Z]{3}[-][0-9]{3}
+
+c) Comentarios acotados por /* y */. SUM = {letras, *, /}
+
+    - /\*(.|[\r\n])*\*/ [Tengo dudas en este]
+
+d) Identificadores de cualquier longitud que comiencen con una letra y contengan letras, dígitos o
+guiones. No pueden terminar con guion
+
+    - [a-zA-Z][0-9a-zA-Z\-_]+[^\-]
+
+e) Ídem anterior pero que no contengan dos guiones seguidos
+
+    - [a-zA-Z](?:[a-zA-Z0-9]|-(?!-))+[^\-]
+
+f/l) Constantes en otras bases como en el lenguaje C
+
+    - [Me daba paja, pero son las de base2, base8, base16 (hexa), etc]
+
+g) Constantes aritméticas enteras. Controlar el rango permitido.
+
+    - [0-9]{1,5} [Con rango se refiere al rango de asignar un int?]
+
+h) Constantes reales con formato xx.xx, controlando el rango permitido.
+
+    - [0-9]{1,5}.[0-9]{1,10}
+
+i) Constantes “string” de la forma “texto “
+    
+    - "([^"]|\")*"])"
+
+j) Palabras reservadas (IF-WHILE-DECVAR-ENDDEC-INTEGER-FLOAT-WRITE)
+
+    - (IF|WHILE|DECVAR|ENDDEC|INTEGER|FLOAT|WRITE){1}
+
+k) Operadores lógicos y operadores aritméticos básicos
+
+    - [0-9a-zA-Z][\s+]*(\+|\-|\*|\/|&&|\|\||<|>|>=|<=|==|!=){1}[\s+]*[0-9a-zA-Z]
+
+
+
+
+

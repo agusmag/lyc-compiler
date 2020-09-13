@@ -1,0 +1,86 @@
+DECVAR
+    contador: Integer;
+    promedio: Float;
+    actual, suma: Float;
+ENDDEC
+
+write "Hola mundo!";
+contador: 0;
+actual: 999;
+suma: 02;
+contador: contador+1;
+
+while (contador <= 92) {
+    contador: contador + 1;
+    actual: (contador/0.342) + (contador*contador);
+    suma: suma + actual;
+    
+}
+
+write "La suma es: ";
+write suma;
+
+if (actual > 2){
+    write "2 > 3";    
+}
+
+if (actual < 3){
+    if(actual >= 3){
+        write "soy true";
+        
+    }
+    if(actual <= 3){
+        write "soy true";
+        
+    }
+    if(actual != 3){
+        write "soy true";
+        
+    }
+    if(actual == 3){
+        write "soy true";
+        
+    }
+}else{
+    actual:333.3333;
+}
+
+a) determinar los elementos léxicos y escribir una expresión regular para cada uno de éstos
+
+DIGITO          [0-9]
+LETRA           [a-zA-Z]
+ESPACIO         [\s+]
+TEXTO           "([^"]|\")*"])"
+OP_LOGARITMICO  (&&|\|\||<|>|>=|<=|==|!=)
+OP_ARITMETICO   (\+|\-|\*|\/)
+
+END_LINE        ";"
+CONS            {LETRA}({LETRA}|{DIGITO})*
+CONDICION       {CONS}{ESPACIO}({OP_LOGARITMICO}|{OP_ARITMETICO}){ESPACIO}{CONS}
+ASIG            ({CONS}|({CONS}","{CONS})+)":"{CONS}{END_LINE}
+BLOQUE          (({ASIG}|{CONDICION}|CONS){END_LINE})*
+
+OP_SUM          "+"
+OP_RES          "-"
+OP_MUL          "*"
+OP_DIV          "/"
+OP_LESS         "<"
+OP_MORE         ">"
+OP_EQ           "="
+OP_LEQ          "<="
+OP_MOQ          ">="
+OP_EQQ          "=="
+OP_AND          "&&"
+OP_OR           "||"
+
+LLAVE           "{"
+END_LLAVE       "}"
+PARENTESIS      "("
+END_PARENTESIS  ")"
+
+OP_DEC          "DECVAR"({ASIG}*)"ENDDEC"
+WRITE           "WRITE"{ESPACIO}({CONS}|{TEXTO})
+IF              "IF"{PARENTESIS}{CONDICION}{END_PARENTESIS}{LLAVE}{BLOQUE}{END_LLAVE}("ELSE"{LLAVE}{BLOQUE}{END_LLAVE})*
+
+WHILE           "WHILE"{PARENTESIS}{CONDICION}{END_PARENTESIS}{LLAVE}{BLOQUE}{END_LLAVE}
+
