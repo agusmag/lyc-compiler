@@ -11,13 +11,13 @@ int yyerror(void);
 
 %option noyywrap
 
-
-INTEGER         "Integer"
-DIGITO          [0-9]
+ENTERO          [0-9]
+DECIMAL         ({ENTERO}*\.[0-9]+)
 LETRA           [a-zA-Z]
 ESPACIO         [\s+]
+TEXTO           \"(.)*\"
 
-ID              {LETRA}({LETRA}|{DIGITO})*
+ID              {LETRA}({LETRA}|{ENTERO})*
 
 OP_SUM          "+"
 OP_RES          "-"
@@ -29,44 +29,63 @@ OP_EQ           "="
 OP_LEQ          "<""="
 OP_MOQ          ">""="
 OP_EQQ          "=""="
+OP_DIFF         "!""="
 OP_AND          "&""&"
 OP_OR           "|""|"
 OP_ASIG         ":"
-OP_ENDLN         ";"
-/*** OP_LOGICO        (&&||||<|>|>=|<=|==|!=) ***/
-/*** OP_ARITMETICO   (+|-|*|/) ***/
 
 LLAVE           "{"
 END_LLAVE       "}"
 PARENTESIS      "("
 END_PARENTESIS  ")"
+COMA            ","
+END_LINE        ";"
+COMILLA_DOBLE   "\""
+COMILLA_SIMPLE  "'"
 
 %%
-{OP_ENDLN}          {printf("\nOP ENDLN: %s\n", yytext);}
-{OP_ASIG}           {printf("\nOP ASIG: %s\n", yytext);}
-{OP_SUM}            {printf("\nOP SUMA: %s\n", yytext);}
-{OP_MUL}            {printf("\nOP MUL: %s\n", yytext);}
-{OP_RES}            {printf("\nOP RES: %s\n", yytext);}
-{OP_DIV}            {printf("\nOP DIV: %s\n", yytext);}
-{OP_LESS}           {printf("\nOP LESS: %s\n", yytext);}
-{OP_MORE}           {printf("\nOP MORE: %s\n", yytext);}
-{OP_EQ}             {printf("\nOP EQ: %s\n", yytext);}
-{OP_LEQ}            {printf("\nOP LEQ: %s\n", yytext);}
-{OP_MOQ}            {printf("\nOP MOQ: %s\n", yytext);}
-{OP_EQQ}            {printf("\nOP EQQ: %s\n", yytext);}
-{OP_AND}            {printf("\nOP AND: %s\n", yytext);}
-{OP_OR}             {printf("\nOP OR: %s\n", yytext);}
+{TEXTO}             {printf("\nTEXTO: %s\n", yytext);}
+{ENTERO}            {printf("\nDIGITO: %s\n", yytext);}
+{DECIMAL}           {printf("\nDECIMAL: %s\n", yytext);}
+{END_LINE}          {printf("\nEND LINE: %s\n", yytext);}
+{OP_ASIG}           {printf("\nOPERADOR ASIG: %s\n", yytext);}
+{OP_SUM}            {printf("\nOPERADOR SUMA: %s\n", yytext);}
+{OP_MUL}            {printf("\nOPERADOR MUL: %s\n", yytext);}
+{OP_RES}            {printf("\nOPERADOR RES: %s\n", yytext);}
+{OP_DIV}            {printf("\nOPERADOR DIV: %s\n", yytext);}
+{OP_LESS}           {printf("\nOPERADOR LESS: %s\n", yytext);}
+{OP_MORE}           {printf("\nOPERADOR MORE: %s\n", yytext);}
+{OP_EQ}             {printf("\nOPERADOR EQ: %s\n", yytext);}
+{OP_LEQ}            {printf("\nOPERADOR LEQ: %s\n", yytext);}
+{OP_MOQ}            {printf("\nOPERADOR MOQ: %s\n", yytext);}
+{OP_EQQ}            {printf("\nOPERADOR EQQ: %s\n", yytext);}
+{OP_DIFF}           {printf("\nOPERADOR DIFF: %s\n", yytext);}
+{OP_AND}            {printf("\nOPERADOR AND: %s\n", yytext);}
+{OP_OR}             {printf("\nOPERADOR OR: %s\n", yytext);}
 {LLAVE}             {printf("\nLLAVE: %s\n", yytext);}
 {END_LLAVE}         {printf("\nEND LLAVE: %s\n", yytext);}
 {PARENTESIS}        {printf("\nPARENTESIS: %s\n", yytext);}
 {END_PARENTESIS}    {printf("\nEND PARENTESIS: %s\n", yytext);}
-"DECVAR"            {printf("\nRESERVADA: %s\n", yytext);}
+{COMA}              {printf("\nCOMA: %s\n", yytext);}
+{COMILLA_DOBLE}     {printf("\nCOMILLA DOBLE: %s\n", yytext);}
+{COMILLA_SIMPLE}    {printf("\nCOMILLA SIMPLE: %s\n", yytext);}
+"DECVAR"            {printf("\nDECLARACION: %s\n", yytext);}
+"ENDDEC"            {printf("\nEND DECLARACION: %s\n", yytext);}
+"Integer"           {printf("\nTIPO INTEGER: %s\n", yytext);}
+"Float"             {printf("\nTIPO FLOAT: %s\n", yytext);}
+"String"            {printf("\nTIPO STRING: %s\n", yytext);}
+"if"                {printf("\nIF: %s\n", yytext);}
+"else"              {printf("\nELSE: %s\n", yytext);}
+"while"             {printf("\nWHILE: %s\n", yytext);}
+"for"               {printf("\nFOR: %s\n", yytext);}
+"write"             {printf("\nWRITE: %s\n", yytext);}
 {ID}                {printf("\nID: %s\n", yytext);}
 " "
 "\n"
 "\t"
 "\n\t"
 "\r\n"
+
 .                   {yyerror();}
 
 %%
