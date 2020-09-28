@@ -1,3 +1,6 @@
-Relleno por que todavía no hay nada.
-La idea es dividir esto en carpetas de documentacion y otras con el código, pero todavía no se como carajo se arma :DRelleno por que todavía no hay nada.
-La idea es dividir esto en carpetas de documentacion y otras con el código, pero todavía no se como carajo se arma :D
+Distribucion:
+    * Entrega1_Lexico/Grupo18 -> Todo lo relacionado a FLEX y BISON
+        - ToDo -> Agregar funcion para saber si estamos debug o no (print o return)
+        - ToDo -> Que los lexemas vayan a la tabla de simbolos con una funcion
+        - ToDo -> Hacer la parte de bison
+    * ToDo
