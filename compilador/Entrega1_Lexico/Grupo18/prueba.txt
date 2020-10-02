@@ -1,4 +1,4 @@
-DIM < contador,promedio,actual,suma> AS < Integer,Float,Float,Float >
+DIM <contador,promedio,actual,suma> AS <Integer,Float,Float,Float>
 
 CONST nombre=80;
 PUT "Prueba.txt LyC Tema 4!";
