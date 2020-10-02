@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "y.tab.h"
 
 #define TAM_PILA 100
@@ -115,10 +116,18 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 
 %}
 
+%union {
+	char * int_val;
+	char * real_val;
+	char * str_val;
+	char * cmp_val;
+}
+
+%token <str_val>ID      
 %token COMENTARIO_SIMPLE
-%token CONST_STR        
-%token CONST_INT        
-%token CONST_REAL       
+%token <str_val>CONST_STR        
+%token <int_val>CONST_INT        
+%token <real_val>CONST_REAL       
 %token END_LINE         
 %token OP_ASIG          
 %token OP_ASIG_CONS     
@@ -126,14 +135,19 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %token OP_MUL           
 %token OP_RES           
 %token OP_DIV           
-%token OP_LEQ           
-%token OP_MOQ           
-%token OP_EQQ           
-%token OP_DIFF          
-%token OP_LESS          
-%token OP_MORE          
+%token <cmp_val>OP_LEQ           
+%token <cmp_val>OP_MOQ           
+%token <cmp_val>OP_EQQ           
+%token <cmp_val>OP_DIFF          
+%token <cmp_val>OP_LESS          
+%token <cmp_val>OP_MORE          
+%token <cmp_val>OP_NOT           
 %token OP_AND           
 %token OP_OR            
+%token PUNTO            
+%token PUNTO_Y_COMA     
+%token CORCHETE         
+%token END_CORCHETE     
 %token LLAVE            
 %token END_LLAVE        
 %token PARENTESIS       
@@ -155,11 +169,8 @@ FILE *fIntermedia; //ARCHIVO CON INTERMEDIA
 %token DO               
 %token WHILE            
 %token IN               
-%token REPEAT           
-%token UNTIL            
 %token PUT              
 %token GET              
-%token ID               
 
 %%
 
@@ -172,7 +183,7 @@ programa:
 		printf("\tFin COMPILADOR ok\n"); 
 		if(crearArchivoIntermedia()==TODO_OK) {
 			printf("\nArchivo con intermedia generado\n");
-			generarASM();
+			//generarASM();
 		} else {
 			printf("Hubo un error al generar el archivo de intermedia");
 		}
@@ -180,7 +191,7 @@ programa:
 
 est_declaracion:
 	DIM {
-        printf("\t\Inicio declaracion multiple\n");
+        printf("\t\nInicio declaracion multiple\n");
     } est_variables AS est_tipos {
         printf("\tFin de la declaracion multiple\n");
     }
@@ -194,7 +205,7 @@ lista_variables:
     | ID COMA lista_variables
 
 est_tipos:
-    OP_LESS lista_variables OP_MORE
+    OP_LESS lista_tipos OP_MORE
 
 lista_tipos:
     tipo
@@ -214,9 +225,9 @@ est_asignacion:
     ;
 
 asignacion: 
-    ID OP_ASIG_CONS REAL {
+    ID OP_ASIG_CONS FLOAT {
         validarDeclaracionTipoDato("REAL");
-    }; 
+    } 
     | ID OP_ASIG_CONS STRING {
         validarDeclaracionTipoDato("STRING");
     }
@@ -239,9 +250,9 @@ bloque:
 sentencia:
     ciclo
     | est_declaracion
-    | seleccion  
-    | asignacion
-    | entrada_salida
+    | est_asignacion PUNTO_Y_COMA
+    | seleccion
+    | entrada_salida PUNTO_Y_COMA
     ;
 
 //While
@@ -642,11 +653,19 @@ op_or_: OP_OR {
 } ;
 
 comparacion:
-    expresion OP_COMPARACION expresion { 
+    expresion lista_comparadores expresion { 
             strcpy(comparador_usado,yylval.cmp_val);
     }  
     | expresion
     ;
+
+lista_comparadores:
+    OP_LEQ
+    | OP_MOQ 
+    | OP_EQQ
+    | OP_DIFF
+    | OP_LESS
+    | OP_MORE
 
 expresion:
     expresion OP_SUM termino {
@@ -710,6 +729,256 @@ factor:
 // ---------------------------------------------------------------
 
 %%
+// FUNCIONES DE TABLA DE SIMBOLOS
+int insertar_TS(char* tipo, char* nombre) {
+	int i, posicion;
+	
+	for(i = 0; i < puntero_ts; i++)
+	{
+		if(strcmp(tablaSimbolos[i].nombre, nombre) == 0)
+		{
+			return i;
+		}
+	}
+	strcpy(tablaSimbolos[puntero_ts].tipo, tipo);
+	strcpy(tablaSimbolos[puntero_ts].nombre, nombre);
+	
+	if(strcmp(tipo,"CONST_STR") == 0)
+	{
+		int longitud = strlen(tablaSimbolos[i].nombre);
+		sprintf(tablaSimbolos[puntero_ts].longitud, "%d", longitud);	
+	} 
+	else if (strcmp(tipo,"CONST_INT") == 0  || strcmp(tipo,"CONST_REAL") == 0)
+	{
+		strcpy(tablaSimbolos[puntero_ts].valor, tablaSimbolos[i].nombre);
+	}
+	
+	posicion = puntero_ts;
+	puntero_ts++;
+	return posicion;
+}
+
+int verificarExistencia(char* nombre) {
+	int i;
+	for (i=0;i < puntero_ts;i++)
+	{
+		//printf("Voy a comprar %s con %s \n",nombre, tablaSimbolos[i].nombre);
+		if(strcmp(nombre,tablaSimbolos[i].nombre) == 0)
+		{
+			return EXISTE;
+		}
+	}
+	return NO_EXISTE;
+}
+
+char * recuperarValorTS(char* nombre) {
+	int i;
+	for (i=0;i < puntero_ts;i++)
+	{
+		//printf("Voy a comprar %s con %s \n",nombre, tablaSimbolos[i].nombre);
+		if(strcmp(nombre,tablaSimbolos[i].nombre) == 0)
+		{
+			return tablaSimbolos[i].valor;
+		}
+	}
+	finAnormal("Syntax Error","Variable no inicializada");
+	return "ERROR";
+}
+
+char * recuperarTipoTS(char* nombre) {
+	int i;
+	for (i=0;i < puntero_ts;i++)
+	{
+		//printf("Voy a comprar %s con %s \n",nombre, tablaSimbolos[i].nombre);
+		if(strcmp(nombre,tablaSimbolos[i].nombre) == 0)
+		{
+			return tablaSimbolos[i].tipo;
+		}
+	}
+	finAnormal("Syntax Error","Variable no inicializada");
+	return "ERROR";
+}
+
+int crearArchivoTS()
+{
+	FILE *archivo; 
+	int i;
+	archivo = fopen("ts.txt","w"); 
+
+	if (!archivo){	return ERROR; }
+
+	/*fprintf(archivo, "Nombre                        Tipo                  Valor                Longitud\n");
+	
+	for (i = 0; i < puntero_ts; i++)
+	{
+		if (strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 || strcmp(tablaSimbolos[i].tipo, "REAL") == 0  || strcmp(tablaSimbolos[i].tipo, "STRING") == 0 ) {  
+			fprintf(archivo,"%-30s%-10s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 ) {
+			fprintf(archivo,"%-29s%-10s                                    %-30d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre) - 2);
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0) {
+			fprintf(archivo,"_%-29s%-10s           %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+		}
+		else {
+			fprintf(archivo,"%-30s%-10s                                %-30s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+		}
+	}
+	*/
+	fprintf(archivo, "Nombre\t\tTipo\t\tValor\t\tLongitud\n");
+	for (i = 0; i < puntero_ts; i++)
+	{
+		if (strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 || strcmp(tablaSimbolos[i].tipo, "REAL") == 0  || strcmp(tablaSimbolos[i].tipo, "STRING") == 0 ) {  
+			fprintf(archivo,"%s\t\t%s\t\t-\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo);
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_STR") == 0 ) {
+			fprintf(archivo,"%s\t\t%s\t\t-\t\t%d\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,strlen(tablaSimbolos[i].nombre) - 2);
+		}
+		else if(strcmp(tablaSimbolos[i].tipo, "CONST_INT") == 0 || strcmp(tablaSimbolos[i].tipo, "CONST_REAL") == 0) {
+			fprintf(archivo,"_%s\t\t%s\t\t%s\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+		}
+		else {
+			fprintf(archivo,"%s\t\t%s\t\t%s\t\t-\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo,tablaSimbolos[i].valor);
+		}
+	}
+	fclose(archivo); 
+
+	return TODO_OK;
+}
+
+// FUNCIONES DE PILA
+void apilar(int nroPila, char * val) {
+	switch(nroPila) {
+		case PILA_IF:
+			if(pilaLlena(PILA_IF) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de IF.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaIF[tope_pila_if]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_if++;
+			break;
+
+		case PILA_WHILE:
+			if(pilaLlena(PILA_WHILE) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de WHILE.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaWhile[tope_pila_while]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_while++;
+			break;
+
+		case PILA_ASIGNACION:
+			if(pilaLlena(PILA_ASIGNACION) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de ASIGNACION.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaAsignacion[tope_pila_asignacion]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_asignacion++;
+			break;
+	
+		case PILA_REPEAT:
+			if(pilaLlena(PILA_REPEAT) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de REPEAT.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaRepeat[tope_pila_repeat]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_repeat++;
+			break;	
+
+		case PILA_BETWEEN:
+			if(pilaLlena(PILA_BETWEEN) == TRUE){
+				printf("Error: Se exedio el tamano de la pila de BETWEEN.\n");
+				system ("Pause");
+				exit (1);
+			}
+			pilaBetween[tope_pila_between]=val;
+			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
+			tope_pila_between++;
+			break;	
+
+		default:
+			printf("\tError: La pila recibida no se reconoce\n",val);
+			system ("Pause");
+			exit (1);
+			break;
+	}
+}
+
+int desapilar(int nroPila) {
+	switch(nroPila){
+		case PILA_IF:
+			if(pilaVacia(tope_pila_if) == 0) {
+				char * dato = pilaIF[tope_pila_if-1];
+				tope_pila_if--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				printf("Error: La pila esta vacia.\n");
+				system ("Pause");
+				exit (1);
+			}
+			break;
+	
+		case PILA_WHILE:
+
+			if(pilaVacia(tope_pila_while) == 0) {
+				char * dato = pilaWhile[tope_pila_while-1];
+				tope_pila_while--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+		
+			break;
+
+		case PILA_ASIGNACION:
+			if(pilaVacia(tope_pila_asignacion) == 0) {
+				char * dato = pilaAsignacion[tope_pila_asignacion-1];
+				tope_pila_asignacion--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return (tope_pila_asignacion);			// ESTA PILA EN VEZ DE DEVOLVER EL DATO DEVUELVE LA POSICION, SINO TENGO QUE HACER UNA FUNCION NUEVA
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+		
+			break;
+
+		case PILA_REPEAT:		
+			if(pilaVacia(tope_pila_repeat) == 0) {
+				char * dato = pilaRepeat[tope_pila_repeat-1];
+				tope_pila_repeat--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+			break;	
+
+		case PILA_BETWEEN:
+			if(pilaVacia(tope_pila_between) == 0) {
+				char * dato = pilaBetween[tope_pila_between-1];
+				tope_pila_between--;	
+				printf("\tDESAPILAR #CELDA -> %s\n",dato);
+				return atoi(dato);		
+			} else {
+				finAnormal("Stack Error","La pila esta vacia");
+			}
+			break;	
+
+		default:
+			finAnormal("Stack Error","La pila recibida no se reconoce");
+			break;
+	}
+}
 
 int pilaVacia(int tope)
 {
@@ -928,37 +1197,6 @@ int yyerror() {
 void finAnormal(char * tipo, char * mensaje) {
     printf("[ERROR]: %s - %s\n",tipo,mensaje);
     yyerror();
-}
-
-int crearArchivoIntermedia() {
-    FILE * archivo;
-    int i;
-    archivo = fopen("intermedia.txt", "wt");
-
-    if (!archivo) {
-        return ERROR;
-    }
-
-    for (i = 1; i < puntero_tokens; i++) {
-            fprintf(archivo,"%s\n", listaTokens[i]);
-            //fprintf(archivo,"CELDA %d: %s\n", i, listaTokens[i]);
-    }
-    fclose(archivo);
-
-    return TODO_OK;
-}
-
-void escribirEnLista(int pos, char * val)
-{
-        // Convierto en CHAR *
-        aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
-    strcpy(aux, val);
-
-        // escribo en vector
-        listaTokens[pos] = aux;
-
-        printf("\tEscribio en %i el valor %s\n",pos,aux);
-
 }
 
 void validarDeclaracionTipoDato(char * tipo) {

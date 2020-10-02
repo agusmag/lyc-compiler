@@ -4,7 +4,6 @@
 
 #include "y.tab.h"
 FILE    *yyin;
-int     yylval;
 char    *yyltext;
 
 #define COTA_INT 65536
@@ -29,7 +28,6 @@ CONST_STR           {CAR_COMILLAS}([^\"])*{CAR_COMILLAS}
 COMENTARIO_SIMPLE	"*-"([^-*]|\n)*?"-*"
 ID					{LETRA}({LETRA}|{DIGITO}|_)*
 
-OP_COMPARACION      ["<"|"="|">"|"<="|">="|"><"]
 OP_LEQ              "<""="
 OP_MOQ              ">""="
 OP_EQQ              "=""="
@@ -44,85 +42,79 @@ OP_ASIG   			":"
 OP_ASIG_CONS   		"="
 OP_AND				("AND"|"and"|"&&")
 OP_OR				("OR"|"or"|"\|\|")
-OP_NOT				("NOT"|"not")
-BETWEEN				("BETWEEN"|"between")
-CAR_PUNTO           "\."
-CORCHETE            "["
-END_CORCHETE        "]"
-LLAVE           "{"
-END_LLAVE       "}"
-PARENTESIS      "("
-END_PARENTESIS  ")"
-COMA            ","
-PUNTO           ","
-PUNTO_Y_COMA    ";"
-COMILLA_SIMPLE  "'"
+OP_NOT				("NOT"|"not"|"\!")
+CORCHETE            "\["
+END_CORCHETE        "\]"
+LLAVE           "\{"
+END_LLAVE       "\}"
+PARENTESIS      "\("
+END_PARENTESIS  "\)"
+COMA            "\,"
+PUNTO           "\."
+PUNTO_Y_COMA    "\;"
+COMILLA_SIMPLE  "\'"
 CAR_COMILLAS        "\""
 
 %%
-{COMENTARIO_SIMPLE} { print("\n %s", yytext); RETURN COMENTARIO_SIMPLE; }
-{CONST_STR}         { print("\n %s", yytext); RETURN CONST_STR;         }
-{CONST_INT}         { print("\n %s", yytext); RETURN CONST_INT;         }
-{CONST_REAL}        { print("\n %s", yytext); RETURN CONST_REAL;        }
-{PUNTO}             { print("\n %s", yytext); RETURN PUNTO;             }
-{PUNTO_Y_COMA}      { print("\n %s", yytext); RETURN PUNTO_Y_COMA;      }
-{OP_ASIG}           { print("\n %s", yytext); RETURN OP_ASIG;           }
-{OP_ASIG_CONS}      { print("\n %s", yytext); RETURN OP_ASIG_CONS;      }
-{OP_SUM}            { print("\n %s", yytext); RETURN OP_SUM;            }
-{OP_MUL}            { print("\n %s", yytext); RETURN OP_MUL;            }
-{OP_RES}            { print("\n %s", yytext); RETURN OP_RES;            }
-{OP_DIV}            { print("\n %s", yytext); RETURN OP_DIV;            }
-{OP_LEQ}            { print("\n %s", yytext); RETURN OP_LEQ;            }
-{OP_MOQ}            { print("\n %s", yytext); RETURN OP_MOQ;            }
-{OP_EQQ}            { print("\n %s", yytext); RETURN OP_EQQ;            }
-{OP_DIFF}           { print("\n %s", yytext); RETURN OP_DIFF;           }
-{OP_LESS}           { print("\n %s", yytext); RETURN OP_LESS;           }
-{OP_MORE}           { print("\n %s", yytext); RETURN OP_MORE;           }
-{OP_AND}            { print("\n %s", yytext); RETURN OP_AND;            }
-{OP_OR}             { print("\n %s", yytext); RETURN OP_OR;             }
-{LLAVE}             { print("\n %s", yytext); RETURN LLAVE;             }
-{END_LLAVE}         { print("\n %s", yytext); RETURN END_LLAVE;         }
-{PARENTESIS}        { print("\n %s", yytext); RETURN PARENTESIS;        }
-{END_PARENTESIS}    { print("\n %s", yytext); RETURN END_PARENTESIS;    }
-{CORCHETE}          { print("\n %s", yytext); RETURN CORCHETE;          }
-{END_CORCHETE}      { print("\n %s", yytext); RETURN END_CORCHETE;      }
-{COMA}              { print("\n %s", yytext); RETURN COMA;              }
-{COMILLA_SIMPLE}    { print("\n %s", yytext); RETURN COMILLA_SIMPLE;    }
-"CONST"             { print("\n %s", yytext); RETURN CONST;             }
-"const"             { print("\n %s", yytext); RETURN CONST;"            }
-"DIM"               { print("\n %s", yytext); RETURN DIM;"              }
-"dim"               { print("\n %s", yytext); RETURN DIM;"              }
-"AS"                { print("\n %s", yytext); RETURN AS;"               }
-"as"                { print("\n %s", yytext); RETURN AS;"               }
-"float"             { print("\n %s", yytext); RETURN FLOAT;"            }
-"Float"             { print("\n %s", yytext); RETURN FLOAT;"            }
-"integer"           { print("\n %s", yytext); RETURN INTEGER;"          }
-"Integer"           { print("\n %s", yytext); RETURN INTEGER;"          }
-"string"            { print("\n %s", yytext); RETURN STRING;"           }
-"String"            { print("\n %s", yytext); RETURN STRING;"           }
-"if"                { print("\n %s", yytext); RETURN IF;"               }
-"IF"                { print("\n %s", yytext); RETURN IF;"               }
-"else"              { print("\n %s", yytext); RETURN ELSE;"             }
-"Else"              { print("\n %s", yytext); RETURN ELSE;"             }
-"for"               { print("\n %s", yytext); RETURN FOR;"              }
-"FOR"               { print("\n %s", yytext); RETURN FOR;"              }
-"to"                { print("\n %s", yytext); RETURN TO;"               }
-"TO"                { print("\n %s", yytext); RETURN TO;"               }
-"do"                { print("\n %s", yytext); RETURN DO;"               }
-"DO"                { print("\n %s", yytext); RETURN DO;"               }
-"while"             { print("\n %s", yytext); RETURN WHILE;"            }
-"WHILE"             { print("\n %s", yytext); RETURN WHILE;"            }
-"in"                { print("\n %s", yytext); RETURN IN;"               }
-"IN"                { print("\n %s", yytext); RETURN IN;"               }
-"repeat"            { print("\n %s", yytext); RETURN REPEAT;"           }
-"REPEAT"            { print("\n %s", yytext); RETURN REPEAT;"           }
-"until"             { print("\n %s", yytext); RETURN UNTIL;"            }
-"UNTIL"             { print("\n %s", yytext); RETURN UNTIL;"            }
-"PUT"               { print("\n %s", yytext); RETURN PUT;"              }
-"put"               { print("\n %s", yytext); RETURN PUT;"              }
-"GET"               { print("\n %s", yytext); RETURN GET;"              }
-"get"               { print("\n %s", yytext); RETURN GET;"              }
-{ID}                { print("\n %s", yytext); RETURN ID;                }
+{COMENTARIO_SIMPLE} { printf("\n %s", yytext); return COMENTARIO_SIMPLE; }
+{CONST_STR}         { printf("\n %s", yytext); return CONST_STR;         }
+{CONST_INT}         { printf("\n %s", yytext); return CONST_INT;         }
+{CONST_REAL}        { printf("\n %s", yytext); return CONST_REAL;        }
+{PUNTO}             { printf("\n %s", yytext); return PUNTO;             }
+{PUNTO_Y_COMA}      { printf("\n %s", yytext); return PUNTO_Y_COMA;      }
+{OP_ASIG}           { printf("\n %s", yytext); return OP_ASIG;           }
+{OP_ASIG_CONS}      { printf("\n %s", yytext); return OP_ASIG_CONS;      }
+{OP_SUM}            { printf("\n %s", yytext); return OP_SUM;            }
+{OP_MUL}            { printf("\n %s", yytext); return OP_MUL;            }
+{OP_RES}            { printf("\n %s", yytext); return OP_RES;            }
+{OP_DIV}            { printf("\n %s", yytext); return OP_DIV;            }
+{OP_LEQ}            { printf("\n %s", yytext); return OP_LEQ;            }
+{OP_MOQ}            { printf("\n %s", yytext); return OP_MOQ;            }
+{OP_EQQ}            { printf("\n %s", yytext); return OP_EQQ;            }
+{OP_DIFF}           { printf("\n %s", yytext); return OP_DIFF;           }
+{OP_LESS}           { printf("\n %s", yytext); return OP_LESS;           }
+{OP_MORE}           { printf("\n %s", yytext); return OP_MORE;           }
+{OP_AND}            { printf("\n %s", yytext); return OP_AND;            }
+{OP_OR}             { printf("\n %s", yytext); return OP_OR;             }
+{LLAVE}             { printf("\n %s", yytext); return LLAVE;             }
+{END_LLAVE}         { printf("\n %s", yytext); return END_LLAVE;         }
+{PARENTESIS}        { printf("\n %s", yytext); return PARENTESIS;        }
+{END_PARENTESIS}    { printf("\n %s", yytext); return END_PARENTESIS;    }
+{CORCHETE}          { printf("\n %s", yytext); return CORCHETE;          }
+{END_CORCHETE}      { printf("\n %s", yytext); return END_CORCHETE;      }
+{COMA}              { printf("\n %s", yytext); return COMA;              }
+{COMILLA_SIMPLE}    { printf("\n %s", yytext); return COMILLA_SIMPLE;    }
+"CONST"             { printf("\n %s", yytext); return CONST;             }
+"const"             { printf("\n %s", yytext); return CONST;             }
+"DIM"               { printf("\n %s", yytext); return DIM;               }
+"dim"               { printf("\n %s", yytext); return DIM;               }
+"AS"                { printf("\n %s", yytext); return AS;                }
+"as"                { printf("\n %s", yytext); return AS;                }
+"float"             { printf("\n %s", yytext); return FLOAT;             }
+"Float"             { printf("\n %s", yytext); return FLOAT;             }
+"integer"           { printf("\n %s", yytext); return INTEGER;           }
+"Integer"           { printf("\n %s", yytext); return INTEGER;           }
+"string"            { printf("\n %s", yytext); return STRING;            }
+"String"            { printf("\n %s", yytext); return STRING;            }
+"if"                { printf("\n %s", yytext); return IF;                }
+"IF"                { printf("\n %s", yytext); return IF;                }
+"else"              { printf("\n %s", yytext); return ELSE;              }
+"Else"              { printf("\n %s", yytext); return ELSE;              }
+"for"               { printf("\n %s", yytext); return FOR;               }
+"FOR"               { printf("\n %s", yytext); return FOR;               }
+"to"                { printf("\n %s", yytext); return TO;                }
+"TO"                { printf("\n %s", yytext); return TO;                }
+"do"                { printf("\n %s", yytext); return DO;                }
+"DO"                { printf("\n %s", yytext); return DO;                }
+"while"             { printf("\n %s", yytext); return WHILE;             }
+"WHILE"             { printf("\n %s", yytext); return WHILE;             }
+"in"                { printf("\n %s", yytext); return IN;                }
+"IN"                { printf("\n %s", yytext); return IN;                }
+"PUT"               { printf("\n %s", yytext); return PUT;               }
+"put"               { printf("\n %s", yytext); return PUT;               }
+"GET"               { printf("\n %s", yytext); return GET;               }
+"get"               { printf("\n %s", yytext); return GET;               }
+{ID}                { printf("\n %s", yytext); return ID;                }
 " "
 "\n"
 "\t"
