@@ -7,8 +7,6 @@ GET actual;
 contador: 0;
 suma: 02.5+nombre;
 
-ID OP_ASIG INT | FLOAT | FLOAT OP_SUM INT
-
 while (contador <= 92) {
     contador: contador + 1;
     actual: (contador/0.342) + (contador* contar (actual*contador ;

@@ -118,8 +118,12 @@ asignacion:
     |  ID OP_ASIG_CONS CONST_INT {$<tipo_int>$ = $3; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
     ;
 
+asignacion: 
+		ID OP_ASIG expresion {printf("Fin asignacion.\n");}
+        ;
+
 ciclo:
-     WHILE PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+     WHILE {printf("Comienzo de ciclo While.\n");} PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {printf("Fin de ciclo While.\n");} 
      ;
 
 
@@ -190,10 +194,10 @@ tipo:
 est_tipos:
     OP_LESS lista_tipos OP_MORE;
 
-//If
+
 seleccion:
     	IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
-		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE LLAVE bloque END_LLAVE;
+		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {printf("Comienzo Else.\n");} END_LLAVE bloque END_LLAVE {printf("Fin Else.\n");};
 
 entrada_salida:
 	GET {

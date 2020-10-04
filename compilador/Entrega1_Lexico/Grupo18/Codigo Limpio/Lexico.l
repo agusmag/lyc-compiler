@@ -104,7 +104,7 @@ CAR_COMILLAS        "\""
 "put"               {  return PUT;               }
 "GET"               {  return GET;               }
 "get"               {  return GET;               }
-{ID}                { yylval.tipo_str = yytext;  return ID;}
+{ID}                { yylval.tipo_str = yytext; return ID;}
 " "
 "\n"
 "\t"
