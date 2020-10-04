@@ -1,8 +1,11 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
+#include <math.h>
+#include <conio.h>
 #include "y.tab.h"
+
 FILE    *yyin;
 char    *yyltext;
 
@@ -57,9 +60,9 @@ CAR_COMILLAS        "\""
 
 %%
 {COMENTARIO_SIMPLE} {  return COMENTARIO_SIMPLE; }
-{CONST_STR}         {  return CONST_STR;         }
-{CONST_INT}         {  return CONST_INT;         }
-{CONST_REAL}        {  return CONST_REAL;        }
+{CONST_STR}         { yylval.tipo_str = yytext;  return CONST_STR;}
+{CONST_INT}         { yylval.tipo_int = atoi(yytext); return CONST_INT;         }
+{CONST_REAL}        { yylval.tipo_double = atof(yytext); return CONST_REAL;        }
 {PUNTO_Y_COMA}      {  return PUNTO_Y_COMA;      }
 {OP_ASIG}           {  return OP_ASIG;           }
 {OP_ASIG_CONS}      {  return OP_ASIG_CONS;      }
@@ -101,7 +104,7 @@ CAR_COMILLAS        "\""
 "put"               {  return PUT;               }
 "GET"               {  return GET;               }
 "get"               {  return GET;               }
-{ID}                {  return ID;                }
+{ID}                { yylval.tipo_str = yytext;  return ID;}
 " "
 "\n"
 "\t"

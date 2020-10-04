@@ -8,7 +8,12 @@
 #include "y.tab.h"
 #define YYERROR_VERBOSE 1
 FILE  *yyin;
+
+char vecAux[35];
+
 %}
+
+
 
 /* --- Tabla de simbolos --- */
 // A definir.
@@ -18,17 +23,17 @@ FILE  *yyin;
 /*---- 2. Tokens - Start ----*/
 
 %union {
-	char * int_val;
-	char * real_val;
-	char * str_val;
-	char * cmp_val;
+int tipo_int;
+double tipo_double;
+char* tipo_str;
+char* tipo_cmp;
 }
 
 %start PROGRAMA
 %token DIM
-%token <cmp_val>OP_LESS
-%token <cmp_val>OP_MORE
-%token <cmp_val>OP_DIFF
+%token <tipo_cmp>OP_LESS
+%token <tipo_cmp>OP_MORE
+%token <tipo_cmp>OP_DIFF
 %token OP_SUM
 %token OP_MUL           
 %token OP_RES           
@@ -39,24 +44,24 @@ FILE  *yyin;
 
 %token OP_ASIG //:
 %token OP_ASIG_CONS //=
-%token <str_val> ID
+%token <tipo_str> ID
 %token CONST
-%token CONST_REAL 
+%token <tipo_double>CONST_REAL 
 %token COMA
-%token <int_val>CONST_INT 
+%token <tipo_int>CONST_INT 
 %token AS
 %token FLOAT            
 %token INTEGER
 %token PUT
 %token CAR_COMILLAS
-%token <str_val>CONST_STR
+%token <tipo_str>CONST_STR
 %token PUNTO_Y_COMA
 %token PUNTO
 %token GET
 %token WHILE
 %token PARENTESIS       
 %token END_PARENTESIS
-%token <cmp_val>OP_LEQ
+%token <tipo_cmp>OP_LEQ
 %token LLAVE            
 %token END_LLAVE
 %token COMENTARIO_SIMPLE
@@ -110,7 +115,7 @@ est_asignacion:
 asignacion: 
     ID OP_ASIG_CONS FLOAT
     | ID OP_ASIG_CONS CONST_STR
-    | ID OP_ASIG_CONS CONST_INT {printf("\t\tAsignado entero: %d\n", $3);}
+    |  ID OP_ASIG_CONS CONST_INT {$<tipo_int>$ = $3; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
     ;
 
 ciclo:
@@ -192,14 +197,14 @@ seleccion:
 
 entrada_salida:
 	GET {
-        printf("\t\tGET\n"); 
-    } ID 
+        printf("\t\tGET: "); 
+    } ID    {printf("%s\n", yylval.tipo_str);}
 	| PUT {
-        printf("\t\tPUT\n");
-    } ID 
+        printf("\t\tPUT: ");
+    } ID {printf("%s\n", yylval.tipo_str);}
 	| PUT {
-        printf("\t\tPUT\n");
-    } CONST_STR
+        printf("\t\tPUT: ");
+    } CONST_STR {printf("%s\n", yylval.tipo_str);}
 ;
 
 %%
