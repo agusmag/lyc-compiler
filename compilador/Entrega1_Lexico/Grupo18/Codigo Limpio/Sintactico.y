@@ -69,6 +69,8 @@ char* tipo_cmp;
 %token CORCHETE         
 %token END_CORCHETE
 %token CONTAR
+%token LISTA_CONTAR
+
 
 
 /*---- 3. Definición de reglas gramaticales ----*/
@@ -142,6 +144,7 @@ expresion:
     expresion OP_SUM termino
     | expresion OP_RES termino
     | termino
+    | termino COMA expresion
  	;
 
 termino: 
@@ -151,11 +154,12 @@ termino:
     ;
 
 factor:
-    ID
+    ID           {$<tipo_str>$ = $1; printf("\t\tAsignado ID: %s\n", $<tipo_str>$);}
     | CONST_INT {$<tipo_int>$ = $1; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
-    | CONST_REAL		 
+    | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado entero: %f\n", $<tipo_double>$);}	 
     | CONST_STR
-    | PARENTESIS expresion END_PARENTESIS
+    | PARENTESIS expresion END_PARENTESIS 
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE {printf("\t\tentre\n");}
     ;
 
 
