@@ -9,7 +9,7 @@ suma: 02.5+nombre;
 
 while (contador <= 92) {
     contador: contador + 1;
-    actual: (contador/0.342) + (contador* contar (actual*contador 
+    actual: (contador/0.342) + (contador* contar (actual*contador ;
     [256,nombre*suma,52,4]));
     suma: suma + actual;
 }

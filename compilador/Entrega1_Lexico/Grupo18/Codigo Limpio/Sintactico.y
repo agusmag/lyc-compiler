@@ -68,6 +68,7 @@ char* tipo_cmp;
 %token ELSE
 %token CORCHETE         
 %token END_CORCHETE
+%token CONTAR
 
 
 /*---- 3. Definición de reglas gramaticales ----*/
