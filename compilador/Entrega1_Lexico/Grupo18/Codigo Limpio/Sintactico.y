@@ -141,16 +141,17 @@ comparacion:
     ;
 
 expresion:
-    expresion OP_SUM termino
+    expresion OP_SUM termino   
     | expresion OP_RES termino
     | termino
-    | termino COMA expresion
+
  	;
 
 termino: 
-    termino OP_MUL factor
+    termino OP_MUL factor   
     | termino OP_DIV factor
     | factor
+    | termino COMA expresion
     ;
 
 factor:
