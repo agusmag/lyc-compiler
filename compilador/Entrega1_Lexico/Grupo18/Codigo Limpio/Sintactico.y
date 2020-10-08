@@ -206,7 +206,10 @@ est_tipos:
 
 seleccion:
     	IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
-		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {printf("Comienzo Else.\n");} END_LLAVE bloque END_LLAVE {printf("Fin Else.\n");};
+		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {printf("Comienzo Else.\n");} END_LLAVE bloque END_LLAVE {printf("Fin Else.\n");}
+        | IF PARENTESIS condicion END_PARENTESIS sentencia {printf("if sin llave.\n");}
+        ;
+
 
 entrada_salida:
 	GET {
