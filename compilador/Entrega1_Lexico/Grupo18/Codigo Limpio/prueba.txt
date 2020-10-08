@@ -4,12 +4,12 @@ CONST nombre=80;
 PUT "Prueba.txt LyC Tema 4!";
 PUT "Ingrese un valor entero para actual: ";
 GET actual;
-contador: 0;
+contador:0;
 suma: 02.5+nombre;
 
 while (contador <= 92) {
     contador: contador + 1;
-    actual: (contador/0.342) + (contador* contar (actual*contador ;
+    actual: (contador/0.342) + (contador* contar (actual*contador 
     [256,nombre*suma,52,4]));
     suma: suma + actual;
 }

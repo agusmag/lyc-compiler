@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <conio.h>
 #include "y.tab.h"
 #define YYERROR_VERBOSE 1
 FILE  *yyin;
@@ -110,6 +109,8 @@ est_asignacion:
     } asignacion {
         printf("\tFin Declaracion CONST\n");
     }
+    |  asignacion {printf("\tInicio Declaracion :\n");}
+
     ;
 
 asignacion: 
@@ -150,7 +151,7 @@ termino:
 
 factor:
     ID
-    | CONST_INT
+    | CONST_INT {$<tipo_int>$ = $1; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
     | CONST_REAL		 
     | CONST_STR
     | PARENTESIS expresion END_PARENTESIS
