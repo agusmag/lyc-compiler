@@ -145,13 +145,15 @@ expresion:
     | expresion OP_RES termino
     | termino
 
+
  	;
 
 termino: 
     termino OP_MUL factor   
     | termino OP_DIV factor
     | factor
-    | termino COMA expresion
+    | termino COMA termino
+
     ;
 
 factor:
@@ -160,7 +162,7 @@ factor:
     | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado entero: %f\n", $<tipo_double>$);}	 
     | CONST_STR
     | PARENTESIS expresion END_PARENTESIS 
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE {printf("\t\tentre\n");}
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\t\tentre\n");}
     ;
 
 
