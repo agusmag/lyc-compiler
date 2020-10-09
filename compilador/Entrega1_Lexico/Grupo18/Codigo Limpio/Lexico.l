@@ -136,7 +136,6 @@ void validarString(char cadena[])
     {
         yyerror("Error: Rango de string excedido. Se permite un maximo de 50 caracteres", 0, 0, 0);
     }
-    printf("la cadena es %s\n",cadena);
 }
 
 void validarFloat(double numero)

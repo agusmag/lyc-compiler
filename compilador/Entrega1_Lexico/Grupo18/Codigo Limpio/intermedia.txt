@@ -1,4 +1,4 @@
-DIM <contador,promedio,actual,suma> AS <Integer,Float,Float,Float>
+DIM <contador,promedio,actual,suma,prueba> AS <Integer,Float,Float,Float,Integer>
 
 CONST nombre=80;
 PUT "Prueba.txt LyC Tema 4!";
@@ -9,8 +9,7 @@ suma: 02.5+nombre;
 
 while (contador <= 92) {
     contador: contador + 1;
-    actual: (contador/0.342) + (contador* contar (actual*contador ;
-    [256,nombre*suma,52,4]));
+
     suma: suma + actual;
 }
 

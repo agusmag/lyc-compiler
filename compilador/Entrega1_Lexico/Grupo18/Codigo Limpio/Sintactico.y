@@ -42,9 +42,15 @@ void guardarTS();
 t_tabla tablaTS;
 
 char idvec[50][50];
-int cantid = 0, i=0;
-char vecAux[20];
+int cantid = 0, i=0, cant_aux=0;
+char vecAux[50];
 char* punt;
+char pos[2];
+char* separador1;
+char nombre[50];
+char tipo_dato[50];
+
+int j=0;
 
 /* --- Validaciones --- */
 int existeID(const char*);
@@ -151,13 +157,24 @@ est_asignacion:
     ;
 
 asignacion: 
-    ID OP_ASIG_CONS FLOAT
+    ID OP_ASIG_CONS FLOAT 
     | ID OP_ASIG_CONS CONST_STR
     |  ID OP_ASIG_CONS CONST_INT {$<tipo_int>$ = $3; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
     ;
 
 asignacion: 
-		ID OP_ASIG expresion {printf("Fin asignacion.\n");}
+		ID OP_ASIG expresion {printf("Fin asignacion.\n");
+                                                strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
+                                                punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
+                                                //printf("%s\n\n",punt);
+                                                if(!existeID(punt)) /*No existe: entonces no esta declarada*/
+                                                {
+                                                    sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
+                                                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                                                }
+                                            
+                                                
+                                            }
         ;
 
 ciclo:
@@ -193,10 +210,10 @@ termino:
 factor:
     ID           {$<tipo_str>$ = $1; printf("\t\tAsignado ID: %s\n", $<tipo_str>$);}
     | CONST_INT {$<tipo_int>$ = $1; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
-    | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado entero: %f\n", $<tipo_double>$);}	 
+    | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado Real: %f\n", $<tipo_double>$);}	 
     | CONST_STR
     | PARENTESIS expresion END_PARENTESIS 
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\t\tentre\n");}
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS
     ;
 
 
@@ -212,7 +229,22 @@ lista_comparadores:
 est_declaracion:
 	DIM {
         printf("\t\nInicio declaracion multiple\n");
-    } est_variables AS est_tipos {
+    } est_variables AS est_tipos {  
+                                                for(i=0;i<cant_aux;i++) /*vamos agregando todos los ids que leyo*/
+                                                {
+                                                    separador1 = strtok(idvec[i],";");
+                                                    strcpy(nombre,separador1);
+                                                    separador1 = strtok(NULL, ";");
+
+
+                                                   if(insertarTS(nombre, separador1, "", 0, 0) != 0) //no lo guarda porque ya existe
+                                                    {
+                                                        sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
+                                                        yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
+                                                    }
+                                                }
+                                                cantid=0;
+                                            
         printf("\tFin de la declaracion multiple\n");
     }
     ;
@@ -221,8 +253,26 @@ est_variables:
     OP_LESS lista_variables OP_MORE;
 
 lista_variables:
-    ID
-    | ID COMA lista_variables
+    ID {                strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
+                        punt = strtok(vecAux, ">"); /*eliminamos extras*/
+                        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
+                        //sprintf(pos, "%d", cantid);
+                        //strcat(idvec[cantid],";");
+                        //strcat(idvec[cantid],pos);
+                        //printf("%s\t%d\n",idvec[cantid], cantid);
+                        cantid++;
+                    }
+    | ID COMA lista_variables {
+                        strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
+                        punt = strtok(vecAux, ","); /*eliminamos extras*/
+                        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
+                        //sprintf(pos, "%d", cantid);
+                        //strcat(idvec[cantid],";");
+                        //strcat(idvec[cantid],pos);
+                        //printf("%s\t%d\n",idvec[cantid], cantid);
+                        cantid++;
+                        cant_aux = cantid;
+                    }
     ;
 
 lista_tipos:
@@ -230,8 +280,12 @@ lista_tipos:
     | tipo COMA lista_tipos;
 
 tipo:
-    INTEGER
-    | FLOAT
+    INTEGER {           strcat(idvec[cantid-1],";");
+                        strcat(idvec[cantid-1],"INTEGER");
+    printf("%s\t%d\t\t%dINT\n",idvec[--cantid], cantid,cant_aux);}
+    | FLOAT {strcat(idvec[cantid-1],";");
+                        strcat(idvec[cantid-1],"FLOAT");
+    printf("%s\t%d\t\t%dFLOAT\n",idvec[--cantid], cantid,cant_aux);}
     | CONST_STR;
 
 est_tipos:
@@ -300,7 +354,6 @@ int insertarTS(const char *nombre,const char *tipo, const char* valString, int v
 
     t_data *data = (t_data*)malloc(sizeof(t_data));
     data = crearDatos(nombre, tipo, valString, valInt, valDouble);
-    printf("llegue aca\n");
 
     if(data == NULL)
     {
@@ -345,7 +398,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     strcpy(data->tipo, tipo);
 
     //Es una variable
-    if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INT")==0 || strcmp(tipo, "FLOAT")==0)
+    if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INTEGER")==0 || strcmp(tipo, "FLOAT")==0)
     {
 
         //al nombre lo dejo aca porque no lleva _
@@ -412,7 +465,7 @@ void guardarTS()
         aux = tabla;
         tabla = tabla->next;
         
-        if(strcmp(aux->data.tipo, "INT") == 0) //variable int
+        if(strcmp(aux->data.tipo, "INTEGER") == 0) //variable int
         {
             sprintf(linea, "%-50s%-25s%-50s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
@@ -455,16 +508,17 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
     strcat(nombreCTE, id);
     int b1 = 0;
     int b2 = 0;
-
-    while(tabla)
+    int j =0;
+    
+    while(j<50)
     {
-        b1 = strcmp(tabla->data.nombre, id);
-        b2 = strcmp(tabla->data.nombre, nombreCTE);
-        if(b1 == 0 || b2 == 0)
+        b1 = strcmp(idvec[j], id);
+        //b2 = strcmp(tabla->data.nombre, nombreCTE);
+        if(b1 == 0)
         {
                 return 1;
         }
-        tabla = tabla->next;
+        j++;
     }
     return 0;
 }
