@@ -164,9 +164,9 @@ asignacion:
 
 asignacion: 
 		ID OP_ASIG expresion {printf("Fin asignacion.\n");
+
                                                 strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
                                                 punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
-                                                //printf("%s\n\n",punt);
                                                 if(!existeID(punt)) /*No existe: entonces no esta declarada*/
                                                 {
                                                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
@@ -256,10 +256,6 @@ lista_variables:
     ID {                strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
                         punt = strtok(vecAux, ">"); /*eliminamos extras*/
                         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
-                        //sprintf(pos, "%d", cantid);
-                        //strcat(idvec[cantid],";");
-                        //strcat(idvec[cantid],pos);
-                        //printf("%s\t%d\n",idvec[cantid], cantid);
                         cantid++;
                     }
     | ID COMA lista_variables {
@@ -282,10 +278,11 @@ lista_tipos:
 tipo:
     INTEGER {           strcat(idvec[cantid-1],";");
                         strcat(idvec[cantid-1],"INTEGER");
-    printf("%s\t%d\t\t%dINT\n",idvec[--cantid], cantid,cant_aux);}
-    | FLOAT {strcat(idvec[cantid-1],";");
+                        cantid--;}
+    | FLOAT {
+                        strcat(idvec[cantid-1],";");
                         strcat(idvec[cantid-1],"FLOAT");
-    printf("%s\t%d\t\t%dFLOAT\n",idvec[--cantid], cantid,cant_aux);}
+                        cantid--;}
     | CONST_STR;
 
 est_tipos:
@@ -510,7 +507,7 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
     int b2 = 0;
     int j =0;
     
-    while(j<50)
+    while(j<cant_aux)
     {
         b1 = strcmp(idvec[j], id);
         //b2 = strcmp(tabla->data.nombre, nombreCTE);
