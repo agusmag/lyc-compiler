@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 #include <math.h>
+#include <limits.h>
 
 #include "y.tab.h"
 
@@ -16,8 +18,14 @@ char    *yyltext;
 #define ERROR_INT 7
 #define ERROR_REAL 9
 
-int yyerror(void);
+//int yyerror(void);
 
+/* Tabla de simbolos */
+
+    void validarString(char[]);
+    void validarFloat(double);
+    void validarInt(int);
+    char valor[20];
 %}
 
 %option noyywrap
@@ -60,9 +68,15 @@ CAR_COMILLAS        "\""
 
 %%
 {COMENTARIO_SIMPLE} {  return COMENTARIO_SIMPLE; }
-{CONST_STR}         { yylval.tipo_str = yytext;  return CONST_STR;}
-{CONST_INT}         { yylval.tipo_int = atoi(yytext); return CONST_INT;         }
-{CONST_REAL}        { yylval.tipo_double = atof(yytext); return CONST_REAL;        }
+{CONST_STR}         { yylval.tipo_str = yytext;
+						validarString(yylval.tipo_str);
+                    	insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0);  return CONST_STR;}
+{CONST_INT}         { yylval.tipo_int = atoi(yytext);
+						validarInt(yylval.tipo_int);
+                    	insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0); return CONST_INT;         }
+{CONST_REAL}        { yylval.tipo_double = atof(yytext);
+						validarFloat(yylval.tipo_double);
+                    	insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double); return CONST_REAL;        }
 {PUNTO_Y_COMA}      {  return PUNTO_Y_COMA;      }
 {OP_ASIG}           {  return OP_ASIG;           }
 {OP_ASIG_CONS}      {  return OP_ASIG_CONS;      }
@@ -114,7 +128,43 @@ CAR_COMILLAS        "\""
 
 %%
 
-int yyerror(void)
+void validarString(char cadena[])
 {
-    return 0;
+    int largo = strlen(cadena);
+
+    if(largo > 50)
+    {
+        yyerror("Error: Rango de string excedido. Se permite un maximo de 50 caracteres", 0, 0, 0);
+    }
+    printf("la cadena es %s\n",cadena);
+}
+
+void validarFloat(double numero)
+{   
+    double max = 3.402823 * pow(10, 38);
+    double min = 1.175494 * pow(10, -38);
+
+    if(numero > max || (numero > 0 && numero < min))
+    {
+        yyerror("Error: Rango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n");
+    }
+}
+
+void validarInt(int numero)
+{
+    if(numero > 65535)
+    {
+        yyerror("Error: Valor de int excedido, el mayor posible es 65535", 0, 0, 0);
+    }
+}
+
+int yyerror(char *mensaje, int fila, int ci, int cf)
+{
+    if(fila == 0 || ci == 0 || cf == 0) /* || fila <= yylineno)*/
+        printf("\nLinea %d: %s.\n", yylineno, mensaje);
+    else
+        printf("\nLinea %d, %d-%d: %s.\n", fila, ci, cf, mensaje);
+    
+    system("Pause");
+    exit(1);
 }
