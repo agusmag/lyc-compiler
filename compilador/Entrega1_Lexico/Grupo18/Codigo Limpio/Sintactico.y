@@ -134,13 +134,13 @@ bloque;
 
 bloque:
     bloque sentencia
-    | sentencia
+    | sentencia  
     ;
 
 sentencia:
     ciclo
     | est_declaracion
-    | est_asignacion PUNTO_Y_COMA
+    | est_asignacion PUNTO_Y_COMA    
     | seleccion
     | entrada_salida PUNTO_Y_COMA
     ;
@@ -152,7 +152,7 @@ est_asignacion:
     } asignacion {
         printf("\tFin Declaracion CONST\n");
     }
-    |  asignacion {printf("\tInicio Declaracion :\n");}
+    |  asignacion {printf("\tInicio Declaracion :\n");} 
 
     ;
 
@@ -194,7 +194,7 @@ comparacion:
 expresion:
     expresion OP_SUM termino   
     | expresion OP_RES termino
-    | termino
+    | termino 
 
 
  	;
@@ -212,8 +212,8 @@ factor:
     | CONST_INT {$<tipo_int>$ = $1; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
     | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado Real: %f\n", $<tipo_double>$);}	 
     | CONST_STR
-    | PARENTESIS expresion END_PARENTESIS 
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS
+    | PARENTESIS expresion END_PARENTESIS {printf("\t\t(expresion)\n");}
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\t\contar()\n");}
     ;
 
 
@@ -262,10 +262,6 @@ lista_variables:
                         strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
                         punt = strtok(vecAux, ","); /*eliminamos extras*/
                         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
-                        //sprintf(pos, "%d", cantid);
-                        //strcat(idvec[cantid],";");
-                        //strcat(idvec[cantid],pos);
-                        //printf("%s\t%d\n",idvec[cantid], cantid);
                         cantid++;
                         cant_aux = cantid;
                     }
