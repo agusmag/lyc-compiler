@@ -213,7 +213,7 @@ factor:
     | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado Real: %f\n", $<tipo_double>$);}	 
     | CONST_STR
     | PARENTESIS expresion END_PARENTESIS {printf("\t\t(expresion)\n");}
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\t\contar()\n");}
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\tcontar()\n");}
     ;
 
 

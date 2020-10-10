@@ -1,17 +1,19 @@
 NOMBRE                                            TIPODATO                 VALOR                                             LONGITUD                      
-prueba                                            INTEGER                  --                                                6
 suma                                              FLOAT                    --                                                4
 actual                                            FLOAT                    --                                                6
 promedio                                          FLOAT                    --                                                8
 contador                                          INTEGER                  --                                                8
 _80                                               CONST_INT                80                                                2
 _"Prueba.txt LyC Tema 4!"                         CONST_STR                "Prueba.txt LyC Tema 4!"                          24
-_"Ingrese un valor entero para actual: "1         CONST_STR                "Ingrese un valor entero para actual: "           40
 _0                                                CONST_INT                0                                                 1
 _2.5                                              CONST_REAL               2.5                                               3
 _92                                               CONST_INT                92                                                2
 _1                                                CONST_INT                1                                                 1
+_0.342                                            CONST_REAL               0.342                                             5
+_256                                              CONST_INT                256                                               3
+_52                                               CONST_INT                52                                                2
+_4                                                CONST_INT                4                                                 1
 _"La suma es: "                                   CONST_STR                "La suma es: "                                    14
 _2                                                CONST_INT                2                                                 1
-_"actual es mayor"                                CONST_STR                "actual es mayor"                                 17
+_"actual es mayor que 2 y distinto de cero"       CONST_STR                "actual es mayor que 2 y distinto de cero"        42
 _"no es mayor que 2"                              CONST_STR                "no es mayor que 2"                               19
