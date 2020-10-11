@@ -203,7 +203,7 @@ termino:
     termino OP_MUL factor   
     | termino OP_DIV factor
     | factor
-    | termino COMA termino
+    | termino COMA factor
 
     ;
 
