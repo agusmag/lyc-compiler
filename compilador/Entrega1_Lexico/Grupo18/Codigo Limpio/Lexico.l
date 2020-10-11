@@ -18,6 +18,9 @@ char    *yyltext;
 #define ERROR_INT 7
 #define ERROR_REAL 9
 
+#define ES_CONST_NOMBRE 1
+#define NO_ES_CONST_NOMBRE 0
+
 //int yyerror(void);
 
 /* Tabla de simbolos */
@@ -72,13 +75,13 @@ COMILLA_CIERRA  "\”"
 {COMENTARIO_SIMPLE} {  return COMENTARIO_SIMPLE; }
 {CONST_STR}         { yylval.tipo_str = yytext;
 						validarString(yylval.tipo_str);
-                    	insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0);  return CONST_STR;}
+                    	insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0, 0);  return CONST_STR;}
 {CONST_INT}         { yylval.tipo_int = atoi(yytext);
 						validarInt(yylval.tipo_int);
-                    	insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0); return CONST_INT;         }
+                    	insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0, 0); return CONST_INT;         }
 {CONST_REAL}        { yylval.tipo_double = atof(yytext);
 						validarFloat(yylval.tipo_double);
-                    	insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double); return CONST_REAL;        }
+                    	insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double, 0); return CONST_REAL;        }
 {PUNTO_Y_COMA}      {  return PUNTO_Y_COMA;      }
 {OP_ASIG}           {  return OP_ASIG;           }
 {OP_ASIG_CONS}      {  return OP_ASIG_CONS;      }

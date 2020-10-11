@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include "y.tab.h"
 #define YYERROR_VERBOSE 1
+#define ES_CONST_NOMBRE 1
+#define NO_ES_CONST_NOMBRE 0
 FILE  *yyin;
 
 //char vecAux[35];
@@ -36,8 +38,8 @@ typedef struct
 }t_tabla;
 
 void crearTablaTS();
-int insertarTS(const char*, const char*, const char*, int, double);
-t_data* crearDatos(const char*, const char*, const char*, int, double);
+int insertarTS(const char*, const char*, const char*, int, double, int);
+t_data* crearDatos(const char*, const char*, const char*, int, double, int);
 void guardarTS();
 void limpiarConstanteString();
 t_tabla tablaTS;
@@ -150,17 +152,27 @@ sentencia:
 
 
 est_asignacion:
-	CONST {
-        printf("\t\tInicio Declaracion CONST\n");
-    } asignacion {
-        printf("\tFin Declaracion CONST\n");
-    }
-    |  asignacion {printf("\tInicio Declaracion :\n");} 
-
+	CONST ID OP_ASIG_CONS CONST_REAL {  printf("Constante flotante con nombre.\n");
+                                        strcpy($<tipo_str>$, $2);
+                                        $<tipo_double>$ = $4;
+                                        insertarTS($<tipo_str>$, "CONST_REAL", "", 0, yylval.tipo_double, ES_CONST_NOMBRE);
+                                        }
+    | CONST ID OP_ASIG_CONS CONST_INT { printf("Constante entera con nombre.\n");
+                                        strcpy($<tipo_str>$, $2);
+                                        $<tipo_int>$ = $4;
+                                        insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
+                                        guardarTS();}
+                                        
+    | CONST ID OP_ASIG_CONS CONST_STR { printf("Constante string con nombre.\n");
+                                        strcpy($<tipo_str>$, $2);
+                                        strcpy($<tipo_str>$, $4);
+                                        insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, 1);
+                                        }
+    |  asignacion {printf("\tInicio Declaracion :\n");}
     ;
 
 asignacion: 
-    ID OP_ASIG_CONS FLOAT 
+    ID OP_ASIG_CONS CONST_REAL 
     | ID OP_ASIG_CONS CONST_STR
     |  ID OP_ASIG_CONS CONST_INT {$<tipo_int>$ = $3; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
     ;
@@ -240,7 +252,7 @@ est_declaracion:
                                                     separador1 = strtok(NULL, ";");
 
 
-                                                   if(insertarTS(nombre, separador1, "", 0, 0) != 0) //no lo guarda porque ya existe
+                                                   if(insertarTS(nombre, separador1, "", 0, 0, NO_ES_CONST_NOMBRE) != 0) //no lo guarda porque ya existe
                                                     {
                                                         sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
                                                         yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
@@ -329,11 +341,12 @@ int main(int argc, char *argv[])
     }
 }
 
-int insertarTS(const char *nombre,const char *tipo, const char* valString, int valInt, double valDouble)
+int insertarTS(const char *nombre,const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
 {
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[50] = "_";
     strcat(nombreCTE, nombre);
+    
     
     while(tabla)
     {
@@ -349,8 +362,10 @@ int insertarTS(const char *nombre,const char *tipo, const char* valString, int v
         tabla = tabla->next;
     }
 
+    
+
     t_data *data = (t_data*)malloc(sizeof(t_data));
-    data = crearDatos(nombre, tipo, valString, valInt, valDouble);
+    data = crearDatos(nombre, tipo, valString, valInt, valDouble, esConstNombre);
 
     if(data == NULL)
     {
@@ -380,7 +395,7 @@ int insertarTS(const char *nombre,const char *tipo, const char* valString, int v
 }
 
 
-t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble)
+t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
 {
     char full[50] = "_";
     char aux[20];
@@ -394,10 +409,11 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     data->tipo = (char*)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
 
-    //Es una variable
-    if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INTEGER")==0 || strcmp(tipo, "FLOAT")==0)
-    {
+   
 
+    //Es una variable
+    if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INTEGER")==0 || strcmp(tipo, "FLOAT")==0 && esConstNombre == 0)
+    {
         //al nombre lo dejo aca porque no lleva _
         data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombre, nombre);
@@ -406,32 +422,65 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     else
     { 
 
+        if(esConstNombre == ES_CONST_NOMBRE)
+        {
+            data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+            strcpy(data->nombre, nombre);
+        }
+
          //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
         if(strcmp(tipo, "CONST_STR") == 0)
         {
             data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
-            data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
-            strcat(full, valString);
-            strcpy(data->nombre, full);    
             strcpy(data->valor.valor_str, valString);
+            
+            if(esConstNombre == ES_CONST_NOMBRE)
+            {
+                data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+                strcpy(data->nombre, nombre);
+            }
+            else
+            {
+                data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
+                strcat(full, valString);
+                strcpy(data->nombre, full);    
+            }
 
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
-            sprintf(aux, "%g", valDouble);
-            strcat(full, aux);
-            data->nombre = (char*)malloc(sizeof(char) * strlen(full));
-
-            strcpy(data->nombre, full);
             data->valor.valor_double = valDouble;
+
+            if(esConstNombre == ES_CONST_NOMBRE)
+            {
+                data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+                strcpy(data->nombre, nombre);
+            }
+            else
+            {
+                sprintf(aux, "%g", valDouble);
+                strcat(full, aux);
+                data->nombre = (char*)malloc(sizeof(char) * strlen(full));
+                strcpy(data->nombre, full);
+            }
+
         }
         if(strcmp(tipo, "CONST_INT") == 0)
         {
-            sprintf(aux, "%d", valInt);
-            strcat(full, aux);
-            data->nombre = (char*)malloc(sizeof(char) * strlen(full));
-            strcpy(data->nombre, full);
             data->valor.valor_int = valInt;
+
+            if(esConstNombre == ES_CONST_NOMBRE)
+            {
+                data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+                strcpy(data->nombre, nombre);
+            }
+            else
+            {
+                sprintf(aux, "%d", valInt);
+                strcat(full, aux);
+                data->nombre = (char*)malloc(sizeof(char) * strlen(full));
+                strcpy(data->nombre, full);
+            }
         }
         return data;
 
