@@ -3,7 +3,6 @@ suma                                              FLOAT                    --   
 actual                                            FLOAT                    --                                                6
 promedio                                          FLOAT                    --                                                8
 contador                                          INTEGER                  --                                                8
-80                                                CONST_INT                80                                                1
 nombre                                            CONST_INT                80                                                5
 _"Prueba.txt LyC Tema 4!"                         CONST_STR                "Prueba.txt LyC Tema 4!"                          24
 "Ingrese un valor entero para actual: "           CONST_STR                "Ingrese un valor entero para actual: "           38

@@ -124,7 +124,7 @@ char* tipo_cmp;
 
 PROGRAMA:
 {
-    printf("\tInicia el COMPILADOR\n");
+    printf("\n\nInicia el COMPILADOR\n\n");
 } 
 algoritmo
 {
@@ -133,7 +133,7 @@ algoritmo
 
 algoritmo: 
 {
-    printf("COMIENZO de BLOQUES\n");
+    printf("\tCOMIENZO de BLOQUES\n");
 } 
 bloque;
 
@@ -152,18 +152,18 @@ sentencia:
 
 
 est_asignacion:
-	CONST ID OP_ASIG_CONS CONST_REAL {  printf("Constante flotante con nombre.\n");
+	CONST ID OP_ASIG_CONS CONST_REAL {  printf("\t\tConstante flotante con nombre.\n");
                                         strcpy($<tipo_str>$, $2);
                                         $<tipo_double>$ = $4;
                                         insertarTS($<tipo_str>$, "CONST_REAL", "", 0, yylval.tipo_double, ES_CONST_NOMBRE);
                                         }
-    | CONST ID OP_ASIG_CONS CONST_INT { printf("Constante entera con nombre.\n");
+    | CONST ID OP_ASIG_CONS CONST_INT { printf("\t\tConstante entera con nombre.\n");
                                         strcpy($<tipo_str>$, $2);
                                         $<tipo_int>$ = $4;
                                         insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
                                         }
                                         
-    | CONST ID OP_ASIG_CONS CONST_STR { printf("Constante string con nombre.\n");
+    | CONST ID OP_ASIG_CONS CONST_STR { printf("\t\tConstante string con nombre.\n");
                                         strcpy($<tipo_str>$, $2);
                                         strcpy($<tipo_str>$, $4);
                                         insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, 1);
@@ -193,7 +193,7 @@ asignacion:
         ;
 
 ciclo:
-     WHILE {printf("Comienzo de ciclo While.\n");} PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {printf("Fin de ciclo While.\n");} 
+     WHILE {printf("WHILE.\n");} PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {printf("FIN WHILE.\n");} 
      ;
 
 
@@ -228,7 +228,7 @@ factor:
     | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado Real: %f\n", $<tipo_double>$);}	 
     | CONST_STR
     | PARENTESIS expresion END_PARENTESIS {printf("\t\t(expresion)\n");}
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\tcontar()\n");}
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\tContar()\n");}
     ;
 
 
@@ -243,7 +243,7 @@ lista_comparadores:
 
 est_declaracion:
 	DIM {
-        printf("\t\nInicio declaracion multiple\n");
+        printf("\t\tDECLARACION MULTIPLE\n");
     } est_variables AS est_tipos {  
                                                 for(i=0;i<cant_aux;i++) /*vamos agregando todos los ids que leyo*/
                                                 {
@@ -260,7 +260,7 @@ est_declaracion:
                                                 }
                                                 cantid=0;
                                             
-        printf("\tFin de la declaracion multiple\n");
+        printf("\t\tFIN DECLARACION MULTIPLE\n");
     }
     ;
 
@@ -302,8 +302,8 @@ est_tipos:
 
 seleccion:
     	IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
-		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {printf("Comienzo Else.\n");} END_LLAVE bloque END_LLAVE {printf("Fin Else.\n");}
-        | IF PARENTESIS condicion END_PARENTESIS sentencia {printf("if sin llave.\n");}
+		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {printf("ELSE.\n");} END_LLAVE bloque END_LLAVE {printf("FIN ELSE.\n");}
+        | IF PARENTESIS condicion END_PARENTESIS sentencia {printf("IF Sin llave.\n");}
         ;
 
 
