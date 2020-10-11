@@ -35,7 +35,7 @@ DIGITO			    [0-9]
 CONST_INT		    ({DIGITO})+
 CONST_REAL		    ({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			    [a-zA-Z]
-CONST_STR           {CAR_COMILLAS}([^\"])*{CAR_COMILLAS}
+CONST_STR           ({CAR_COMILLAS}|{COMILLA_ABRE})([^\"])*({CAR_COMILLAS}|{COMILLA_CIERRA})
 COMENTARIO_SIMPLE	"*-"([^-*]|\n)*?"-*"
 ID					{LETRA}({LETRA}|{DIGITO}|_)*
 
@@ -65,6 +65,8 @@ PUNTO           "\."
 PUNTO_Y_COMA    "\;"
 COMILLA_SIMPLE  "\'"
 CAR_COMILLAS        "\""
+COMILLA_ABRE    "\“"
+COMILLA_CIERRA  "\”"
 
 %%
 {COMENTARIO_SIMPLE} {  return COMENTARIO_SIMPLE; }
@@ -98,6 +100,8 @@ CAR_COMILLAS        "\""
 {CORCHETE}          {  return CORCHETE;          }
 {END_CORCHETE}      {  return END_CORCHETE;      }
 {COMA}              {  return COMA;              }
+{COMILLA_ABRE}      {  return COMILLA_ABRE;      }
+{COMILLA_CIERRA}    {  return COMILLA_CIERRA;    }
 "CONST"             {  return CONST;             }
 "const"             {  return CONST;             }
 "DIM"               {  return DIM;               }

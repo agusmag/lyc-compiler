@@ -19,5 +19,5 @@ PUT "actual es mayor que 2 y distinto de cero";
 Else
 }
 if (actual < nombre)
-PUT “no es mayor que 2”;
+PUT "no es mayor que 2";
 }

@@ -39,6 +39,7 @@ void crearTablaTS();
 int insertarTS(const char*, const char*, const char*, int, double);
 t_data* crearDatos(const char*, const char*, const char*, int, double);
 void guardarTS();
+void limpiarConstanteString();
 t_tabla tablaTS;
 
 char idvec[50][50];
@@ -109,6 +110,8 @@ char* tipo_cmp;
 %token CORCHETE         
 %token END_CORCHETE
 %token CONTAR
+%token COMILLA_ABRE
+%token COMILLA_CIERRA
 %token LISTA_CONTAR
 
 
@@ -301,7 +304,8 @@ entrada_salida:
     } ID {printf("%s\n", yylval.tipo_str);}
 	| PUT {
         printf("\t\tPUT: ");
-    } CONST_STR {printf("%s\n", yylval.tipo_str);}
+    } CONST_STR {   strcpy(vecAux, yylval.tipo_str);
+                    printf("%s\n", vecAux);}
 ;
 
 %%
