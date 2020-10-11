@@ -161,7 +161,7 @@ est_asignacion:
                                         strcpy($<tipo_str>$, $2);
                                         $<tipo_int>$ = $4;
                                         insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
-                                        guardarTS();}
+                                        }
                                         
     | CONST ID OP_ASIG_CONS CONST_STR { printf("Constante string con nombre.\n");
                                         strcpy($<tipo_str>$, $2);
