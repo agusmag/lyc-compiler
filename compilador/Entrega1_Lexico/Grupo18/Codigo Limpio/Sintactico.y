@@ -150,56 +150,57 @@ sentencia:
     | entrada_salida PUNTO_Y_COMA
     ;
 
-
 est_asignacion:
-	CONST ID OP_ASIG_CONS CONST_REAL {  printf("\t\tConstante flotante con nombre.\n");
-                                        strcpy($<tipo_str>$, $2);
-                                        $<tipo_double>$ = $4;
-                                        insertarTS($<tipo_str>$, "CONST_REAL", "", 0, yylval.tipo_double, ES_CONST_NOMBRE);
-                                        }
-    | CONST ID OP_ASIG_CONS CONST_INT { printf("\t\tConstante entera con nombre.\n");
-                                        strcpy($<tipo_str>$, $2);
-                                        $<tipo_int>$ = $4;
-                                        insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
-                                        }
-                                        
-    | CONST ID OP_ASIG_CONS CONST_STR { printf("\t\tConstante string con nombre.\n");
-                                        strcpy($<tipo_str>$, $2);
-                                        strcpy($<tipo_str>$, $4);
-                                        insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, 1);
-                                        }
-    |  asignacion {printf("\tInicio Declaracion :\n");}
+	CONST ID OP_ASIG_CONS CONST_REAL {  
+        printf("\t\t CONST %s : $f\n", $2, $4);
+        strcpy($<tipo_str>$, $2);
+        $<tipo_double>$ = $4;
+        insertarTS($<tipo_str>$, "CONST_REAL", "", 0, yylval.tipo_double, ES_CONST_NOMBRE);
+    }
+    | CONST ID OP_ASIG_CONS CONST_INT { 
+        printf("\t\t CONST %s : $d\n", $2, $4);
+        strcpy($<tipo_str>$, $2);
+        $<tipo_int>$ = $4;
+        insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
+    }                               
+    | CONST ID OP_ASIG_CONS CONST_STR { 
+        printf("\t\t CONST %s : $s\n", $2, $4);
+        strcpy($<tipo_str>$, $2);
+        strcpy($<tipo_str>$, $4);
+        insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, 1);
+    }
+    |  asignacion
     ;
 
-asignacion: 
-    ID OP_ASIG_CONS CONST_REAL 
-    | ID OP_ASIG_CONS CONST_STR
-    |  ID OP_ASIG_CONS CONST_INT {$<tipo_int>$ = $3; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
+asignacion:
+    ID {
+        printf("\t\t %s\n", $<tipo_str>$);
+    } OP_ASIG {
+        printf("Inicio Asignacion.\n");
+    } expresion {
+        printf("Fin Asignacion.\n");
+        strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
+        punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
+        if(!existeID(punt)) /*No existe: entonces no esta declarada*/
+        {
+            sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
+            yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        }
+    }
     ;
-
-asignacion: 
-		ID OP_ASIG expresion {printf("Fin asignacion.\n");
-
-                                                strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
-                                                punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
-                                                if(!existeID(punt)) /*No existe: entonces no esta declarada*/
-                                                {
-                                                    sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
-                                                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
-                                                }
-                                            
-                                                
-                                            }
-        ;
 
 ciclo:
-     WHILE {printf("WHILE.\n");} PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {printf("FIN WHILE.\n");} 
-     ;
-
+     WHILE {
+         printf("Inicio While.\n");
+    } PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {
+        printf("Fin While.\n");
+    } 
+    ;
 
 condicion:
     comparacion
-    | comparacion OP_AND comparacion;
+    | comparacion OP_AND comparacion
+    ;
 
 comparacion:
     expresion lista_comparadores expresion  
@@ -207,60 +208,81 @@ comparacion:
     ;
 
 expresion:
-    expresion OP_SUM termino   
-    | expresion OP_RES termino
+    expresion OP_SUM {
+        printf("\t\t + ");
+    } termino
+    | expresion OP_RES {
+        printf("\t\t - ");
+    } termino
     | termino 
-
-
  	;
 
 termino: 
-    termino OP_MUL factor   
-    | termino OP_DIV factor
+    termino OP_MUL {
+        printf("\t\t * ");
+    } factor
+    | termino OP_DIV {
+        printf("\t\t / ");
+    } factor
     | factor
     | termino COMA factor
-
     ;
 
 factor:
-    ID           {$<tipo_str>$ = $1; printf("\t\tAsignado ID: %s\n", $<tipo_str>$);}
-    | CONST_INT {$<tipo_int>$ = $1; printf("\t\tAsignado entero: %d\n", $<tipo_int>$);}
-    | CONST_REAL	{$<tipo_double>$ = $1; printf("\t\tAsignado Real: %f\n", $<tipo_double>$);}	 
+    ID {
+        $<tipo_str>$ = $1; printf("\t\t %s\n", $<tipo_str>$);
+    }
+    | CONST_INT  {$<tipo_int>$ = $1; printf("\t\t %d\n", $<tipo_int>$);}
+    | CONST_REAL {$<tipo_double>$ = $1; printf("\t\t %f\n", $<tipo_double>$);}	 
     | CONST_STR
-    | PARENTESIS expresion END_PARENTESIS {printf("\t\t(expresion)\n");}
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {printf("\tContar()\n");}
+    | PARENTESIS expresion END_PARENTESIS {
+        printf("\t\t(expresion)\n");
+    }
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {
+        printf("\tContar()\n");
+    }
     ;
 
 
 lista_comparadores:
-    OP_LEQ
-    | OP_MOQ 
-    | OP_EQQ
-    | OP_DIFF
-    | OP_LESS
-    | OP_MORE
+    OP_LEQ {
+        printf("\t\t <= ");
+    }
+    | OP_MOQ {
+        printf("\t\t >= ");
+    }
+    | OP_EQQ {
+        printf("\t\t == ");
+    }
+    | OP_DIFF {
+        printf("\t\t <> ");
+    }
+    | OP_LESS {
+        printf("\t\t < ");
+    }
+    | OP_MORE {
+        printf("\t\t > ");
+    }
     ;
 
 est_declaracion:
 	DIM {
-        printf("\t\tDECLARACION MULTIPLE\n");
+        printf("Inicio declaracion multiple\n");
     } est_variables AS est_tipos {  
-                                                for(i=0;i<cant_aux;i++) /*vamos agregando todos los ids que leyo*/
-                                                {
-                                                    separador1 = strtok(idvec[i],";");
-                                                    strcpy(nombre,separador1);
-                                                    separador1 = strtok(NULL, ";");
+        for(i=0;i<cant_aux;i++) /*vamos agregando todos los ids que leyo*/
+        {
+            separador1 = strtok(idvec[i],";");
+            strcpy(nombre,separador1);
+            separador1 = strtok(NULL, ";");
 
-
-                                                   if(insertarTS(nombre, separador1, "", 0, 0, NO_ES_CONST_NOMBRE) != 0) //no lo guarda porque ya existe
-                                                    {
-                                                        sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
-                                                        yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
-                                                    }
-                                                }
-                                                cantid=0;
-                                            
-        printf("\t\tFIN DECLARACION MULTIPLE\n");
+            if(insertarTS(nombre, separador1, "", 0, 0, NO_ES_CONST_NOMBRE) != 0) //no lo guarda porque ya existe
+            {
+                sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
+                yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
+            }
+        }
+        cantid=0;
+        printf("Fin declaracion multiple\n");
     }
     ;
 
@@ -268,18 +290,24 @@ est_variables:
     OP_LESS lista_variables OP_MORE;
 
 lista_variables:
-    ID {                strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
-                        punt = strtok(vecAux, ">"); /*eliminamos extras*/
-                        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
-                        cantid++;
-                    }
-    | ID COMA lista_variables {
-                        strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
-                        punt = strtok(vecAux, ","); /*eliminamos extras*/
-                        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
-                        cantid++;
-                        cant_aux = cantid;
-                    }
+    ID {
+        printf("\t\t %s\n", $<tipo_str>$);
+        strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
+        punt = strtok(vecAux, ">"); /*eliminamos extras*/
+        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
+        cantid++;
+    }
+    | ID {
+        printf("\t\t %s\n", $<tipo_str>$);
+    } COMA {
+        printf("\t\t ,\n");
+    } lista_variables {
+        strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
+        punt = strtok(vecAux, ","); /*eliminamos extras*/
+        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
+        cantid++;
+        cant_aux = cantid;
+    }
     ;
 
 lista_tipos:
@@ -299,10 +327,13 @@ tipo:
 est_tipos:
     OP_LESS lista_tipos OP_MORE;
 
-
 seleccion:
     	IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
-		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {printf("ELSE.\n");} END_LLAVE bloque END_LLAVE {printf("FIN ELSE.\n");}
+		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {
+            printf("Inicio Else.\n");
+        } END_LLAVE bloque END_LLAVE {
+            printf("Fin Else.\n");
+        }
         | IF PARENTESIS condicion END_PARENTESIS sentencia {printf("IF Sin llave.\n");}
         ;
 
@@ -310,15 +341,19 @@ seleccion:
 entrada_salida:
 	GET {
         printf("\t\tGET: "); 
-    } ID    {printf("%s\n", yylval.tipo_str);}
+    } ID    {
+        printf("%s\n", yylval.tipo_str);}
 	| PUT {
         printf("\t\tPUT: ");
-    } ID {printf("%s\n", yylval.tipo_str);}
+    } ID {
+        printf("%s\n", yylval.tipo_str);}
 	| PUT {
         printf("\t\tPUT: ");
-    } CONST_STR {   strcpy(vecAux, yylval.tipo_str);
-                    printf("%s\n", vecAux);}
-;
+    } CONST_STR {
+        strcpy(vecAux, yylval.tipo_str);
+        printf("%s\n", vecAux);
+    }
+    ;
 
 %%
 
@@ -341,7 +376,7 @@ int main(int argc, char *argv[])
     }
 }
 
-int insertarTS(const char *nombre,const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
+int insertarTS(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
 {
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[50] = "_";
@@ -361,8 +396,6 @@ int insertarTS(const char *nombre,const char *tipo, const char* valString, int v
         }
         tabla = tabla->next;
     }
-
-    
 
     t_data *data = (t_data*)malloc(sizeof(t_data));
     data = crearDatos(nombre, tipo, valString, valInt, valDouble, esConstNombre);
@@ -394,7 +427,6 @@ int insertarTS(const char *nombre,const char *tipo, const char* valString, int v
     return 0;
 }
 
-
 t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
 {
     char full[50] = "_";
@@ -409,19 +441,16 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     data->tipo = (char*)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
 
-   
-
-    //Es una variable
-    if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INTEGER")==0 || strcmp(tipo, "FLOAT")==0 && esConstNombre == 0)
+    //Si es una variable
+    if((strcmp(tipo, "STRING") == 0 || strcmp(tipo, "INTEGER") == 0 || strcmp(tipo, "FLOAT") == 0) && esConstNombre == 0)
     {
-        //al nombre lo dejo aca porque no lleva _
+        //Al nombre lo dejo aca porque no lleva _
         data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombre, nombre);
         return data;
     }
     else
     { 
-
         if(esConstNombre == ES_CONST_NOMBRE)
         {
             data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));

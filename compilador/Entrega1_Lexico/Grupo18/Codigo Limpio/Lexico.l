@@ -23,7 +23,7 @@ char    *yyltext;
 
 int esConst = 0;
 
-//int yyerror(void);
+int yyerror(char *, int, int, int);
 
 /* Tabla de simbolos */
 
@@ -75,19 +75,19 @@ COMILLA_CIERRA  "\”"
 
 %%
 {COMENTARIO_SIMPLE} {  return COMENTARIO_SIMPLE; }
-{CONST_STR}         { yylval.tipo_str = yytext;
+{CONST_STR}         {  yylval.tipo_str = yytext;
 						validarString(yylval.tipo_str);
                         if(esConst == 0)
                     	    insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0, 0);
                         esConst = 0;
                          return CONST_STR;}
-{CONST_INT}         { yylval.tipo_int = atoi(yytext);
+{CONST_INT}         {  yylval.tipo_int = atoi(yytext);
 						validarInt(yylval.tipo_int);
                         if(esConst == 0)
                     	insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0, 0);
                         esConst = 0;
                         return CONST_INT;         }
-{CONST_REAL}        { yylval.tipo_double = atof(yytext);
+{CONST_REAL}        {  yylval.tipo_double = atof(yytext);
 						validarFloat(yylval.tipo_double);
                         if(esConst == 0)
                     	insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double, 0);
@@ -155,9 +155,9 @@ void validarString(char cadena[])
 {
     int largo = strlen(cadena);
 
-    if(largo > 50)
+    if(largo > 30)
     {
-        yyerror("Error: Rango de string excedido. Se permite un maximo de 50 caracteres", 0, 0, 0);
+        yyerror("Error: Rango de string excedido. Se permite un maximo de 30 caracteres", 0, 0, 0);
     }
 }
 
@@ -168,7 +168,7 @@ void validarFloat(double numero)
 
     if(numero > max || (numero > 0 && numero < min))
     {
-        yyerror("Error: Rango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n");
+        yyerror("Error: Rango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n", 0, 0, 0);
     }
 }
 
