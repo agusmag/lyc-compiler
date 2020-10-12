@@ -156,9 +156,9 @@ est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
         printf("\n\t\t\tInicio Asignacion.\n");
         printf("\t\t\t\tCONST %s", $2);
-        strcpy($<tipo_str>$, $2);
-        $<tipo_double>$ = $4;
-        insertarTS($<tipo_str>$, "CONST_REAL", "", 0, 0, ES_CONST_NOMBRE);
+        //strcpy($<tipo_str>$, $2);
+        //$<tipo_double>$ = $4;
+        insertarTS(obtenerID($2), "CONST_REAL", "", $4, 0, ES_CONST_NOMBRE);
     }
     | CONST ID OP_ASIG_CONS CONST_INT {
         printf("\n\t\t\tInicio Asignacion.\n");
@@ -170,8 +170,8 @@ est_asignacion:
     | CONST ID OP_ASIG_CONS CONST_STR {
         printf("\n\t\t\tInicio Asignacion.\n");
         printf("\t\t\t\tCONST %s", $2);
-        strcpy($<tipo_str>$, $2);
-        insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, ES_CONST_NOMBRE);
+        //strcpy($<tipo_str>$, $2);
+        insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
     }
     |  asignacion
     ;
@@ -582,7 +582,7 @@ void guardarTS()
         }
         else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50d%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-50s%-25s%-50d%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "FLOAT") ==0)
         {
@@ -590,7 +590,7 @@ void guardarTS()
         }
         else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50g%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-50s%-25s%-50g%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "STRING") == 0)
         {
@@ -598,7 +598,7 @@ void guardarTS()
         }
         else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre));
         }
         fprintf(arch, "%s", linea);
         free(aux);

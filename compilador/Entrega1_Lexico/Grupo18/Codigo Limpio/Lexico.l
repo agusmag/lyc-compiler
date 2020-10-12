@@ -152,7 +152,7 @@ COMILLA_CIERRA      "\”"
 "GET"               {  debug_print("GET", yytext); return GET;                          }
 "get"               {  debug_print("GET", yytext); return GET;                          }
 "contar"			{  debug_print("CONTAR", yytext); return CONTAR;                    }
-{ID}                {  debug_print("ID", yytext); yylval.tipo_str = yytext; yylval.nomID = yytext; return ID;  }
+{ID}                {  debug_print("ID", yytext); yylval.tipo_str = yytext; return ID;  }
 " "
 "\n"
 "\t"
