@@ -1,20 +1,40 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <float.h>
+#include <math.h>
+#include <limits.h>
 
 #include "y.tab.h"
-FILE    *yyin;
-char    *yyltext;
 
+/* CONSTANTES */
 #define COTA_INT 65536
 #define COTA_FLOAT 4294967296
 #define ERROR_ID 3
 #define ERROR_STR 5
 #define ERROR_INT 7
 #define ERROR_REAL 9
+#define DEBUG_MODE 0 /*1 para YES, 0 para NO*/
+#define ES_CONST_NOMBRE 1
+#define NO_ES_CONST_NOMBRE 0
 
-int yyerror(void);
+/* VARIABLES */
+int esConst = 0;
+FILE    *yyin;
+char    *yyltext;
 
+/* FUNCIONES*/
+int yyerror(char *, int, int, int);
+int insertarTS(const char*, const char*, const char*, int, double, int);
+void debug_print(char*, char *);
+
+/* TABLA DE SIMBOLOS*/
+
+    void validarString(char[]);
+    void validarFloat(double);
+    void validarInt(int);
+    char valor[20];
 %}
 
 %option noyywrap
@@ -24,15 +44,15 @@ DIGITO			    [0-9]
 CONST_INT		    ({DIGITO})+
 CONST_REAL		    ({DIGITO})+"."({DIGITO})*|({DIGITO})*"."({DIGITO})+
 LETRA			    [a-zA-Z]
-CONST_STR           {CAR_COMILLAS}([^\"])*{CAR_COMILLAS}
+CONST_STR           ({CAR_COMILLAS}|{COMILLA_ABRE})([^\"])*({CAR_COMILLAS}|{COMILLA_CIERRA})
 COMENTARIO_SIMPLE	"*-"([^-*]|\n)*?"-*"
 ID					{LETRA}({LETRA}|{DIGITO}|_)*
 
-OP_LEQ              "<""="
+OP_LEQ              "<="
 OP_MOQ              ">""="
 OP_EQQ              "=""="
 OP_DIFF             "<"">"
-OP_LESS             "<"
+OP_LESS             "<" 
 OP_MORE             ">"
 OP_SUM              "\+"
 OP_RES				"\-"
@@ -45,76 +65,94 @@ OP_OR				("OR"|"or"|"\|\|")
 OP_NOT				("NOT"|"not"|"\!")
 CORCHETE            "\["
 END_CORCHETE        "\]"
-LLAVE           "\{"
-END_LLAVE       "\}"
-PARENTESIS      "\("
-END_PARENTESIS  "\)"
-COMA            "\,"
-PUNTO           "\."
-PUNTO_Y_COMA    "\;"
-COMILLA_SIMPLE  "\'"
+LLAVE               "\{"
+END_LLAVE           "\}"
+PARENTESIS          "\("
+END_PARENTESIS      "\)"
+COMA                "\,"
+PUNTO               "\."
+PUNTO_Y_COMA        "\;"
+COMILLA_SIMPLE      "\'"
 CAR_COMILLAS        "\""
+COMILLA_ABRE        "\“"
+COMILLA_CIERRA      "\”"
 
 %%
-{COMENTARIO_SIMPLE} { printf("\n %s", yytext); return COMENTARIO_SIMPLE; }
-{CONST_STR}         { printf("\n %s", yytext); return CONST_STR;         }
-{CONST_INT}         { printf("\n %s", yytext); return CONST_INT;         }
-{CONST_REAL}        { printf("\n %s", yytext); return CONST_REAL;        }
-{PUNTO}             { printf("\n %s", yytext); return PUNTO;             }
-{PUNTO_Y_COMA}      { printf("\n %s", yytext); return PUNTO_Y_COMA;      }
-{OP_ASIG}           { printf("\n %s", yytext); return OP_ASIG;           }
-{OP_ASIG_CONS}      { printf("\n %s", yytext); return OP_ASIG_CONS;      }
-{OP_SUM}            { printf("\n %s", yytext); return OP_SUM;            }
-{OP_MUL}            { printf("\n %s", yytext); return OP_MUL;            }
-{OP_RES}            { printf("\n %s", yytext); return OP_RES;            }
-{OP_DIV}            { printf("\n %s", yytext); return OP_DIV;            }
-{OP_LEQ}            { printf("\n %s", yytext); return OP_LEQ;            }
-{OP_MOQ}            { printf("\n %s", yytext); return OP_MOQ;            }
-{OP_EQQ}            { printf("\n %s", yytext); return OP_EQQ;            }
-{OP_DIFF}           { printf("\n %s", yytext); return OP_DIFF;           }
-{OP_LESS}           { printf("\n %s", yytext); return OP_LESS;           }
-{OP_MORE}           { printf("\n %s", yytext); return OP_MORE;           }
-{OP_AND}            { printf("\n %s", yytext); return OP_AND;            }
-{OP_OR}             { printf("\n %s", yytext); return OP_OR;             }
-{LLAVE}             { printf("\n %s", yytext); return LLAVE;             }
-{END_LLAVE}         { printf("\n %s", yytext); return END_LLAVE;         }
-{PARENTESIS}        { printf("\n %s", yytext); return PARENTESIS;        }
-{END_PARENTESIS}    { printf("\n %s", yytext); return END_PARENTESIS;    }
-{CORCHETE}          { printf("\n %s", yytext); return CORCHETE;          }
-{END_CORCHETE}      { printf("\n %s", yytext); return END_CORCHETE;      }
-{COMA}              { printf("\n %s", yytext); return COMA;              }
-{COMILLA_SIMPLE}    { printf("\n %s", yytext); return COMILLA_SIMPLE;    }
-"CONST"             { printf("\n %s", yytext); return CONST;             }
-"const"             { printf("\n %s", yytext); return CONST;             }
-"DIM"               { printf("\n %s", yytext); return DIM;               }
-"dim"               { printf("\n %s", yytext); return DIM;               }
-"AS"                { printf("\n %s", yytext); return AS;                }
-"as"                { printf("\n %s", yytext); return AS;                }
-"float"             { printf("\n %s", yytext); return FLOAT;             }
-"Float"             { printf("\n %s", yytext); return FLOAT;             }
-"integer"           { printf("\n %s", yytext); return INTEGER;           }
-"Integer"           { printf("\n %s", yytext); return INTEGER;           }
-"string"            { printf("\n %s", yytext); return STRING;            }
-"String"            { printf("\n %s", yytext); return STRING;            }
-"if"                { printf("\n %s", yytext); return IF;                }
-"IF"                { printf("\n %s", yytext); return IF;                }
-"else"              { printf("\n %s", yytext); return ELSE;              }
-"Else"              { printf("\n %s", yytext); return ELSE;              }
-"for"               { printf("\n %s", yytext); return FOR;               }
-"FOR"               { printf("\n %s", yytext); return FOR;               }
-"to"                { printf("\n %s", yytext); return TO;                }
-"TO"                { printf("\n %s", yytext); return TO;                }
-"do"                { printf("\n %s", yytext); return DO;                }
-"DO"                { printf("\n %s", yytext); return DO;                }
-"while"             { printf("\n %s", yytext); return WHILE;             }
-"WHILE"             { printf("\n %s", yytext); return WHILE;             }
-"in"                { printf("\n %s", yytext); return IN;                }
-"IN"                { printf("\n %s", yytext); return IN;                }
-"PUT"               { printf("\n %s", yytext); return PUT;               }
-"put"               { printf("\n %s", yytext); return PUT;               }
-"GET"               { printf("\n %s", yytext); return GET;               }
-"get"               { printf("\n %s", yytext); return GET;               }
-{ID}                { printf("\n %s", yytext); return ID;                }
+{COMENTARIO_SIMPLE} {  debug_print("COMENTARIO_SIMPLE", yytext); return COMENTARIO_SIMPLE; }
+{CONST_STR}         {  yylval.tipo_str = yytext;
+						validarString(yylval.tipo_str);
+                        if(esConst == 0)
+                    	    insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0, 0);
+                        esConst = 0;
+                        debug_print("CONST_STR", yytext);
+                        return CONST_STR;}
+{CONST_INT}         {  yylval.tipo_int = atoi(yytext);
+						validarInt(yylval.tipo_int);
+                        if(esConst == 0)
+                    	insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0, 0);
+                        esConst = 0;
+                        debug_print("CONST_INT", yytext);
+                        return CONST_INT;         }
+{CONST_REAL}        {  yylval.tipo_double = atof(yytext);
+					   validarFloat(yylval.tipo_double);
+                       if(esConst == 0)
+                    	insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double, 0);
+                       esConst = 0;
+                       debug_print("CONST_REAL", yytext);
+                       return CONST_REAL;        }
+{PUNTO_Y_COMA}      {  debug_print("PUNTO_Y_COMA", yytext); return PUNTO_Y_COMA;        }
+{OP_ASIG}           {  debug_print("OP_ASIG", yytext); return OP_ASIG;                  }
+{OP_ASIG_CONS}      {  debug_print("OP_ASIG_CONS", yytext); return OP_ASIG_CONS;        }
+{OP_SUM}            {  debug_print("OP_SUM", yytext); return OP_SUM;                    }
+{OP_MUL}            {  debug_print("OP_MULT", yytext); return OP_MUL;                   }
+{OP_RES}            {  debug_print("OP_RES", yytext); return OP_RES;                    }
+{OP_DIV}            {  debug_print("OP_DIV", yytext); return OP_DIV;                    }
+{OP_LEQ}            {  debug_print("OP_LEQ", yytext); return OP_LEQ;                    }
+{OP_MOQ}            {  debug_print("OP_MOQ", yytext); return OP_MOQ;                    }
+{OP_EQQ}            {  debug_print("OP_EQQ", yytext); return OP_EQQ;                    }
+{OP_DIFF}           {  debug_print("OP_DIFF", yytext); return OP_DIFF;                  }
+{OP_LESS}           {  debug_print("OP_LESS", yytext); return OP_LESS;                  }
+{OP_MORE}           {  debug_print("OP_MORE", yytext); return OP_MORE;                  }
+{OP_AND}            {  debug_print("OP_AND", yytext); return OP_AND;                    }
+{LLAVE}             {  debug_print("LLAVE", yytext); return LLAVE;                      }
+{END_LLAVE}         {  debug_print("END_LLAVE", yytext); return END_LLAVE;              }
+{PARENTESIS}        {  debug_print("PARENTESIS", yytext); return PARENTESIS;            }
+{END_PARENTESIS}    {  debug_print("END_PARENTESIS", yytext); return END_PARENTESIS;    }
+{CORCHETE}          {  debug_print("CORCHETE", yytext); return CORCHETE;                }
+{END_CORCHETE}      {  debug_print("END_CORCHETE", yytext); return END_CORCHETE;        }
+{COMA}              {  debug_print("COMA", yytext); return COMA;                        }
+{COMILLA_ABRE}      {  debug_print("COMILLA_ABRE", yytext); return COMILLA_ABRE;        }
+{COMILLA_CIERRA}    {  debug_print("COMILLA_CIERRA", yytext); return COMILLA_CIERRA;    }
+"CONST"             {  
+                        esConst = 1;
+                        debug_print("CONST", yytext);
+                        return CONST;            
+                    }
+"const"             { 
+                        esConst = 1;
+                        debug_print("CONST", yytext);
+                        return CONST;           
+                    }
+"DIM"               {  debug_print("DIM", yytext); return DIM;                          }
+"dim"               {  debug_print("DIM", yytext); return DIM;                          }
+"AS"                {  debug_print("AS", yytext); return AS;                            }
+"as"                {  debug_print("AS", yytext); return AS;                            }
+"float"             {  debug_print("FLOAT", yytext); return FLOAT;                      }
+"Float"             {  debug_print("FLOAT", yytext); return FLOAT;                      }
+"integer"           {  debug_print("INTEGER", yytext); return INTEGER;                  }
+"Integer"           {  debug_print("INTEGER", yytext); return INTEGER;                  }
+"if"                {  debug_print("IF", yytext); return IF;                            }
+"IF"                {  debug_print("IF", yytext); return IF;                            }
+"else"              {  debug_print("ELSE", yytext); return ELSE;                        }
+"Else"              {  debug_print("ELSE", yytext); return ELSE;                        }
+"while"             {  debug_print("WHILE", yytext); return WHILE;                      }
+"WHILE"             {  debug_print("WHILE",yytext); return WHILE;                       }
+"PUT"               {  debug_print("PUT", yytext); return PUT;                          }
+"put"               {  debug_print("PUT", yytext); return PUT;                          }
+"GET"               {  debug_print("GET", yytext); return GET;                          }
+"get"               {  debug_print("GET", yytext); return GET;                          }
+"contar"			{  debug_print("CONTAR", yytext); return CONTAR;                    }
+{ID}                {  debug_print("ID", yytext); yylval.tipo_str = yytext; return ID;  }
 " "
 "\n"
 "\t"
@@ -122,3 +160,50 @@ CAR_COMILLAS        "\""
 "\r\n"
 
 %%
+
+void validarString(char cadena[])
+{
+    int largo = strlen(cadena);
+
+    if(largo > 30)
+    {
+        yyerror("Error: Rango de string excedido. Se permite un maximo de 30 caracteres", 0, 0, 0);
+    }
+}
+
+void validarFloat(double numero)
+{   
+    double max = 3.402823 * pow(10, 38);
+    double min = 1.175494 * pow(10, -38);
+
+    if(numero > max || (numero > 0 && numero < min))
+    {
+        yyerror("Error: Rango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n", 0, 0, 0);
+    }
+}
+
+void validarInt(int numero)
+{
+    if(numero > 65535)
+    {
+        yyerror("Error: Valor de int excedido, el mayor posible es 65535", 0, 0, 0);
+    }
+}
+
+int yyerror(char *mensaje, int fila, int ci, int cf)
+{
+    if(fila == 0 || ci == 0 || cf == 0) /* || fila <= yylineno)*/
+        printf("\nLinea %d: %s.\n", yylineno, mensaje);
+    else
+        printf("\nLinea %d, %d-%d: %s.\n", fila, ci, cf, mensaje);
+    
+    exit(1);
+}
+
+void debug_print(char* tipo, char *mensaje)
+{
+    if (DEBUG_MODE == 1)
+        printf("\nLEX: %s [%s]\n", mensaje, tipo);    
+
+    return;
+}
