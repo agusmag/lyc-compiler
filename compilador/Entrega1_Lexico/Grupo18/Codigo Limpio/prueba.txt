@@ -21,7 +21,8 @@ if (actual == 2) {
 if (actual > 2 and actual <> 0) {
     PUT "actual es > que 2 y != de 0";
 }
-Else }
+Else 
+}
     if (actual < nombre)
         PUT "no es mayor que 2";
 }

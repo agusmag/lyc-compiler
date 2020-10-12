@@ -58,6 +58,7 @@ int j=0;
 /* --- Validaciones --- */
 int existeID(const char*);
 int esNumero(const char*,char*);
+char* obtenerID(char*);
 char mensajes[100];
 
 %}
@@ -154,24 +155,23 @@ sentencia:
 est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
         printf("\n\t\t\tInicio Asignacion.\n");
-        printf("\t\t\t\tCONST %s\n", $2);
+        printf("\t\t\t\tCONST %s", $2);
         strcpy($<tipo_str>$, $2);
         $<tipo_double>$ = $4;
-        insertarTS($<tipo_str>$, "CONST_REAL", "", 0, yylval.tipo_double, ES_CONST_NOMBRE);
+        insertarTS($<tipo_str>$, "CONST_REAL", "", 0, 0, ES_CONST_NOMBRE);
     }
     | CONST ID OP_ASIG_CONS CONST_INT {
         printf("\n\t\t\tInicio Asignacion.\n");
-        printf("\t\t\t\tCONST %s\n", $2);
-        strcpy($<tipo_str>$, $2);
-        $<tipo_int>$ = $4;
-        insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
+        //strcpy($<tipo_str>$, $2);
+        printf("\t\t\t\tCONST %s", $2);
+        insertarTS(obtenerID($2), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
+        //insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
     }                               
     | CONST ID OP_ASIG_CONS CONST_STR {
         printf("\n\t\t\tInicio Asignacion.\n");
-        printf("\t\t\t\tCONST %s\n", $2);
+        printf("\t\t\t\tCONST %s", $2);
         strcpy($<tipo_str>$, $2);
-        strcpy($<tipo_str>$, $4);
-        insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, 1);
+        insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, ES_CONST_NOMBRE);
     }
     |  asignacion
     ;
@@ -261,7 +261,7 @@ factor:
         printf(") ");
     }
     | CONTAR {
-        printf("contar ");
+        printf("contar(");
     } PARENTESIS expresion PUNTO_Y_COMA {
         printf("; ");
     } CORCHETE {
@@ -269,8 +269,7 @@ factor:
     } expresion END_CORCHETE {
         printf("] ");
     } END_PARENTESIS {
-        printf(") ");
-        printf("\t\t\t\n contar()");
+        printf(")");
     }
     ;
 
@@ -660,4 +659,10 @@ int esNumero(const char* id,char* error)
     }
     sprintf(error, "%s%s%s", "Error: no se declaro la variable '", id, "'");
     return 0;
+}
+
+char* obtenerID(char* cadena)
+{
+    char* posAsig = strtok(cadena, "=");
+    return cadena;
 }
