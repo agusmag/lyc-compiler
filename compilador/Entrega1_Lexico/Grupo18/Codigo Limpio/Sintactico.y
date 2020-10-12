@@ -178,10 +178,10 @@ est_asignacion:
 
 asignacion:
     ID {
-        printf("\t\t\t\t%s ", $1);
-    } OP_ASIG {
-        printf("%s ", $1);
-    } expresion {
+        printf("\t\t\t\t%s", $1);
+    } OP_ASIG  {
+        printf(": ");
+    }  expresion {
         printf("\n\t\t\tFin Asignacion.\n");
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
