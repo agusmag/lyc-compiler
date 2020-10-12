@@ -1,0 +1,5 @@
+NOMBRE                                            TIPODATO                 VALOR                                             LONGITUD                      
+suma                                              FLOAT                    --                                                4
+actual                                            FLOAT                    --                                                6
+promedio                                          FLOAT                    --                                                8
+contador                                          INTEGER                  --                                                8

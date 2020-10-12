@@ -8,24 +8,28 @@
 
 #include "y.tab.h"
 
-FILE    *yyin;
-char    *yyltext;
-
+/* CONSTANTES */
 #define COTA_INT 65536
 #define COTA_FLOAT 4294967296
 #define ERROR_ID 3
 #define ERROR_STR 5
 #define ERROR_INT 7
 #define ERROR_REAL 9
-
+#define DEBUG_MODE 0 /*1 para YES, 0 para NO*/
 #define ES_CONST_NOMBRE 1
 #define NO_ES_CONST_NOMBRE 0
 
+/* VARIABLES */
 int esConst = 0;
+FILE    *yyin;
+char    *yyltext;
 
+/* FUNCIONES*/
 int yyerror(char *, int, int, int);
+int insertarTS(const char*, const char*, const char*, int, double, int);
+void debug_print(char*, char *);
 
-/* Tabla de simbolos */
+/* TABLA DE SIMBOLOS*/
 
     void validarString(char[]);
     void validarFloat(double);
@@ -61,88 +65,94 @@ OP_OR				("OR"|"or"|"\|\|")
 OP_NOT				("NOT"|"not"|"\!")
 CORCHETE            "\["
 END_CORCHETE        "\]"
-LLAVE           "\{"
-END_LLAVE       "\}"
-PARENTESIS      "\("
-END_PARENTESIS  "\)"
-COMA            "\,"
-PUNTO           "\."
-PUNTO_Y_COMA    "\;"
-COMILLA_SIMPLE  "\'"
+LLAVE               "\{"
+END_LLAVE           "\}"
+PARENTESIS          "\("
+END_PARENTESIS      "\)"
+COMA                "\,"
+PUNTO               "\."
+PUNTO_Y_COMA        "\;"
+COMILLA_SIMPLE      "\'"
 CAR_COMILLAS        "\""
-COMILLA_ABRE    "\“"
-COMILLA_CIERRA  "\”"
+COMILLA_ABRE        "\“"
+COMILLA_CIERRA      "\”"
 
 %%
-{COMENTARIO_SIMPLE} {  return COMENTARIO_SIMPLE; }
+{COMENTARIO_SIMPLE} {  debug_print("COMENTARIO_SIMPLE", yytext); return COMENTARIO_SIMPLE; }
 {CONST_STR}         {  yylval.tipo_str = yytext;
 						validarString(yylval.tipo_str);
                         if(esConst == 0)
                     	    insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0, 0);
                         esConst = 0;
-                         return CONST_STR;}
+                        debug_print("CONST_STR", yytext);
+                        return CONST_STR;}
 {CONST_INT}         {  yylval.tipo_int = atoi(yytext);
 						validarInt(yylval.tipo_int);
                         if(esConst == 0)
                     	insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0, 0);
                         esConst = 0;
+                        debug_print("CONST_INT", yytext);
                         return CONST_INT;         }
 {CONST_REAL}        {  yylval.tipo_double = atof(yytext);
-						validarFloat(yylval.tipo_double);
-                        if(esConst == 0)
+					   validarFloat(yylval.tipo_double);
+                       if(esConst == 0)
                     	insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double, 0);
-                        esConst = 0;
-                        return CONST_REAL;        }
-{PUNTO_Y_COMA}      {  return PUNTO_Y_COMA;      }
-{OP_ASIG}           {  return OP_ASIG;           }
-{OP_ASIG_CONS}      {  return OP_ASIG_CONS;      }
-{OP_SUM}            {  return OP_SUM;            }
-{OP_MUL}            {  return OP_MUL;            }
-{OP_RES}            {  return OP_RES;            }
-{OP_DIV}            {  return OP_DIV;            }
-{OP_LEQ}            {  return OP_LEQ;            }
-{OP_MOQ}            {  return OP_MOQ;            }
-{OP_EQQ}            {  return OP_EQQ;            }
-{OP_DIFF}           {  return OP_DIFF;           }
-{OP_LESS}           {  return OP_LESS;           }
-{OP_MORE}           {  return OP_MORE;           }
-{OP_AND}            {  return OP_AND;            }
-{LLAVE}             {  return LLAVE;             }
-{END_LLAVE}         {  return END_LLAVE;         }
-{PARENTESIS}        {  return PARENTESIS;        }
-{END_PARENTESIS}    {  return END_PARENTESIS;    }
-{CORCHETE}          {  return CORCHETE;          }
-{END_CORCHETE}      {  return END_CORCHETE;      }
-{COMA}              {  return COMA;              }
-{COMILLA_ABRE}      {  return COMILLA_ABRE;      }
-{COMILLA_CIERRA}    {  return COMILLA_CIERRA;    }
+                       esConst = 0;
+                       debug_print("CONST_REAL", yytext);
+                       return CONST_REAL;        }
+{PUNTO_Y_COMA}      {  debug_print("PUNTO_Y_COMA", yytext); return PUNTO_Y_COMA;        }
+{OP_ASIG}           {  debug_print("OP_ASIG", yytext); return OP_ASIG;                  }
+{OP_ASIG_CONS}      {  debug_print("OP_ASIG_CONS", yytext); return OP_ASIG_CONS;        }
+{OP_SUM}            {  debug_print("OP_SUM", yytext); return OP_SUM;                    }
+{OP_MUL}            {  debug_print("OP_MULT", yytext); return OP_MUL;                   }
+{OP_RES}            {  debug_print("OP_RES", yytext); return OP_RES;                    }
+{OP_DIV}            {  debug_print("OP_DIV", yytext); return OP_DIV;                    }
+{OP_LEQ}            {  debug_print("OP_LEQ", yytext); return OP_LEQ;                    }
+{OP_MOQ}            {  debug_print("OP_MOQ", yytext); return OP_MOQ;                    }
+{OP_EQQ}            {  debug_print("OP_EQQ", yytext); return OP_EQQ;                    }
+{OP_DIFF}           {  debug_print("OP_DIFF", yytext); return OP_DIFF;                  }
+{OP_LESS}           {  debug_print("OP_LESS", yytext); return OP_LESS;                  }
+{OP_MORE}           {  debug_print("OP_MORE", yytext); return OP_MORE;                  }
+{OP_AND}            {  debug_print("OP_AND", yytext); return OP_AND;                    }
+{LLAVE}             {  debug_print("LLAVE", yytext); return LLAVE;                      }
+{END_LLAVE}         {  debug_print("END_LLAVE", yytext); return END_LLAVE;              }
+{PARENTESIS}        {  debug_print("PARENTESIS", yytext); return PARENTESIS;            }
+{END_PARENTESIS}    {  debug_print("END_PARENTESIS", yytext); return END_PARENTESIS;    }
+{CORCHETE}          {  debug_print("CORCHETE", yytext); return CORCHETE;                }
+{END_CORCHETE}      {  debug_print("END_CORCHETE", yytext); return END_CORCHETE;        }
+{COMA}              {  debug_print("COMA", yytext); return COMA;                        }
+{COMILLA_ABRE}      {  debug_print("COMILLA_ABRE", yytext); return COMILLA_ABRE;        }
+{COMILLA_CIERRA}    {  debug_print("COMILLA_CIERRA", yytext); return COMILLA_CIERRA;    }
 "CONST"             {  
                         esConst = 1;
+                        debug_print("CONST", yytext);
                         return CONST;            
-                                                 }
+                    }
 "const"             { 
                         esConst = 1;
-                        return CONST;           }
-"DIM"               {  return DIM;               }
-"dim"               {  return DIM;               }
-"AS"                {  return AS;                }
-"as"                {  return AS;                }
-"float"             {  return FLOAT;             }
-"Float"             {  return FLOAT;             }
-"integer"           {  return INTEGER;           }
-"Integer"           {  return INTEGER;           }
-"if"                {  return IF;                }
-"IF"                {  return IF;                }
-"else"              {  return ELSE;              }
-"Else"              {  return ELSE;              }
-"while"             {  return WHILE;             }
-"WHILE"             {  return WHILE;             }
-"PUT"               {  return PUT;               }
-"put"               {  return PUT;               }
-"GET"               {  return GET;               }
-"get"               {  return GET;               }
-"contar"			{  return CONTAR;            }
-{ID}                { yylval.tipo_str = yytext; return ID;}
+                        debug_print("CONST", yytext);
+                        return CONST;           
+                    }
+"DIM"               {  debug_print("DIM", yytext); return DIM;                          }
+"dim"               {  debug_print("DIM", yytext); return DIM;                          }
+"AS"                {  debug_print("AS", yytext); return AS;                            }
+"as"                {  debug_print("AS", yytext); return AS;                            }
+"float"             {  debug_print("FLOAT", yytext); return FLOAT;                      }
+"Float"             {  debug_print("FLOAT", yytext); return FLOAT;                      }
+"integer"           {  debug_print("INTEGER", yytext); return INTEGER;                  }
+"Integer"           {  debug_print("INTEGER", yytext); return INTEGER;                  }
+"if"                {  debug_print("IF", yytext); return IF;                            }
+"IF"                {  debug_print("IF", yytext); return IF;                            }
+"else"              {  debug_print("ELSE", yytext); return ELSE;                        }
+"Else"              {  debug_print("ELSE", yytext); return ELSE;                        }
+"while"             {  debug_print("WHILE", yytext); return WHILE;                      }
+"WHILE"             {  debug_print("WHILE",yytext); return WHILE;                       }
+"PUT"               {  debug_print("PUT", yytext); return PUT;                          }
+"put"               {  debug_print("PUT", yytext); return PUT;                          }
+"GET"               {  debug_print("GET", yytext); return GET;                          }
+"get"               {  debug_print("GET", yytext); return GET;                          }
+"contar"			{  debug_print("CONTAR", yytext); return CONTAR;                    }
+{ID}                {  debug_print("ID", yytext); yylval.tipo_str = yytext; return ID;  }
 " "
 "\n"
 "\t"
@@ -187,6 +197,13 @@ int yyerror(char *mensaje, int fila, int ci, int cf)
     else
         printf("\nLinea %d, %d-%d: %s.\n", fila, ci, cf, mensaje);
     
-    system("Pause");
     exit(1);
+}
+
+void debug_print(char* tipo, char *mensaje)
+{
+    if (DEBUG_MODE == 1)
+        printf("\nLEX: %s [%s]\n", mensaje, tipo);    
+
+    return;
 }

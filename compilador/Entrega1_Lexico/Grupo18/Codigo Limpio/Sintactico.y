@@ -46,7 +46,7 @@ t_tabla tablaTS;
 
 char idvec[50][50];
 int cantid = 0, i=0, cant_aux=0;
-char vecAux[50];
+char vecAux[300];
 char* punt;
 char pos[2];
 char* separador1;
@@ -81,6 +81,7 @@ char* tipo_cmp;
 %token OP_RES           
 %token OP_DIV
 %token OP_AND
+%token OP_OR
 %token OP_EQQ
 %token OP_MOQ
 
@@ -116,55 +117,58 @@ char* tipo_cmp;
 %token COMILLA_CIERRA
 %token LISTA_CONTAR
 
-
-
 /*---- 3. Definición de reglas gramaticales ----*/
 
 %%
 
 PROGRAMA:
-{
-    printf("\n\nInicia el COMPILADOR\n\n");
-} 
-algoritmo
-{
-	{ guardarTS(); printf("\nCompilacion OK.\n");} 
-};
+    {
+        printf("\n\nInicia el COMPILADOR\n\n");
+    } 
+    algoritmo {
+        guardarTS();
+        printf("\nCompilacion OK.\n");
+    };
 
-algoritmo: 
-{
-    printf("\tCOMIENZO de BLOQUES\n");
-} 
-bloque;
+algoritmo:
+    bloque
+    ;
 
 bloque:
     bloque sentencia
-    | sentencia  
+    | sentencia
     ;
 
 sentencia:
     ciclo
     | est_declaracion
-    | est_asignacion PUNTO_Y_COMA    
+    | est_asignacion PUNTO_Y_COMA {
+        printf(";\n");
+    }
     | seleccion
-    | entrada_salida PUNTO_Y_COMA
+    | entrada_salida PUNTO_Y_COMA {
+        printf(";\n");
+    }
     ;
 
 est_asignacion:
-	CONST ID OP_ASIG_CONS CONST_REAL {  
-        printf("\t\t CONST %s : $f\n", $2, $4);
+	CONST ID OP_ASIG_CONS CONST_REAL { 
+        printf("\n\t\t\tInicio Asignacion.\n");
+        printf("\t\t\t\tCONST %s\n", $2);
         strcpy($<tipo_str>$, $2);
         $<tipo_double>$ = $4;
         insertarTS($<tipo_str>$, "CONST_REAL", "", 0, yylval.tipo_double, ES_CONST_NOMBRE);
     }
-    | CONST ID OP_ASIG_CONS CONST_INT { 
-        printf("\t\t CONST %s : $d\n", $2, $4);
+    | CONST ID OP_ASIG_CONS CONST_INT {
+        printf("\n\t\t\tInicio Asignacion.\n");
+        printf("\t\t\t\tCONST %s\n", $2);
         strcpy($<tipo_str>$, $2);
         $<tipo_int>$ = $4;
         insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
     }                               
-    | CONST ID OP_ASIG_CONS CONST_STR { 
-        printf("\t\t CONST %s : $s\n", $2, $4);
+    | CONST ID OP_ASIG_CONS CONST_STR {
+        printf("\n\t\t\tInicio Asignacion.\n");
+        printf("\t\t\t\tCONST %s\n", $2);
         strcpy($<tipo_str>$, $2);
         strcpy($<tipo_str>$, $4);
         insertarTS($2, "CONST_STR", $<tipo_str>$, 0, 0, 1);
@@ -174,11 +178,11 @@ est_asignacion:
 
 asignacion:
     ID {
-        printf("\t\t %s\n", $<tipo_str>$);
+        printf("\t\t\t\t%s ", $1);
     } OP_ASIG {
-        printf("Inicio Asignacion.\n");
+        printf("%s ", $1);
     } expresion {
-        printf("Fin Asignacion.\n");
+        printf("\n\t\t\tFin Asignacion.\n");
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
         if(!existeID(punt)) /*No existe: entonces no esta declarada*/
@@ -191,84 +195,112 @@ asignacion:
 
 ciclo:
      WHILE {
-         printf("Inicio While.\n");
+         printf("\n\t\t\tInicio While.\n");
     } PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {
-        printf("Fin While.\n");
+        printf("\n\t\t\tFin While.\n");
     } 
     ;
 
 condicion:
     comparacion
-    | comparacion OP_AND comparacion
+    | comparacion OP_AND {
+        printf("and ");
+    } comparacion
+    | comparacion OP_OR {
+        printf("or ");
+    } comparacion
     ;
 
 comparacion:
-    expresion lista_comparadores expresion  
+    expresion lista_comparadores expresion
     | expresion
     ;
 
 expresion:
     expresion OP_SUM {
-        printf("\t\t + ");
+        printf("+ ");
     } termino
     | expresion OP_RES {
-        printf("\t\t - ");
+        printf("- ");
     } termino
     | termino 
  	;
 
 termino: 
     termino OP_MUL {
-        printf("\t\t * ");
+        printf("* ");
     } factor
     | termino OP_DIV {
-        printf("\t\t / ");
+        printf("/ ");
     } factor
     | factor
-    | termino COMA factor
+    | termino COMA {
+        printf(", ");
+    } factor
     ;
 
 factor:
     ID {
-        $<tipo_str>$ = $1; printf("\t\t %s\n", $<tipo_str>$);
+        $<tipo_str>$ = $1;
+        printf("%s ", $1);
     }
-    | CONST_INT  {$<tipo_int>$ = $1; printf("\t\t %d\n", $<tipo_int>$);}
-    | CONST_REAL {$<tipo_double>$ = $1; printf("\t\t %f\n", $<tipo_double>$);}	 
-    | CONST_STR
-    | PARENTESIS expresion END_PARENTESIS {
-        printf("\t\t(expresion)\n");
+    | CONST_INT  {
+        $<tipo_int>$ = $1;
+        printf("%d ", $1);
     }
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS {
-        printf("\tContar()\n");
+    | CONST_REAL {
+        $<tipo_double>$ = $1;
+        printf("%f ", $1);
+    }	 
+    | CONST_STR {
+        printf("%s ", $1);
+    }
+    | PARENTESIS {
+        printf("( ");
+    }expresion END_PARENTESIS {
+        printf(") ");
+    }
+    | CONTAR {
+        printf("contar ");
+    } PARENTESIS expresion PUNTO_Y_COMA {
+        printf("; ");
+    } CORCHETE {
+        printf("[ ");
+    } expresion END_CORCHETE {
+        printf("] ");
+    } END_PARENTESIS {
+        printf(") ");
+        printf("\t\t\t\n contar()");
     }
     ;
 
-
 lista_comparadores:
     OP_LEQ {
-        printf("\t\t <= ");
+        printf("<= ");
     }
     | OP_MOQ {
-        printf("\t\t >= ");
+        printf(">= ");
     }
     | OP_EQQ {
-        printf("\t\t == ");
+        printf("== ");
     }
     | OP_DIFF {
-        printf("\t\t <> ");
+        printf("<> ");
     }
     | OP_LESS {
-        printf("\t\t < ");
+        printf("< ");
     }
     | OP_MORE {
-        printf("\t\t > ");
+        printf("> ");
     }
     ;
 
 est_declaracion:
 	DIM {
-        printf("Inicio declaracion multiple\n");
-    } est_variables AS est_tipos {  
+        printf("\n\t\t\tInicio declaracion multiple\n\t\t\t\t");
+    } est_variables AS {
+        printf(" AS ");
+    } est_tipos {  
         for(i=0;i<cant_aux;i++) /*vamos agregando todos los ids que leyo*/
         {
             separador1 = strtok(idvec[i],";");
@@ -282,26 +314,26 @@ est_declaracion:
             }
         }
         cantid=0;
-        printf("Fin declaracion multiple\n");
+        printf("\n\t\t\tFin declaracion multiple\n");
     }
     ;
 
 est_variables:
-    OP_LESS lista_variables OP_MORE;
+    OP_LESS {
+        printf("<");
+    } lista_variables OP_MORE;
 
 lista_variables:
     ID {
-        printf("\t\t %s\n", $<tipo_str>$);
+        printf(" %s", $1);
         strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
         punt = strtok(vecAux, ">"); /*eliminamos extras*/
         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
         cantid++;
     }
     | ID {
-        printf("\t\t %s\n", $<tipo_str>$);
-    } COMA {
-        printf("\t\t ,\n");
-    } lista_variables {
+        printf(" %s", $1);
+    } COMA lista_variables {
         strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
         punt = strtok(vecAux, ","); /*eliminamos extras*/
         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
@@ -312,46 +344,54 @@ lista_variables:
 
 lista_tipos:
     tipo
-    | tipo COMA lista_tipos;
+    | tipo COMA {
+        printf(", ");
+    } lista_tipos;
 
 tipo:
-    INTEGER {           strcat(idvec[cantid-1],";");
-                        strcat(idvec[cantid-1],"INTEGER");
-                        cantid--;}
+    INTEGER {
+        printf("Integer");
+        strcat(idvec[cantid-1],";");
+        strcat(idvec[cantid-1],"INTEGER");
+        cantid--;
+    }
     | FLOAT {
-                        strcat(idvec[cantid-1],";");
-                        strcat(idvec[cantid-1],"FLOAT");
-                        cantid--;}
-    | CONST_STR;
+        printf("Float");
+        strcat(idvec[cantid-1],";");
+        strcat(idvec[cantid-1],"FLOAT");
+        cantid--;
+    }
+    | CONST_STR {
+        printf("String");
+    };
 
 est_tipos:
-    OP_LESS lista_tipos OP_MORE;
+    OP_LESS {
+        printf("<");
+    } lista_tipos OP_MORE {
+        printf(">");
+    };
 
 seleccion:
-    	IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
-		| IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {
-            printf("Inicio Else.\n");
-        } END_LLAVE bloque END_LLAVE {
-            printf("Fin Else.\n");
-        }
-        | IF PARENTESIS condicion END_PARENTESIS sentencia {printf("IF Sin llave.\n");}
-        ;
-
+    IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+    | IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {
+        printf("ELSE\n");
+    } LLAVE bloque END_LLAVE {
+        printf("FIN ELSE.\n");
+    }
+    | IF PARENTESIS condicion END_PARENTESIS sentencia {
+        printf("IF Sin llave.\n");
+    }
+    ;
 
 entrada_salida:
-	GET {
-        printf("\t\tGET: "); 
-    } ID    {
-        printf("%s\n", yylval.tipo_str);}
-	| PUT {
-        printf("\t\tPUT: ");
-    } ID {
-        printf("%s\n", yylval.tipo_str);}
-	| PUT {
-        printf("\t\tPUT: ");
-    } CONST_STR {
-        strcpy(vecAux, yylval.tipo_str);
-        printf("%s\n", vecAux);
+	GET ID {
+        printf("\n\t\t\tGET %s", $2);}
+	| PUT ID {
+        printf("\n\t\t\tPUT %s", $2);}
+	| PUT CONST_STR {
+        strcpy(vecAux, $2);
+        printf("\n\t\t\tPUT %s", vecAux);
     }
     ;
 
@@ -368,10 +408,9 @@ int main(int argc, char *argv[])
     }
     else
     { 
-        crearTablaTS();//tablaTS.primero = NULL;
+        crearTablaTS(); //tablaTS.primero = NULL;
         yyparse();
         fclose(yyin);
-        system("Pause"); /*Esta pausa la puse para ver lo que hace via mensajes*/
         return 0;
     }
 }
@@ -381,7 +420,6 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[50] = "_";
     strcat(nombreCTE, nombre);
-    
     
     while(tabla)
     {
@@ -517,7 +555,6 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     return NULL;
 }
 
-
 void guardarTS()
 {
     FILE* arch;
@@ -542,27 +579,27 @@ void guardarTS()
         
         if(strcmp(aux->data.tipo, "INTEGER") == 0) //variable int
         {
-            sprintf(linea, "%-50s%-25s%-50s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50d%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-50s%-25s%-50d%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) -1);
         }
         else if(strcmp(aux->data.tipo, "FLOAT") ==0)
         {
-            sprintf(linea, "%-50s%-25s%-50s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50g%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-50s%-25s%-50g%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
         }
         else if(strcmp(aux->data.tipo, "STRING") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50s%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre) -1);
         }
         fprintf(arch, "%s", linea);
         free(aux);
