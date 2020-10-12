@@ -158,7 +158,7 @@ est_asignacion:
         printf("\t\t\t\tCONST %s", $2);
         //strcpy($<tipo_str>$, $2);
         //$<tipo_double>$ = $4;
-        insertarTS(obtenerID($2), "CONST_REAL", "", $4, 0, ES_CONST_NOMBRE);
+        insertarTS(obtenerID($2), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
     }
     | CONST ID OP_ASIG_CONS CONST_INT {
         printf("\n\t\t\tInicio Asignacion.\n");
@@ -590,7 +590,7 @@ void guardarTS()
         }
         else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50g%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre));
+            sprintf(linea, "%-50s%-25s%-50f%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "STRING") == 0)
         {
