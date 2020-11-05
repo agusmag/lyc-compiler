@@ -1,2 +1,2 @@
-Segunda.exe prueba.txt
+Segunda.exe prueba_completa.txt
 pause
