@@ -86,17 +86,17 @@ COMILLA_CIERRA      "\”"
                         esConst = 0;
                         debug_print("CONST_STR", yytext);
                         return CONST_STR;}
-{CONST_INT}         {  *yylval.tipo_int = atoi(yytext);
-						validarInt(*yylval.tipo_int);
+{CONST_INT}         {  yylval.tipo_int = atoi(yytext);
+						validarInt(yylval.tipo_int);
                         if(esConst == 0)
-                    	insertarTS(yytext, "CONST_INT", "", *yylval.tipo_int, 0, 0);
+                    	insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0, 0);
                         esConst = 0;
                         debug_print("CONST_INT", yytext);
                         return CONST_INT;         }
-{CONST_REAL}        {  *yylval.tipo_double = atof(yytext);
-					   validarFloat(*yylval.tipo_double);
+{CONST_REAL}        {  yylval.tipo_double = atof(yytext);
+					   validarFloat(yylval.tipo_double);
                        if(esConst == 0)
-                    	insertarTS(yytext, "CONST_REAL", "", 0, *yylval.tipo_double, 0);
+                    	insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double, 0);
                        esConst = 0;
                        debug_print("CONST_REAL", yytext);
                        return CONST_REAL;        }

@@ -10,32 +10,18 @@
 #define NO_ES_CONST_NOMBRE 0
 FILE  *yyin;
 
-// Generacion Codigo Intermedio
-#define TAM_PILA 100
-#define TODO_OK 1
-#define ERROR 0
-#define EXISTE 1
-#define NO_EXISTE 0
-#define TODO_OK 1
-#define PILA_IF 0
-#define PILA_DECLARACION 1
-#define PILA_WHILE 2
-#define PILA_ASIGNACION 3
-
-#define TRUE 1
-#define FALSE 0
+//char vecAux[35];
 
 /* --- Tabla de simbolos --- */
 typedef struct
 {
         char *nombre;
         char *tipo;
-        /*union Valor{
-                int int_val;
-                double real_val;
-                char *str_val;
-        }valor;*/
-        char *valor;
+        union Valor{
+                int valor_int;
+                double valor_double;
+                char *valor_str;
+        }valor;
         int longitud;
 }t_data;
 
@@ -69,71 +55,19 @@ char tipo_dato[50];
 
 int j=0;
 
-// Generacion Codigo Intermedio
-int crearArchivoIntermedia();
-int insertarEnLista(void*, char*);
-int insertarEnListaDeclaracion(char*, char*);
-void escribirEnLista(int, char*, char*);
-char * valorComparacion(char * );
-char   comparador_usado[2];
-char * aux;
-char * auxTipoAsignacion;
-char * inicioWhilePos;
-int flagWHILE = FALSE;
-int flagELSE = FALSE;
-
-char posAuxA[5], posAuxB[5];	//Posicion auxiliar para pivotear con la condicion OR
-char posTrue[5], posFalse[5],posCondDos[5];
-int puntero_tokens=1; //Arranca en uno para comparar en notepad++
-int iniExpre, finExpre;
-
-FILE *fileCodigoIntermedio; //Archivo con el codigo intermedio
-
-// PILAS 
-char * pilaIF[TAM_PILA];			// pila 0
-char * pilaWhile[TAM_PILA];			// pila 1
-char * pilaAsignacion[TAM_PILA];	// pila 3
-char * pilaRepeat[TAM_PILA];		// pila 4
-char * pilaBetween[TAM_PILA];		// pila 5
-int tope_pila_if=0;				// pila 0
-int tope_pila_while=0;			// pila 1
-int tope_pila_asignacion=0;		// pila 3
-int tope_pila_repeat=0;			// pila 4
-int tope_pila_between=0;		// pila 5
-
-////////////////////
-void apilar(int nroPila, char * val);
-int desapilar(int nroPila);
-int pilaVacia(int tope);
-int pilaLlena(int tope);
-void debugPila(int nroPila, int tope);
-
-// LISTAS
-char * listaDeclaracion[100];	//Lista para declaraciones
-char * listaTokens[10000];		//Lista de tokens para gci polaca inversa
-char * listaAux[100];		//Lista de tokens para gci polaca inversa
-int puntero_declaracion = 0;
-int puntero_asignacion = 0;
-int puntero_aux=0;
-
 /* --- Validaciones --- */
 int existeID(const char*);
 int esNumero(const char*,char*);
 char* obtenerID(char*);
 char mensajes[100];
 
-// CONSTANTES
-char cs_char[] = "CHAR";
-char cs_int[]  = "INT";
-char cs_float[]  = "FLOAT";
-
 %}
 
 /*---- 2. Tokens - Start ----*/
 
 %union {
-int* tipo_int;
-float* tipo_double;
+int tipo_int;
+double tipo_double;
 char* tipo_str;
 char* tipo_cmp;
 }
@@ -193,13 +127,8 @@ PROGRAMA:
         printf("\n\nInicia el COMPILADOR\n\n");
     } 
     algoritmo {
-        //guardarTS();
+        guardarTS();
         printf("\nCompilacion OK.\n");
-        if(crearArchivoIntermedia() == TODO_OK) {
-			printf("\nArchivo con codigo intermedio con polaca inversa generado.\n");
-		} else {
-			printf("Hubo un error al generar el archivo con codigo intermedio.\n");
-		}
     };
 
 algoritmo:
@@ -230,13 +159,13 @@ est_asignacion:
         printf("\t\t\t\tCONST %s", $2);
         //strcpy($<tipo_str>$, $2);
         //$<tipo_double>$ = $4;
-        insertarTS(obtenerID($2), "CONST_REAL", "", 0, *$4, ES_CONST_NOMBRE);
+        insertarTS(obtenerID($2), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
     }
     | CONST ID OP_ASIG_CONS CONST_INT {
         printf("\n\t\t\tInicio Asignacion.\n");
         //strcpy($<tipo_str>$, $2);
         printf("\t\t\t\tCONST %s", $2);
-        insertarTS(obtenerID($2), "CONST_INT", "", *$4, 0, ES_CONST_NOMBRE);
+        insertarTS(obtenerID($2), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
         //insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
     }                               
     | CONST ID OP_ASIG_CONS CONST_STR {
@@ -254,187 +183,44 @@ asignacion:
     } OP_ASIG  {
         printf(": ");
     }  expresion {
-        strcpy(vecAux, $1); //en $1 esta el valor de ID
+        strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
         if(!existeID(punt)) /*No existe: entonces no esta declarada*/
         {
             sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
-
-        finExpre = puntero_tokens;
-        int i,j,limit;
-        char sAux[5];
-        sprintf(sAux,yylval.tipo_str);
-
-        //Agrego el simbolo de asignacion a la polaca
-        insertarEnLista("=", cs_char);
-   
-        puntero_asignacion = 0;	//Reset
-        
-        printf("FIN LINEA ASIGNACION\n");
     }
     ;
 
 ciclo:
      WHILE {
          printf("\nInicio While.\n");
-         free(inicioWhilePos);
-		 inicioWhilePos = (char *) malloc(sizeof(char) * (sizeof(int) + 1));
-		 sprintf(inicioWhilePos,"%d",puntero_tokens);
     } PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {
         printf("\n\t\t\tFin While.\n");
-        int x, i, iPosActual;
-        char wPosActual[5], wPosActualTrue[5], wPosCondDos[5];
-        insertarEnLista("BI", cs_char);
-        insertarEnLista(inicioWhilePos, cs_char);			
-        
-        x=desapilar(PILA_WHILE); //Primero que desapilo -> apunta a la parte verdadera
-        sprintf(wPosActualTrue, "%s", posTrue);
-        escribirEnLista(x,wPosActualTrue, cs_char);
-        
-        x=desapilar(PILA_WHILE); //Segundo que desapilo -> apunta al final
-        sprintf(wPosActual, "%d", puntero_tokens);
-        escribirEnLista(x,wPosActual, cs_char);
-        
-        flagWHILE = FALSE;
     } 
     ;
 
 condicion:
-    comparacion {
-        if(flagWHILE == TRUE){ //Manejo del While
-            insertarEnLista("CMP", cs_char);
-            insertarEnLista(valorComparacion(comparador_usado), cs_char);
-            char sPosActual[5];
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActual, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActual); //Usado en el while
-            
-            char sPosActualB[5];
-            insertarEnLista("BI", cs_char);
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActualB, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActualB);	
-            sprintf(posTrue, "%d", puntero_tokens); //Guardo la posicion del true						
-            
-            flagWHILE = FALSE; //Para que no vuelva a entrar
-        }
-    }
+    comparacion
     | comparacion OP_AND {
-        if(flagWHILE == TRUE){
-            insertarEnLista("CMP", cs_char);
-            insertarEnLista(valorComparacion(comparador_usado), cs_char);
-            char sPosActual[5];
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActual, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActual);
-            
-            char sPosActualB[5];
-            insertarEnLista("BI", cs_char);
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActualB, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActualB);
-        } else {
-            insertarEnLista("CMP", cs_char);
-            insertarEnLista(valorComparacion(comparador_usado), cs_char);
-            char sPosActual[5];
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActual, "%d", puntero_tokens-1);
-            apilar(PILA_IF,sPosActual);
-            
-            char sPosActualB[5];
-            insertarEnLista("BI", cs_char);
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActualB, "%d", puntero_tokens-1);
-            apilar(PILA_IF,sPosActualB);
-        }
-        sprintf(posCondDos, "%d", puntero_tokens);
         printf("and ");
-    } comparacion {
-        if(flagWHILE == TRUE){ //Manejo del While
-            insertarEnLista("CMP", cs_char);
-            insertarEnLista(valorComparacion(comparador_usado), cs_char);
-            char sPosActual[5];
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActual, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActual); //Usado en el while
-            
-            char sPosActualB[5];
-            insertarEnLista("BI", cs_char);
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActualB, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActualB);	
-            sprintf(posTrue, "%d", puntero_tokens); //Guardo la posicion del true						
-            
-            flagWHILE = FALSE; //Para que no vuelva a entrar
-        }
-    }
+    } comparacion
     | comparacion OP_OR {
-        if(flagWHILE == TRUE)
-        {
-            insertarEnLista("CMP", cs_char);
-            insertarEnLista(valorComparacion(comparador_usado), cs_char);
-            char sPosActual[5];
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActual, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActual);
-            
-            char sPosActualB[5];
-            insertarEnLista("BI", cs_char);
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActualB, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActualB);	
-        } else {
-            insertarEnLista("CMP", cs_char);
-            insertarEnLista(valorComparacion(comparador_usado), cs_char);
-            char sPosActual[5];
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActual, "%d", puntero_tokens-1);
-            apilar(PILA_IF,sPosActual);
-            
-            char sPosActualB[5];
-            insertarEnLista("BI", cs_char);
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActualB, "%d", puntero_tokens-1);
-            apilar(PILA_IF,sPosActualB);	
-        }
-        sprintf(posCondDos, "%d", puntero_tokens);
         printf("or ");
-    } comparacion {
-        if(flagWHILE == TRUE){
-            insertarEnLista("CMP", cs_char);
-            insertarEnLista(valorComparacion(comparador_usado), cs_char);
-            char sPosActual[5];
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActual, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActual);
-            
-            char sPosActualB[5];
-            insertarEnLista("BI", cs_char);
-            insertarEnLista("###", cs_char);
-            sprintf(sPosActualB, "%d", puntero_tokens-1);
-            apilar(PILA_WHILE,sPosActualB);	
-            sprintf(posTrue, "%d", puntero_tokens); // guardo la posicion del true				
-            //debugPila(PILA_WHILE,tope_pila_while);		
-        }
-    }
+    } comparacion
     ;
 
 comparacion:
-    expresion lista_comparadores {
-        strcpy(comparador_usado,yylval.tipo_cmp);
-    } expresion
+    expresion lista_comparadores expresion
     | expresion
     ;
 
 expresion:
     expresion OP_SUM {
-        insertarEnLista("+", cs_char);
         printf("+ ");
     } termino
     | expresion OP_RES {
-        insertarEnLista("-", cs_char);
         printf("- ");
     } termino
     | termino 
@@ -443,42 +229,31 @@ expresion:
 termino: 
     termino OP_MUL {
         printf("* ");
-    } factor {
-        insertarEnLista("*", cs_char);
-    }
+    } factor
     | termino OP_DIV {
         printf("/ ");
-    } factor {
-        insertarEnLista("/", cs_char);
-    }
-    | factor 
+    } factor
+    | factor
     | termino COMA {
         printf(", ");
-    } factor {
-        insertarEnLista(",", cs_char);
-    }
+    } factor
     ;
 
 factor:
     ID {
         $<tipo_str>$ = $1;
         printf("%s ", $1);
-        insertarEnLista(yylval.tipo_str, cs_char);
     }
     | CONST_INT  {
-        printf("2");
         $<tipo_int>$ = $1;
-        printf("%s ", $1);
-        insertarEnLista(yylval.tipo_int, cs_int);
+        printf("%d ", $1);
     }
     | CONST_REAL {
         $<tipo_double>$ = $1;
-        printf("%s ", $1);
-        insertarEnLista(yylval.tipo_double, cs_float); 
+        printf("%f ", $1);
     }	 
     | CONST_STR {
         printf("%s ", $1);
-        insertarEnLista(yylval.tipo_str, cs_char);
     }
     | PARENTESIS {
         printf("( ");
@@ -597,50 +372,13 @@ est_tipos:
     };
 
 seleccion:
-    IF PARENTESIS condicion END_PARENTESIS LLAVE {
-        insertarEnLista("CMP", cs_char);
-        insertarEnLista(valorComparacion(comparador_usado), cs_char);
-        char sPosActual[5];
-        insertarEnLista("###", cs_char);
-        sprintf(sPosActual, "%d", puntero_tokens-1);
-        apilar(PILA_IF,sPosActual);
-        
-        sprintf(posTrue, "%d", puntero_tokens); //Guardo la posicion del true
-    } bloque {
-        char sPosActual[5];
-        insertarEnLista("BI", cs_char); //Salto incondicional al final del if(todavia no lo se aca)
-        insertarEnLista("###", cs_char); //Este es el que despues se va a reemplazar por la posicion final
-        sprintf(sPosActual, "%d", puntero_tokens-1);
-        apilar(PILA_IF,sPosActual);
-    } END_LLAVE {
-        int x, i, iPosActual;
-        char sPosActual[5], sPosActualTrue[5], sPosActualFalse[5], sPosCondDos[5];
-        
-        x=desapilar(PILA_IF); //Primero que desapilo -> apunta a la posicion actual
-        sprintf(sPosActual, "%d", puntero_tokens);
-        escribirEnLista(x,sPosActual, cs_char);
-        
-        x=desapilar(PILA_IF); //Segundo que desapilo -> apunta a la parte verdadera
-        sprintf(sPosActualTrue, "%s", posTrue);
-        escribirEnLista(x,sPosActualTrue, cs_char);
-        
-        sprintf(sPosActual, "-1");
-        sprintf(posCondDos, "-1");
-        sprintf(posFalse, "-1");
-        sprintf(posTrue, "-1");
-        
-        printf("FIN DEL IF\n"); 
+    IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+    | IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {
+        printf("ELSE\n");
+    } END_LLAVE bloque END_LLAVE {
+        printf("FIN ELSE.\n");
     }
-    | IF PARENTESIS condicion END_PARENTESIS {
-        insertarEnLista("CMP", cs_char);
-        insertarEnLista(valorComparacion(comparador_usado), cs_char);
-        char sPosActual[5];
-        insertarEnLista("###", cs_char);
-        sprintf(sPosActual, "%d", puntero_tokens-1);
-        apilar(PILA_IF,sPosActual);
-    
-        sprintf(posTrue, "%d", puntero_tokens); //Guardo la posicion del true
-    } sentencia {
+    | IF PARENTESIS condicion END_PARENTESIS sentencia {
         printf("IF Sin llave.\n");
     }
     ;
@@ -759,8 +497,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
          //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
         if(strcmp(tipo, "CONST_STR") == 0)
         {
-            data->valor = (char*)malloc(sizeof(char) * strlen(valString) +1);
-            strcpy(data->valor, valString);
+            data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
+            strcpy(data->valor.valor_str, valString);
             
             if(esConstNombre == ES_CONST_NOMBRE)
             {
@@ -777,7 +515,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
-            gcvt(valDouble,sizeof(valDouble),data->valor);
+            data->valor.valor_double = valDouble;
 
             if(esConstNombre == ES_CONST_NOMBRE)
             {
@@ -795,7 +533,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         }
         if(strcmp(tipo, "CONST_INT") == 0)
         {
-            sprintf(data->valor, "%d",valInt);
+            data->valor.valor_int = valInt;
 
             if(esConstNombre == ES_CONST_NOMBRE)
             {
@@ -844,7 +582,7 @@ void guardarTS()
         }
         else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50d%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor, strlen(aux->data.nombre));
+            sprintf(linea, "%-50s%-25s%-50d%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "FLOAT") ==0)
         {
@@ -852,7 +590,7 @@ void guardarTS()
         }
         else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50f%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor, strlen(aux->data.nombre));
+            sprintf(linea, "%-50s%-25s%-50f%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "STRING") == 0)
         {
@@ -860,7 +598,7 @@ void guardarTS()
         }
         else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
         {
-            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor, strlen(aux->data.nombre));
+            sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre));
         }
         fprintf(arch, "%s", linea);
         free(aux);
@@ -871,112 +609,6 @@ void guardarTS()
 void crearTablaTS()
 {
     tablaTS.primero = NULL;
-}
-
-int crearArchivoIntermedia()
-{
-	FILE * archivo; 
-	int i;
-	archivo = fopen("intermedia.txt", "wt");
-
-	if (!archivo){	return ERROR; }
-
-	for (i = 1; i < puntero_tokens; i++)
-	{
-		fprintf(archivo,"%s\n", listaTokens[i]);
-	}
-	fclose(archivo); 
-
-	return TODO_OK;
-}
-
-int insertarEnLista(void * val, char *tipo)
-{
-
-    if (strcmp(tipo, cs_char)) {
-        aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
-        strcpy(aux, val);
-    } else if(strcmp(tipo, cs_int)) {
-        aux = malloc(sizeof(int*));
-        aux = val;
-    } else {
-        aux = malloc(sizeof(float*));
-        aux = val;  
-    }   
-
-	//Agrego a la lista de tokens
-	listaTokens[puntero_tokens] = aux;
-	puntero_tokens++;
-	
-	//Escribo en archivo
-	fprintf(fileCodigoIntermedio,"%s\n",aux);
-	
-	return (puntero_tokens-1); //Devuelvo posicion
-}
-
-int insertarEnListaDeclaracion(char * val, char *tipo)
-{
-
-    char cs_char[] = "CHAR";
-    char cs_int[]  = "INT";
-
-    if (strcmp(tipo, cs_char)) {
-        aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
-        strcpy(aux, val);
-    } else if(strcmp(tipo, cs_int)) {
-        aux = malloc(sizeof(int*));
-        aux = val;
-    } else {
-        aux = malloc(sizeof(float*));
-        aux = val;  
-    }    
-
-	//Agrego a la lista de tokens
-	listaTokens[puntero_tokens] =  aux;
-	puntero_tokens++;
-	
-	return (puntero_declaracion-1); //Devuelvo posicion
-}
-
-void escribirEnLista(int pos, char * val, char* tipo)
-{
-    char cs_char[] = "CHAR";
-    char cs_int[]  = "INT";
-
-    if (strcmp(tipo, cs_char)) {
-        aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
-        strcpy(aux, val);
-    } else if(strcmp(tipo, cs_int)) {
-        aux = malloc(sizeof(int*));
-        aux = val;
-    } else {
-        aux = malloc(sizeof(float*));
-        aux = val;  
-    }   
-
-	//Agrego a la lista de tokens
-	listaTokens[pos] = aux;
-	
-	printf("\tEscribio en %i el valor %s\n",pos,aux);
-}
-
-char * valorComparacion(char * val){
-	if(strcmp("=", val) == 0){
-		return "BNE";
-	} else if(strcmp(">=", val) == 0){
-		return "BLT";
-	} else if(strcmp(">", val) == 0){
-		return "BLE";
-	} else if(strcmp("<=", val) == 0){
-		return "BGT";
-	} else if(strcmp("<", val) == 0){
-		return "BGE";
-	} else if(strcmp("><", val) == 0){
-		return "BEQ";
-	} else {
-		// NUNCA DEBERIA CAER ACA
-		return val;
-	}
 }
 
 int existeID(const char* id) //y hasta diria que es igual para existeCTE
@@ -1033,118 +665,4 @@ char* obtenerID(char* cadena)
 {
     char* posAsig = strtok(cadena, "=");
     return cadena;
-}
-
-// FUNCIONES DE PILA
-void apilar(int nroPila, char * val)
-{
-	switch(nroPila){
-		case PILA_IF:
-			if(pilaLlena(PILA_IF) == TRUE){
-				printf("Error: Se exedio el tamano de la pila de IF.\n");
-				system ("Pause");
-				exit (1);
-			}
-			pilaIF[tope_pila_if]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
-			tope_pila_if++;
-			break;
-		
-		case PILA_WHILE:
-		
-			if(pilaLlena(PILA_WHILE) == TRUE){
-				printf("Error: Se exedio el tamano de la pila de WHILE.\n");
-				system ("Pause");
-				exit (1);
-			}
-			pilaWhile[tope_pila_while]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
-			tope_pila_while++;
-			break;
-		case PILA_ASIGNACION:
-		
-			if(pilaLlena(PILA_ASIGNACION) == TRUE){
-				printf("Error: Se exedio el tamano de la pila de ASIGNACION.\n");
-				system ("Pause");
-				exit (1);
-			}
-			pilaAsignacion[tope_pila_asignacion]=val;
-			printf("\tAPILAR #CELDA ACTUAL -> %s\n",val);
-			tope_pila_asignacion++;
-			break;	
-		default:
-			printf("\tError: La pila recibida no se reconoce\n",val);
-			system ("Pause");
-			exit (1);
-			break;
-	}
-
-}
-
-int desapilar(int nroPila)
-{
-	switch(nroPila){
-		case PILA_IF:
-			if(pilaVacia(tope_pila_if) == 0)
-			{
-				char * dato = pilaIF[tope_pila_if-1];
-				tope_pila_if--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
-				return atoi(dato);		
-			} else {
-				printf("Error: La pila esta vacia.\n");
-				system ("Pause");
-				exit (1);
-			}
-			
-			break;
-		
-		case PILA_WHILE:
-		
-			if(pilaVacia(tope_pila_while) == 0)
-			{
-				char * dato = pilaWhile[tope_pila_while-1];
-				tope_pila_while--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
-				return atoi(dato);		
-			} else {
-				printf("Stack Error - La pila esta vacia");
-			}
-		
-			break;
-		case PILA_ASIGNACION:
-		
-			if(pilaVacia(tope_pila_asignacion) == 0)
-			{
-				char * dato = pilaAsignacion[tope_pila_asignacion-1];
-				tope_pila_asignacion--;	
-				printf("\tDESAPILAR #CELDA -> %s\n",dato);
-				return (tope_pila_asignacion);			// ESTA PILA EN VEZ DE DEVOLVER EL DATO DEVUELVE LA POSICION, SINO TENGO QUE HACER UNA FUNCION NUEVA
-			} else {
-				printf("Stack Error - La pila esta vacia");
-			}
-		
-			break;	
-		default:
-			printf("Stack Error - La pila recibida no se reconoce");
-			break;
-		
-	}
-	
-}
-
-int pilaVacia(int tope)
-{
-	if (tope-1 == -1){
-		return TRUE;
-	} 
-	return FALSE;
-}
-
-int pilaLlena(int tope)
-{
-	if (tope-1 == TAM_PILA-1){
-		return TRUE;
-	} 
-	return FALSE;
 }

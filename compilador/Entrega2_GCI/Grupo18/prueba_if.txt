@@ -1,3 +1,0 @@
-if (actual == 2) {
-    PUT "actual es = que 2";
-}

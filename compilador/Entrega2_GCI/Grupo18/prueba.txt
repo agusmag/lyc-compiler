@@ -25,5 +25,3 @@ Else }
     if (actual < nombre)
         PUT "no es mayor que 2";
 }
-
-if ( a > 2 ) b + 4;
