@@ -176,41 +176,47 @@ sentencia:
 
 est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
-        printf("\n\t\t\tInicio Asignacion.\n");
-        printf("\t\t\t\tCONST %s", $2);
+        //printf("\n\t\t\tInicio Asignacion.\n");
+        //printf("\t\t\t\tCONST %s", $2);
         //strcpy($<tipo_str>$, $2);
         //$<tipo_double>$ = $4;
         insertarTS(obtenerID($2), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
+        insertarPolacaDouble($4);
+        insertarPolaca($2);
+        insertarPolaca("=");
     }
     | CONST ID OP_ASIG_CONS CONST_INT {
-        printf("\n\t\t\tInicio Asignacion.\n");
-        //strcpy($<tipo_str>$, $2);
-        printf("\t\t\t\tCONST %s", $2);
+        //printf("\n\t\t\tInicio Asignacion.\n");
+        strcpy($<tipo_str>$, $2);
+        //printf("\t\t\t\tCONST %s", $2);
         insertarTS(obtenerID($2), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
-        //insertarTS("nombre", "CONST_INT", "", 80, 0, ES_CONST_NOMBRE);
+        insertarPolacaInt($4);
+        insertarPolaca(obtenerID($2));
+        insertarPolaca("=");
     }                               
     | CONST ID OP_ASIG_CONS CONST_STR {
-        printf("\n\t\t\tInicio Asignacion.\n");
-        printf("\t\t\t\tCONST %s", $2);
+        //printf("\n\t\t\tInicio Asignacion.\n");
+        //printf("\t\t\t\tCONST %s", $2);
         //strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
+        insertarPolaca(obtenerID(yylval.tipo_str));
+        insertarPolaca($2);
+        insertarPolaca("=");
     }
     |  asignacion
     ;
 
 asignacion:
-    ID {
-        printf("\t\t\t\t%s", $1);
-    } OP_ASIG  {
-        printf(": ");
-    }  expresion {
+    ID OP_ASIG expresion {
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
         if(!existeID(punt)) /*No existe: entonces no esta declarada*/
         {
-            sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
+            sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
+        insertarPolaca(vecAux);
+        insertarPolaca(":");
     }
     ;
 
@@ -263,18 +269,24 @@ termino:
 factor:
     ID {
         $<tipo_str>$ = $1;
-        printf("%s ", $1);
+        strcpy(vecAux, $1);
+        insertarPolaca(vecAux);
+        //printf("%s ", $1);
     }
     | CONST_INT  {
         $<tipo_int>$ = $1;
-        printf("%d ", $1);
+        insertarPolacaInt($<tipo_int>$);
+        //printf("%d ", $1);
     }
     | CONST_REAL {
         $<tipo_double>$ = $1;
-        printf("%f ", $1);
+        insertarPolacaDouble($<tipo_double>$);
+        //printf("%f ", $1);
     }	 
     | CONST_STR {
-        printf("%s ", $1);
+        strcpy(vecAux, $1);
+        insertarPolaca(vecAux);
+        //printf("%s ", $1);
     }
     | PARENTESIS {
         printf("( ");

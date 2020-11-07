@@ -1,16 +1,62 @@
-pos: 0, valor: "Prueba.txt LyC Tema 4!" 
-pos: 1, valor: PUT 
-pos: 2, valor: "Ingrese un valor float: " 
-pos: 3, valor: PUT 
-pos: 4, valor: actual 
-pos: 5, valor: GET 
-pos: 6, valor: "La suma es: " 
-pos: 7, valor: PUT 
-pos: 8, valor: "La suma es: " 
-pos: 9, valor: PUT 
-pos: 10, valor: "actual es = que 2" 
-pos: 11, valor: PUT 
-pos: 12, valor: "actual es > que 2 y != de 0" 
-pos: 13, valor: PUT 
-pos: 14, valor: "no es mayor que 2" 
-pos: 15, valor: PUT 
+pos: 0, valor: 80 
+pos: 1, valor: nombre 
+pos: 2, valor: = 
+pos: 3, valor: "xD" 
+pos: 4, valor: varTestString  
+pos: 5, valor: = 
+pos: 6, valor: 20.3000000000 
+pos: 7, valor: varTestDoubl  
+pos: 8, valor: = 
+pos: 9, valor: "Prueba.txt LyC Tema 4!" 
+pos: 10, valor: PUT 
+pos: 11, valor: "Ingrese un valor float: " 
+pos: 12, valor: PUT 
+pos: 13, valor: actual 
+pos: 14, valor: GET 
+pos: 15, valor: 0 
+pos: 16, valor: contador 
+pos: 17, valor: : 
+pos: 18, valor: 2.5000000000 
+pos: 19, valor: nombre 
+pos: 20, valor: suma 
+pos: 21, valor: : 
+pos: 22, valor: contador 
+pos: 23, valor: 92 
+pos: 24, valor: contador 
+pos: 25, valor: 1 
+pos: 26, valor: contador 
+pos: 27, valor: : 
+pos: 28, valor: contador 
+pos: 29, valor: 0.3420000000 
+pos: 30, valor: contador 
+pos: 31, valor: actual 
+pos: 32, valor: contador 
+pos: 33, valor: 256 
+pos: 34, valor: nombre 
+pos: 35, valor: suma 
+pos: 36, valor: 52 
+pos: 37, valor: 4 
+pos: 38, valor: actual 
+pos: 39, valor: : 
+pos: 40, valor: suma 
+pos: 41, valor: actual 
+pos: 42, valor: suma 
+pos: 43, valor: : 
+pos: 44, valor: "La suma es: " 
+pos: 45, valor: PUT 
+pos: 46, valor: suma 
+pos: 47, valor: PUT 
+pos: 48, valor: actual 
+pos: 49, valor: 2 
+pos: 50, valor: "actual es = que 2" 
+pos: 51, valor: PUT 
+pos: 52, valor: actual 
+pos: 53, valor: 2 
+pos: 54, valor: actual 
+pos: 55, valor: 0 
+pos: 56, valor: "actual es > que 2 y != de 0" 
+pos: 57, valor: PUT 
+pos: 58, valor: actual 
+pos: 59, valor: nombre 
+pos: 60, valor: "no es mayor que 2" 
+pos: 61, valor: PUT 
