@@ -60,7 +60,7 @@ int pedirPos();
 void imprimirPolaca();
 void escribirPosicionEnTodaLaPila(int, int);
 char * insertarPolacaEnPosicion(const int, const int);
-int local = -1, delta = 0, hayOr = 0;
+int numeroAnidadas = -1, cantidadCondiciones = 0, hayOr = 0;
 int vecif[50];
 void notCondicion(int);
 
@@ -239,7 +239,79 @@ condicion:
     ;
 
 comparacion:
-    expresion lista_comparadores expresion
+    expresion OP_LEQ expresion
+    {
+        insertarPolaca("CMP");
+        insertarPolaca("BGE");
+        if(hayOr)
+        {
+            insertarPolacaEnPosicion(pedirPos(), posActual +1);
+            hayOr=0;
+        } 
+        guardarPos(); 
+        cantidadCondiciones++;
+    }
+    | expresion  OP_MOQ expresion {
+        insertarPolaca("CMP");
+        insertarPolaca("BLT");
+        if(hayOr)
+        {
+            insertarPolacaEnPosicion(pedirPos(), posActual +1);
+            hayOr=0;
+        } 
+        guardarPos(); 
+        cantidadCondiciones++;
+    }
+    | expresion OP_EQQ expresion
+    {
+        insertarPolaca("CMP");
+        insertarPolaca("BNE");
+        if(hayOr)
+        {
+            insertarPolacaEnPosicion(pedirPos(), posActual +1);
+            hayOr=0;
+        } 
+        guardarPos(); 
+        cantidadCondiciones++;
+    } 
+    |expresion OP_DIFF expresion
+    {
+        insertarPolaca("CMP");
+        insertarPolaca("BEQ");
+        if(hayOr)
+        {
+            insertarPolacaEnPosicion(pedirPos(), posActual +1);
+            hayOr=0;
+        } 
+        guardarPos(); 
+        cantidadCondiciones++;
+    }
+    |
+    expresion OP_LESS expresion
+    {
+        insertarPolaca("CMP");
+        insertarPolaca("BGE");
+        if(hayOr)
+        {
+            insertarPolacaEnPosicion(pedirPos(), posActual +1);
+            hayOr=0;
+        } 
+        guardarPos(); 
+        cantidadCondiciones++;
+    }
+    |
+    expresion OP_MORE expresion
+    {
+        insertarPolaca("CMP");
+        insertarPolaca("BLE");
+        if(hayOr)
+        {
+            insertarPolacaEnPosicion(pedirPos(), posActual +1);
+            hayOr=0;
+        } 
+        guardarPos(); 
+        cantidadCondiciones++;
+    }
     | expresion
     ;
 
@@ -305,33 +377,6 @@ factor:
         printf("] ");
     } END_PARENTESIS {
         printf(")");
-    }
-    ;
-
-lista_comparadores:
-    OP_LEQ {
-        insertarPolaca("CMP");
-        insertarPolaca("BGE");
-    }
-    | OP_MOQ {
-        insertarPolaca("CMP");
-        insertarPolaca("BLT");
-    }
-    | OP_EQQ {
-        insertarPolaca("CMP");
-        insertarPolaca("BNE");
-    }
-    | OP_DIFF {
-        insertarPolaca("CMP");
-        insertarPolaca("BEQ");
-    }
-    | OP_LESS {
-        insertarPolaca("CMP");
-        insertarPolaca("BGE");
-    }
-    | OP_MORE {
-        insertarPolaca("CMP");
-        insertarPolaca("BLE");
     }
     ;
 
@@ -406,21 +451,27 @@ tipo:
     };
 
 est_tipos:
-    OP_LESS {
-        printf("<");
-    } lista_tipos OP_MORE {
-        printf(">");
-    };
+    OP_LESS lista_tipos OP_MORE;
 
 seleccion:
     IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
-    | IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE {
-        printf("ELSE\n");
-    } END_LLAVE bloque END_LLAVE {
-        printf("FIN ELSE.\n");
-    }
-    | IF PARENTESIS condicion END_PARENTESIS sentencia {
-        printf("IF Sin llave.\n");
+    {
+       escribirPosicionEnTodaLaPila(vecif[numeroAnidadas], posActual);
+       numeroAnidadas--;
+    } 
+    | IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE
+    {
+        insertarPolaca("BI");
+        insertarPolacaEnPosicion(pedirPos(), posActual);
+        numeroAnidadas--;
+        insertarPolacaInt(pedirPos());
+    } END_LLAVE bloque
+    {
+        insertarPolacaEnPosicion(pedirPos(), posActual +1);
+    } END_LLAVE
+    | IF PARENTESIS condicion END_PARENTESIS sentencia
+    {
+        insertarPolacaEnPosicion(pedirPos(), posActual);
     }
     ;
 
@@ -789,6 +840,7 @@ int pedirPos()
 	}
 }
 
+//Rellena aquellas posiciones de la Polaca que indican hacia donde hacer el branch.
 void escribirPosicionEnTodaLaPila(int cant, int celda)
 {
 	while(cant > 0)
@@ -819,7 +871,7 @@ char * insertarPolacaEnPosicion(const int posicion, const int valorCelda)
     return strcpy(vectorPolaca[posicion], itoa(valorCelda, aux, 10));
 }
 
-void notCondicion(int cant) //aca le pasamos por parametro el delta correspondiente a cada if
+void notCondicion(int cant) //aca le pasamos por parametro el cantidadCondiciones correspondiente a cada if
 {
     int j;
     for(j=0; j<=cant; j++)
