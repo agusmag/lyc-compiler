@@ -148,6 +148,7 @@ PROGRAMA:
     } 
     algoritmo {
         guardarTS();
+        grabarPolaca();
         printf("\nCompilacion OK.\n");
     };
 
@@ -405,12 +406,19 @@ seleccion:
 
 entrada_salida:
 	GET ID {
-        printf("\n\t\t\tGET %s", $2);}
+        printf("\n\t\t\tGET %s", $2);
+        strcpy(vecAux, $2);
+        insertarPolaca(vecAux);
+        insertarPolaca("GET");}
 	| PUT ID {
-        printf("\n\t\t\tPUT %s", $2);}
+        printf("\n\t\t\tPUT %s", $2);
+        insertarPolaca(vecAux);
+        insertarPolaca("PUT");}
 	| PUT CONST_STR {
         strcpy(vecAux, $2);
         printf("\n\t\t\tPUT %s", vecAux);
+        insertarPolaca(vecAux);
+        insertarPolaca("PUT");
     }
     ;
 

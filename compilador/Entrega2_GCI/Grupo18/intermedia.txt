@@ -1,0 +1,16 @@
+pos: 0, valor: "Prueba.txt LyC Tema 4!" 
+pos: 1, valor: PUT 
+pos: 2, valor: "Ingrese un valor float: " 
+pos: 3, valor: PUT 
+pos: 4, valor: actual 
+pos: 5, valor: GET 
+pos: 6, valor: "La suma es: " 
+pos: 7, valor: PUT 
+pos: 8, valor: "La suma es: " 
+pos: 9, valor: PUT 
+pos: 10, valor: "actual es = que 2" 
+pos: 11, valor: PUT 
+pos: 12, valor: "actual es > que 2 y != de 0" 
+pos: 13, valor: PUT 
+pos: 14, valor: "no es mayor que 2" 
+pos: 15, valor: PUT 
