@@ -408,10 +408,21 @@ entrada_salida:
 	GET ID {
         printf("\n\t\t\tGET %s", $2);
         strcpy(vecAux, $2);
+        if(!existeID(vecAux)) 
+        {
+            sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
+            yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        }
         insertarPolaca(vecAux);
         insertarPolaca("GET");}
 	| PUT ID {
         printf("\n\t\t\tPUT %s", $2);
+        strcpy(vecAux, $2);
+        if(!existeID(vecAux)) 
+        {
+            sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
+            yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        }
         insertarPolaca(vecAux);
         insertarPolaca("PUT");}
 	| PUT CONST_STR {
