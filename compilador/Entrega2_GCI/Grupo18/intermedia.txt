@@ -55,27 +55,22 @@ pos: 53, valor: actual
 pos: 54, valor: 2 
 pos: 55, valor: CMP 
 pos: 56, valor: BNE 
-pos: 57, valor: 82 
+pos: 57, valor: 60 
 pos: 58, valor: "actual es = que 2" 
 pos: 59, valor: PUT 
 pos: 60, valor: actual 
 pos: 61, valor: 2 
 pos: 62, valor: CMP 
 pos: 63, valor: BLE 
-pos: 64, valor:  
-pos: 65, valor: actual 
-pos: 66, valor: 0 
-pos: 67, valor: CMP 
-pos: 68, valor: BEQ 
-pos: 69, valor: 73 
-pos: 70, valor: "actual es > que 2 y != de 0" 
-pos: 71, valor: PUT 
-pos: 72, valor: BI 
-pos: 73, valor: 64 
-pos: 74, valor: actual 
-pos: 75, valor: nombre 
-pos: 76, valor: CMP 
-pos: 77, valor: BGE 
-pos: 78, valor: 81 
-pos: 79, valor: "no es mayor que 2" 
-pos: 80, valor: PUT 
+pos: 64, valor: 69 
+pos: 65, valor: "actual es > que 2 y != de 0" 
+pos: 66, valor: PUT 
+pos: 67, valor: BI 
+pos: 68, valor: 76 
+pos: 69, valor: actual 
+pos: 70, valor: nombre 
+pos: 71, valor: CMP 
+pos: 72, valor: BGE 
+pos: 73, valor: 76 
+pos: 74, valor: "no es mayor que 2" 
+pos: 75, valor: PUT 

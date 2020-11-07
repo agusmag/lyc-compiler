@@ -143,9 +143,6 @@ char* tipo_cmp;
 %%
 
 PROGRAMA:
-    {
-        printf("\n\nInicia el COMPILADOR\n\n");
-    } 
     algoritmo {
         guardarTS();
         grabarPolaca();
@@ -164,40 +161,26 @@ bloque:
 sentencia:
     ciclo
     | est_declaracion
-    | est_asignacion PUNTO_Y_COMA {
-        printf(";\n");
-        printf("\n\t\t\tFin Asignacion.\n");
-    }
+    | est_asignacion PUNTO_Y_COMA
     | seleccion
-    | entrada_salida PUNTO_Y_COMA {
-        printf(";\n");
-    }
+    | entrada_salida PUNTO_Y_COMA
     ;
 
 est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
-        //printf("\n\t\t\tInicio Asignacion.\n");
-        //printf("\t\t\t\tCONST %s", $2);
-        //strcpy($<tipo_str>$, $2);
-        //$<tipo_double>$ = $4;
         insertarTS(obtenerID($2), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
         insertarPolacaDouble($4);
         insertarPolaca($2);
         insertarPolaca("=");
     }
     | CONST ID OP_ASIG_CONS CONST_INT {
-        //printf("\n\t\t\tInicio Asignacion.\n");
         strcpy($<tipo_str>$, $2);
-        //printf("\t\t\t\tCONST %s", $2);
         insertarTS(obtenerID($2), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
         insertarPolacaInt($4);
         insertarPolaca(obtenerID($2));
         insertarPolaca("=");
     }                               
     | CONST ID OP_ASIG_CONS CONST_STR {
-        //printf("\n\t\t\tInicio Asignacion.\n");
-        //printf("\t\t\t\tCONST %s", $2);
-        //strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
         insertarPolaca(obtenerID(yylval.tipo_str));
         insertarPolaca($2);
@@ -221,21 +204,32 @@ asignacion:
     ;
 
 ciclo:
-     WHILE {
-         printf("\nInicio While.\n");
-    } PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE {
-        printf("\n\t\t\tFin While.\n");
-    } 
+     WHILE PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
     ;
 
 condicion:
-    comparacion
-    | comparacion OP_AND {
-        printf("and ");
-    } comparacion
-    | comparacion OP_OR {
-        printf("or ");
-    } comparacion
+    comparacion 
+    {
+          vecif[numeroAnidadas] = cantidadCondiciones;
+          cantidadCondiciones = 0; //Se pasa a otra seleccio n o iteracion y se reseta la cantidad de condiciones.  
+    }
+    | comparacion OP_AND comparacion
+    {
+          vecif[numeroAnidadas] = cantidadCondiciones;
+          cantidadCondiciones = 0; //Se pasa a otra seleccio n o iteracion y se reseta la cantidad de condiciones.  
+    }
+    | comparacion
+    {     //cuando ya lee la primera comparacion, avisamos que se trata de un OR
+        hayOr=1;
+        cantidadCondiciones--; //decrementamos porque ya vamos a trabajar con esa celda ahora, no hace falta que lo haga arriba
+        vecif[numeroAnidadas] = cantidadCondiciones;
+        notCondicion(cantidadCondiciones); //invierto el condicional: el salto va a ser adentro del bloque en lugar de al final
+    } 
+    OP_OR comparacion
+    {
+        vecif[numeroAnidadas] = cantidadCondiciones;
+        cantidadCondiciones = 0; //Se pasa a otra seleccio n o iteracion y se reseta la cantidad de condiciones.  
+    }
     ;
 
 comparacion:
@@ -345,47 +339,25 @@ factor:
         $<tipo_str>$ = $1;
         strcpy(vecAux, $1);
         insertarPolaca(vecAux);
-        //printf("%s ", $1);
     }
     | CONST_INT  {
         $<tipo_int>$ = $1;
         insertarPolacaInt($<tipo_int>$);
-        //printf("%d ", $1);
     }
     | CONST_REAL {
         $<tipo_double>$ = $1;
         insertarPolacaDouble($<tipo_double>$);
-        //printf("%f ", $1);
     }	 
     | CONST_STR {
         strcpy(vecAux, $1);
         insertarPolaca(vecAux);
-        //printf("%s ", $1);
     }
-    | PARENTESIS {
-        printf("( ");
-    }expresion END_PARENTESIS {
-        printf(") ");
-    }
-    | CONTAR {
-        printf("contar(");
-    } PARENTESIS expresion PUNTO_Y_COMA {
-        printf("; ");
-    } CORCHETE {
-        printf("[ ");
-    } expresion END_CORCHETE {
-        printf("] ");
-    } END_PARENTESIS {
-        printf(")");
-    }
+    | PARENTESIS expresion END_PARENTESIS
+    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS
     ;
 
 est_declaracion:
-	DIM {
-        printf("\n\t\t\tInicio declaracion multiple\n\t\t\t\t");
-    } est_variables AS {
-        printf(" AS ");
-    } est_tipos {  
+	DIM est_variables AS est_tipos {  
         for(i=0;i<cant_aux;i++) /*vamos agregando todos los ids que leyo*/
         {
             separador1 = strtok(idvec[i],";");
@@ -399,26 +371,20 @@ est_declaracion:
             }
         }
         cantid=0;
-        printf("\n\t\t\tFin declaracion multiple\n");
     }
     ;
 
 est_variables:
-    OP_LESS {
-        printf("<");
-    } lista_variables OP_MORE;
+    OP_LESS lista_variables OP_MORE;
 
 lista_variables:
     ID {
-        printf(" %s", $1);
         strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
         punt = strtok(vecAux, ">"); /*eliminamos extras*/
         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
         cantid++;
     }
-    | ID {
-        printf(" %s", $1);
-    } COMA lista_variables {
+    | ID COMA lista_variables {
         strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
         punt = strtok(vecAux, ","); /*eliminamos extras*/
         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
@@ -429,26 +395,21 @@ lista_variables:
 
 lista_tipos:
     tipo
-    | tipo COMA {
-        printf(", ");
-    } lista_tipos;
+    | tipo COMA lista_tipos;
 
 tipo:
     INTEGER {
-        printf("Integer");
         strcat(idvec[cantid-1],";");
         strcat(idvec[cantid-1],"INTEGER");
         cantid--;
     }
     | FLOAT {
-        printf("Float");
         strcat(idvec[cantid-1],";");
         strcat(idvec[cantid-1],"FLOAT");
         cantid--;
     }
-    | CONST_STR {
-        printf("String");
-    };
+    | CONST_STR
+    ;
 
 est_tipos:
     OP_LESS lista_tipos OP_MORE;
@@ -462,22 +423,25 @@ seleccion:
     | IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE
     {
         insertarPolaca("BI");
-        insertarPolacaEnPosicion(pedirPos(), posActual);
+        escribirPosicionEnTodaLaPila(vecif[numeroAnidadas], posActual + 1);
         numeroAnidadas--;
-        insertarPolacaInt(pedirPos());
-    } END_LLAVE bloque
+        guardarPos();
+        //insertarPolacaInt(pedirPos());
+    } LLAVE bloque
     {
-        insertarPolacaEnPosicion(pedirPos(), posActual +1);
+        insertarPolacaEnPosicion(pedirPos(), posActual);
     } END_LLAVE
     | IF PARENTESIS condicion END_PARENTESIS sentencia
     {
-        insertarPolacaEnPosicion(pedirPos(), posActual);
+        escribirPosicionEnTodaLaPila(vecif[numeroAnidadas], posActual);
+        numeroAnidadas--;
+        //insertarPolacaEnPosicion(pedirPos(), posActual);
+
     }
     ;
 
 entrada_salida:
 	GET ID {
-        printf("\n\t\t\tGET %s", $2);
         strcpy(vecAux, $2);
         if(!existeID(vecAux)) 
         {
@@ -487,7 +451,6 @@ entrada_salida:
         insertarPolaca(vecAux);
         insertarPolaca("GET");}
 	| PUT ID {
-        printf("\n\t\t\tPUT %s", $2);
         strcpy(vecAux, $2);
         if(!existeID(vecAux)) 
         {
@@ -498,7 +461,6 @@ entrada_salida:
         insertarPolaca("PUT");}
 	| PUT CONST_STR {
         strcpy(vecAux, $2);
-        printf("\n\t\t\tPUT %s", vecAux);
         insertarPolaca(vecAux);
         insertarPolaca("PUT");
     }
