@@ -4,8 +4,6 @@ actual                                            FLOAT                    --   
 promedio                                          FLOAT                    --                                                8
 contador                                          INTEGER                  --                                                8
 nombre                                            CONST_INT                80                                                6
-varTestString                                     CONST_STR                "xD"                                              14
-varTestDoubl                                      CONST_REAL               20.300000                                         13
 _"Prueba.txt LyC Tema 4!"                         CONST_STR                "Prueba.txt LyC Tema 4!"                          25
 _"Ingrese un valor float: "                       CONST_STR                "Ingrese un valor float: "                        27
 _0                                                CONST_INT                0                                                 2

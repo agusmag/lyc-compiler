@@ -244,26 +244,28 @@ comparacion:
     ;
 
 expresion:
-    expresion OP_SUM {
-        printf("+ ");
-    } termino
-    | expresion OP_RES {
-        printf("- ");
-    } termino
+    expresion OP_SUM termino
+    {
+        insertarPolaca("+");
+    }
+    | expresion OP_RES termino
+    {
+        insertarPolaca("-");
+    }
     | termino 
  	;
 
 termino: 
-    termino OP_MUL {
-        printf("* ");
-    } factor
-    | termino OP_DIV {
-        printf("/ ");
-    } factor
+    termino OP_MUL factor
+    {
+        insertarPolaca("*");
+    }
+    | termino OP_DIV factor
+    {
+        insertarPolaca("/");
+    }
     | factor
-    | termino COMA {
-        printf(", ");
-    } factor
+    | termino COMA factor
     ;
 
 factor:
@@ -308,22 +310,28 @@ factor:
 
 lista_comparadores:
     OP_LEQ {
-        printf("<= ");
+        insertarPolaca("CMP");
+        insertarPolaca("BGE");
     }
     | OP_MOQ {
-        printf(">= ");
+        insertarPolaca("CMP");
+        insertarPolaca("BLT");
     }
     | OP_EQQ {
-        printf("== ");
+        insertarPolaca("CMP");
+        insertarPolaca("BNE");
     }
     | OP_DIFF {
-        printf("<> ");
+        insertarPolaca("CMP");
+        insertarPolaca("BEQ");
     }
     | OP_LESS {
-        printf("< ");
+        insertarPolaca("CMP");
+        insertarPolaca("BGE");
     }
     | OP_MORE {
-        printf("> ");
+        insertarPolaca("CMP");
+        insertarPolaca("BLE");
     }
     ;
 

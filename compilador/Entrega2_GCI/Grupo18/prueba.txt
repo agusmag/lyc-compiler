@@ -3,7 +3,6 @@ DIM <contador,promedio,actual,suma> AS <Integer,Float,Float,Float>
 CONST nombre=80;
 PUT "Prueba.txt LyC Tema 4!";
 PUT "Ingrese un valor float: ";
-PUT varSinDeclarar;
 GET actual;
 contador: 0;
 suma: 02.5+nombre;
