@@ -44,6 +44,26 @@ void guardarTS();
 void limpiarConstanteString();
 t_tabla tablaTS;
 
+/* POLACA */
+char vectorPolaca[500][50], auxBet[50];
+int pilaPolaca[50];
+int posActual = 0, topePila = -1;
+
+//Funciones Polaca
+char* insertarPolaca(char *);
+void insertarPolacaInt(int);
+void insertarPolacaDouble(double);
+void avanzarPolaca();
+void grabarPolaca();
+void guardarPos();
+int pedirPos();
+void imprimirPolaca();
+void escribirPosicionEnTodaLaPila(int, int);
+char * insertarPolacaEnPosicion(const int, const int);
+int local = -1, delta = 0, hayOr = 0;
+int vecif[50];
+void notCondicion(int);
+
 char idvec[50][50];
 int cantid = 0, i=0, cant_aux=0;
 char vecAux[300];
@@ -665,4 +685,122 @@ char* obtenerID(char* cadena)
 {
     char* posAsig = strtok(cadena, "=");
     return cadena;
+}
+
+
+/* ---------Funciones para Notación Polaca ------- */
+
+
+//Inserta un string en la notación polaca. 
+char* insertarPolaca(char * cad)
+{
+	strcpy(vectorPolaca[posActual],cad);
+	posActual++; //Aumentamos la posicion, ya que la celda está ocupada por la cadena recibida.
+	return cad;
+}
+
+//Inserta un int en la notación polaca. Lo pasamos a string para que pueda ser almacenado en el array de Polaca.
+void insertarPolacaInt(int entero)
+{
+	char cad[20];
+	itoa(entero, cad, 10); 
+	insertarPolaca(cad);
+}
+
+//Inserta un double en la notación polaca. Lo pasamos a string para que pueda ser almacenado en el array de Polaca.
+void insertarPolacaDouble(double real)
+{
+	char cad[20];
+	sprintf(cad,"%.10f", real);
+	insertarPolaca(cad);
+}
+
+void avanzarPolaca()
+{
+	posActual++;
+}
+
+void imprimirPolaca()
+{
+	int i;
+	for (i=0;i<posActual;i++)
+	    printf("posActual: %d, valor: %s \r\n",i,vectorPolaca[i]);
+}
+
+void guardarPos()
+{
+	topePila++; //Tope = -1 significa pila vacía, el primer elemento de la pila esta en tope = 0
+	pilaPolaca[topePila] = posActual;
+	posActual++;
+}
+
+int pedirPos()
+{
+    //Si hay alguna posicion guardada...
+	if(topePila > -1)
+    {
+        //Retorno es es el numero de celda, y topepila reduce ya que el tope ahora es una posicion menos.
+	    int retorno = pilaPolaca[topePila];
+	    topePila--;
+	    return retorno;
+	}
+    else
+    {
+	    return -1;
+	}
+}
+
+void escribirPosicionEnTodaLaPila(int cant, int celda)
+{
+	while(cant > 0)
+    {
+        char cad[20];
+        itoa(celda, cad, 10);
+        strcpy(vectorPolaca[pedirPos()],cad);
+        cant --;
+	}
+}
+
+//Escribe el archivo de polaca, intermedia.txt
+void grabarPolaca()
+{
+    FILE* pf = fopen("intermedia.txt","wt");
+    int i;
+    for (i=0;i<posActual;i++)
+	    fprintf(pf,"pos: %d, valor: %s \r\n",i,vectorPolaca[i]);
+}
+
+/* Esta función está pensada para cuando desapilamos el valor
+de una celda y lo debemos insertar en la polaca. */
+
+char * insertarPolacaEnPosicion(const int posicion, const int valorCelda)
+{
+    //Ponele que tenemos hasta 1M celdas.
+    char aux[6];
+    return strcpy(vectorPolaca[posicion], itoa(valorCelda, aux, 10));
+}
+
+void notCondicion(int cant) //aca le pasamos por parametro el delta correspondiente a cada if
+{
+    int j;
+    for(j=0; j<=cant; j++)
+    {
+        char cad[50];
+        int k = topePila-j;
+        int i = pilaPolaca[k] - 1;
+        strcpy(cad,vectorPolaca[i]);
+        
+        if(strcmp(cad, "BGE") == 0)
+            strcpy(vectorPolaca[i], "BLT");
+        else if(strcmp(cad, "BLT") == 0)
+            strcpy(vectorPolaca[i], "BGE");
+        else if(strcmp(cad, "BLE") == 0)
+            strcpy(vectorPolaca[i], "BGT");
+        else if(strcmp(cad, "BGT") == 0)
+            strcpy(vectorPolaca[i], "BLE");
+        else if(strcmp(cad, "BEQ") == 0)
+            strcpy(vectorPolaca[i], "BNE");
+        else if(strcmp(cad, "BNE") == 0)
+            strcpy(vectorPolaca[i], "BEQ");
+    }
 }
