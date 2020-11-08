@@ -161,10 +161,10 @@ bloque:
     ;
 
 sentencia:
-    ciclo
+    { numeroAnidadas++; } ciclo
     | est_declaracion
     | est_asignacion PUNTO_Y_COMA
-    | seleccion
+    | { numeroAnidadas++; } seleccion
     | entrada_salida PUNTO_Y_COMA
     ;
 
