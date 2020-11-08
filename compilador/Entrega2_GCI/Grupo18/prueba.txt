@@ -10,19 +10,23 @@ while (contador <= 92) {
     contador: contador + 1;
     actual: (contador/0.342) + (contador* contar (actual*contador ; [256,nombre*suma,52,4]));
     suma: suma + actual;
+    while (contador < 60)
+    {
+        suma: suma + 1;
+    }
 }
 PUT "La suma es: ";
 PUT suma;
 
 if (actual == 2) {
     PUT "actual es = que 2";
+    if(actual == 4)
+    {
+        PUT "TEST2";
+        if(actual == 6)
+            PUT "TEST3";
+    }
 }
-
-if (actual == 2 or actual < 4)
-{
-    PUT "Anda!";
-}
-
 
 if (actual > 2 and actual <> 0) {
     PUT "actual es > que 2 y != de 0";

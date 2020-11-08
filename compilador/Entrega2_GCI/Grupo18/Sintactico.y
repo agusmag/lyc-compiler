@@ -60,6 +60,7 @@ int pedirPos();
 void imprimirPolaca();
 void escribirPosicionEnTodaLaPila(int, int);
 char * insertarPolacaEnPosicion(const int, const int);
+void insertarExpresionEnContar();
 int numeroAnidadas = -1, cantidadCondiciones = 0, hayOr = 0;
 int vecif[50];
 void notCondicion(int);
@@ -348,8 +349,17 @@ comparacion:
         guardarPos(); 
         cantidadCondiciones++;
     }
-    | expresion
     ;
+
+lista: 
+expresion {
+    insertarExpresionEnContar();
+}
+| expresion COMA
+{ 
+    insertarExpresionEnContar();
+} lista;
+
 
 expresion:
     expresion OP_SUM termino
@@ -373,7 +383,7 @@ termino:
         insertarPolaca("/");
     }
     | factor
-    | termino COMA factor
+
     ;
 
 factor:
@@ -395,7 +405,16 @@ factor:
         insertarPolaca(vecAux);
     }
     | PARENTESIS expresion END_PARENTESIS
-    | CONTAR PARENTESIS expresion PUNTO_Y_COMA CORCHETE expresion END_CORCHETE END_PARENTESIS
+    | CONTAR PARENTESIS
+    {
+        insertarPolaca("0");
+        insertarPolaca("@cont");
+        insertarPolaca("=");
+    } expresion
+    {
+        insertarPolaca("@valorAEvaluar");
+        insertarPolaca("=");
+    } PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
     ;
 
 est_declaracion:
@@ -898,4 +917,20 @@ void notCondicion(int cant) //aca le pasamos por parametro el cantidadCondicione
         else if(strcmp(cad, "BNE") == 0)
             strcpy(vectorPolaca[i], "BEQ");
     }
+}
+
+void insertarExpresionEnContar()
+{
+    insertarPolaca("@calculoAux");
+    insertarPolaca("=");
+    insertarPolaca("@calculoAux");
+    insertarPolaca("@valorAEvaluar");
+    insertarPolaca("CMP");
+    insertarPolaca("BNE");
+    insertarPolacaInt(posActual + 6);
+    insertarPolaca("@cont");
+    insertarPolaca("1");
+    insertarPolaca("+");
+    insertarPolaca("@cont");
+    insertarPolaca("=");
 }
