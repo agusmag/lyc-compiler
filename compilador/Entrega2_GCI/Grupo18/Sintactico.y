@@ -204,7 +204,19 @@ asignacion:
     ;
 
 ciclo:
-     WHILE PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+    WHILE 
+    {
+        insertarPolaca("ET");
+        posActual--;
+        guardarPos();
+    }
+    PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+    {
+        insertarPolaca("BI");
+        escribirPosicionEnTodaLaPila(vecif[numeroAnidadas], posActual +1);
+        numeroAnidadas--; //decrementa porque ese bloque while ya terminó
+        insertarPolacaInt(pedirPos());
+    }
     ;
 
 condicion:
@@ -216,7 +228,7 @@ condicion:
     | comparacion OP_AND comparacion
     {
           vecif[numeroAnidadas] = cantidadCondiciones;
-          cantidadCondiciones = 0; //Se pasa a otra seleccio n o iteracion y se reseta la cantidad de condiciones.  
+          cantidadCondiciones = 0; //Se pasa a otra seleccion o iteracion y se reseta la cantidad de condiciones.  
     }
     | comparacion
     {     //cuando ya lee la primera comparacion, avisamos que se trata de un OR
@@ -228,7 +240,7 @@ condicion:
     OP_OR comparacion
     {
         vecif[numeroAnidadas] = cantidadCondiciones;
-        cantidadCondiciones = 0; //Se pasa a otra seleccio n o iteracion y se reseta la cantidad de condiciones.  
+        cantidadCondiciones = 0; //Se pasa a otra seleccion o iteracion y se reseta la cantidad de condiciones.  
     }
     ;
 
@@ -276,7 +288,8 @@ comparacion:
         {
             insertarPolacaEnPosicion(pedirPos(), posActual +1);
             hayOr=0;
-        } 
+        }
+        printf("Test\n");
         guardarPos(); 
         cantidadCondiciones++;
     }
