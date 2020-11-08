@@ -319,7 +319,6 @@ comparacion:
             insertarPolacaEnPosicion(pedirPos(), posActual +1);
             hayOr=0;
         }
-        printf("Test\n");
         guardarPos(); 
         cantidadCondiciones++;
     }
@@ -881,7 +880,7 @@ void grabarPolaca()
     FILE* pf = fopen("intermedia.txt","wt");
     int i;
     for (i=0;i<posActual;i++)
-	    fprintf(pf,"pos: %d, valor: %s \r\n",i,vectorPolaca[i]);
+	    fprintf(pf,"Posicion: %d, Valor: %s \r",i,vectorPolaca[i]);
 }
 
 /* Esta función está pensada para cuando desapilamos el valor

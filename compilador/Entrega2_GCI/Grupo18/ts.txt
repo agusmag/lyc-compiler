@@ -14,12 +14,7 @@ _0.342                                            CONST_REAL               0.342
 _256                                              CONST_INT                256                                               4
 _52                                               CONST_INT                52                                                3
 _4                                                CONST_INT                4                                                 2
-_60                                               CONST_INT                60                                                3
 _"La suma es: "                                   CONST_STR                "La suma es: "                                    15
 _2                                                CONST_INT                2                                                 2
-_"actual es = que 2"                              CONST_STR                "actual es = que 2"                               20
-_"TEST2"                                          CONST_STR                "TEST2"                                           8
-_6                                                CONST_INT                6                                                 2
-_"TEST3"                                          CONST_STR                "TEST3"                                           8
 _"actual es > que 2 y != de 0"                    CONST_STR                "actual es > que 2 y != de 0"                     30
 _"no es mayor que 2"                              CONST_STR                "no es mayor que 2"                               20
