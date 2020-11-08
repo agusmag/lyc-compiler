@@ -105,6 +105,7 @@ char* tipo_cmp;
 %token OP_OR
 %token OP_EQQ
 %token OP_MOQ
+%token OP_NOT
 
 %token OP_ASIG //:
 %token OP_ASIG_CONS //=
@@ -241,6 +242,34 @@ condicion:
     {
         vecif[numeroAnidadas] = cantidadCondiciones;
         cantidadCondiciones = 0; //Se pasa a otra seleccion o iteracion y se reseta la cantidad de condiciones.  
+    }
+    | OP_NOT comparacion
+    {   vecif[numeroAnidadas] = cantidadCondiciones; 
+        notCondicion(cantidadCondiciones);
+        cantidadCondiciones = 0;
+    }
+    | PARENTESIS comparacion END_PARENTESIS OP_AND PARENTESIS comparacion END_PARENTESIS 
+    {   
+        vecif[numeroAnidadas] = cantidadCondiciones;
+        cantidadCondiciones = 0;
+    }
+    | PARENTESIS comparacion END_PARENTESIS 
+    {
+        hayOr=1;
+        cantidadCondiciones--;
+        vecif[numeroAnidadas] = cantidadCondiciones;
+        notCondicion(cantidadCondiciones);
+    }           
+    OP_OR PARENTESIS comparacion END_PARENTESIS 
+    { 
+        vecif[numeroAnidadas] = cantidadCondiciones;
+        cantidadCondiciones = 0;
+    }
+    | OP_NOT PARENTESIS comparacion END_PARENTESIS 
+    {
+         vecif[numeroAnidadas] = cantidadCondiciones;
+         notCondicion(cantidadCondiciones);
+         cantidadCondiciones=0;
     }
     ;
 

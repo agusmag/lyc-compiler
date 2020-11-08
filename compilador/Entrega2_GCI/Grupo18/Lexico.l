@@ -114,6 +114,7 @@ COMILLA_CIERRA      "\”"
 {OP_LESS}           {  debug_print("OP_LESS", yytext); return OP_LESS;                  }
 {OP_MORE}           {  debug_print("OP_MORE", yytext); return OP_MORE;                  }
 {OP_AND}            {  debug_print("OP_AND", yytext); return OP_AND;                    }
+{OP_OR}             {  debug_print("OP_OR", yytext); return OP_OR;                      }
 {LLAVE}             {  debug_print("LLAVE", yytext); return LLAVE;                      }
 {END_LLAVE}         {  debug_print("END_LLAVE", yytext); return END_LLAVE;              }
 {PARENTESIS}        {  debug_print("PARENTESIS", yytext); return PARENTESIS;            }

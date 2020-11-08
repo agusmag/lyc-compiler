@@ -64,21 +64,33 @@ pos: 62, valor: PUT
 pos: 63, valor: actual 
 pos: 64, valor: 2 
 pos: 65, valor: CMP 
-pos: 66, valor: BLE 
-pos: 67, valor: 77 
+pos: 66, valor: BEQ 
+pos: 67, valor: 73 
 pos: 68, valor: actual 
-pos: 69, valor: 0 
+pos: 69, valor: 4 
 pos: 70, valor: CMP 
-pos: 71, valor: BEQ 
-pos: 72, valor: 77 
-pos: 73, valor: "actual es > que 2 y != de 0" 
+pos: 71, valor: BGE 
+pos: 72, valor: 75 
+pos: 73, valor: "Anda!" 
 pos: 74, valor: PUT 
-pos: 75, valor: BI 
-pos: 76, valor: 84 
-pos: 77, valor: actual 
-pos: 78, valor: nombre 
-pos: 79, valor: CMP 
-pos: 80, valor: BGE 
-pos: 81, valor: 84 
-pos: 82, valor: "no es mayor que 2" 
-pos: 83, valor: PUT 
+pos: 75, valor: actual 
+pos: 76, valor: 2 
+pos: 77, valor: CMP 
+pos: 78, valor: BLE 
+pos: 79, valor: 89 
+pos: 80, valor: actual 
+pos: 81, valor: 0 
+pos: 82, valor: CMP 
+pos: 83, valor: BEQ 
+pos: 84, valor: 89 
+pos: 85, valor: "actual es > que 2 y != de 0" 
+pos: 86, valor: PUT 
+pos: 87, valor: BI 
+pos: 88, valor: 96 
+pos: 89, valor: actual 
+pos: 90, valor: nombre 
+pos: 91, valor: CMP 
+pos: 92, valor: BGE 
+pos: 93, valor: 96 
+pos: 94, valor: "no es mayor que 2" 
+pos: 95, valor: PUT 

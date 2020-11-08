@@ -17,5 +17,6 @@ _4                                                CONST_INT                4    
 _"La suma es: "                                   CONST_STR                "La suma es: "                                    15
 _2                                                CONST_INT                2                                                 2
 _"actual es = que 2"                              CONST_STR                "actual es = que 2"                               20
+_"Anda!"                                          CONST_STR                "Anda!"                                           8
 _"actual es > que 2 y != de 0"                    CONST_STR                "actual es > que 2 y != de 0"                     30
 _"no es mayor que 2"                              CONST_STR                "no es mayor que 2"                               20
