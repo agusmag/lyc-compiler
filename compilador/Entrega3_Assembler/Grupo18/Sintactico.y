@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "y.tab.h"
 #define YYERROR_VERBOSE 1
 #define ES_CONST_NOMBRE 1
@@ -44,6 +45,11 @@ t_data* crearDatos(const char*, const char*, const char*, int, double, int);
 void guardarTS();
 void limpiarConstanteString();
 t_tabla tablaTS;
+
+char idvec[32][50];
+int cantid = 0, i=0, contadorString = 0;
+char vecAux[20], vecAsignacion[30][50];
+char* punt;
 
 /* POLACA */
 char vectorPolaca[500][50], auxBet[50];
@@ -96,6 +102,8 @@ char* my_itoa(int num, char *str);
 char* reemplazarChar(char* dest, const char* cad, const char viejo, const char nuevo);
 char* limpiarString(char* dest, const char* cad);
 
+bool verificarAsignacion(const char* id);
+
 
 char idvec[50][50];
 int cantid = 0, i=0, cant_aux=0;
@@ -110,8 +118,14 @@ int j=0;
 
 /* --- Validaciones --- */
 int existeID(const char*);
-int esNumero(const char*,char*);
-char* obtenerID(char*);
+int esNumero(const char*, char*);
+void guardarAsignacion(const char*);
+void guardarAsignacionInt(const int);
+void guardarAsignacionDouble(const double);
+bool verificarAsignacion(const char*);
+bool verificarComparacion();
+bool esCompatible(const char*, const char*);
+int esAsig = 0, esComp = 0, topeAsignacion = -1;
 char mensajes[100];
 
 %}
@@ -180,7 +194,7 @@ PROGRAMA:
     algoritmo {
         guardarTS();
         grabarPolaca();
-        void generarAssembler();
+        generarAssembler();
         printf("\nCompilacion OK.\n");
     };
 
@@ -233,8 +247,16 @@ asignacion:
             sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
+         //Verifica que los tipos de datos sean compatibles
+        if(!verificarAsignacion(punt))
+        {
+            sprintf(mensajes, "%s", "Error: se hacen asignaciones de distinto tipo de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @2.last_column);
+        }
+        insertarPolaca("="); // Sería ":" pero para simplificar, usamos "=".
         insertarPolaca(vecAux);
-        insertarPolaca(":");
+        //insertarPolaca(vecAux);
+        //insertarPolaca(":");
     }
     ;
 
@@ -1200,3 +1222,20 @@ char* limpiarString(char* dest, const char* cad)
     dest[j] = '\0';
     return dest;
 } 
+
+bool verificarAsignacion(const char* id)
+{
+    t_simbolo* lexemaI = getLexema(id);
+    t_simbolo* lexemaD;
+    int i;
+
+    for(i=0; i<=topeAsignacion; i++)
+    {
+        lexemaD = getLexema(vecAsignacion[i]);
+        if(!esCompatible(lexemaI->data.tipo, lexemaD->data.tipo))
+        {
+            return false;
+        }
+    }
+    return true;
+}
