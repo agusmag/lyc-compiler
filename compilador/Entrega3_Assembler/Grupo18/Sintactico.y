@@ -17,6 +17,7 @@ typedef struct
 {
         char *nombre;
         char *tipo;
+        char *nombreASM;
         union Valor{
                 int valor_int;
                 double valor_double;
@@ -64,6 +65,37 @@ void insertarExpresionEnContar();
 int numeroAnidadas = -1, cantidadCondiciones = 0, hayOr = 0;
 int vecif[50];
 void notCondicion(int);
+
+/* --- Assembler --- */
+int vectorEtiquetas[50], topeVectorEtiquetas = -1;
+void generarAssembler();
+/*
+void guardarPosicionDeEtiqueta(const char *);
+bool esPosicionDeEtiqueta(int);
+bool esEtiquetaWhile(const char *);
+
+*/
+void crearHeader(FILE *);
+void crearSeccionData(FILE *);
+void crearSeccionCode(FILE *);
+void crearFooter(FILE *);
+/*
+bool esValor(const char *);
+bool esComparacion(const char *);
+bool esSalto(const char *);
+char * getSalto(const char *);
+bool esGet( char * str );
+bool esDisplay(const char * str);
+bool esAsignacion( char * str );
+bool esOperacion(const char *);
+char * getOperacion(const char *);
+
+*/
+
+char* my_itoa(int num, char *str);
+char* reemplazarChar(char* dest, const char* cad, const char viejo, const char nuevo);
+char* limpiarString(char* dest, const char* cad);
+
 
 char idvec[50][50];
 int cantid = 0, i=0, cant_aux=0;
@@ -148,6 +180,7 @@ PROGRAMA:
     algoritmo {
         guardarTS();
         grabarPolaca();
+        void generarAssembler();
         printf("\nCompilacion OK.\n");
     };
 
@@ -616,6 +649,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         //Al nombre lo dejo aca porque no lleva _
         data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombre, nombre);
+        data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+        strcpy(data->nombreASM, nombre);
         return data;
     }
     else
@@ -635,18 +670,23 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             if(esConstNombre == ES_CONST_NOMBRE)
             {
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
                 strcpy(data->nombre, nombre);
+                strcpy(data->nombreASM, data->nombre);  
             }
             else
             {
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
                 strcat(full, valString);
-                strcpy(data->nombre, full);    
+                strcpy(data->nombre, full);
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
+                strcpy(data->nombreASM, data->nombre);    
             }
 
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
+
             data->valor.valor_double = valDouble;
 
             if(esConstNombre == ES_CONST_NOMBRE)
@@ -656,10 +696,15 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             }
             else
             {
+                char dest[32];
                 sprintf(aux, "%g", valDouble);
                 strcat(full, aux);
                 data->nombre = (char*)malloc(sizeof(char) * strlen(full));
                 strcpy(data->nombre, full);
+                data->valor.valor_double = valDouble;
+                reemplazarChar(dest, full, '.', '_');
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(dest) + 1));
+                strcpy(data->nombreASM, dest);
             }
 
         }
@@ -671,6 +716,9 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             {
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
                 strcpy(data->nombre, nombre);
+                data->valor.valor_int = valInt;
+            data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
+            strcpy(data->nombreASM, full);
             }
             else
             {
@@ -678,6 +726,9 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
                 strcat(full, aux);
                 data->nombre = (char*)malloc(sizeof(char) * strlen(full));
                 strcpy(data->nombre, full);
+                data->valor.valor_int = valInt;
+            data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
+            strcpy(data->nombreASM, full);
             }
         }
         return data;
@@ -741,6 +792,38 @@ void guardarTS()
 void crearTablaTS()
 {
     tablaTS.primero = NULL;
+}
+
+t_simbolo * getLexema(const char *valor){
+    t_simbolo *lexema;
+    t_simbolo *tablaSimbolos = tablaTS.primero;
+
+    char nombreLimpio[32];
+    limpiarString(nombreLimpio, valor);
+    char nombreCTE[32] = "_";
+    strcat(nombreCTE, nombreLimpio);
+    int esID, esCTE, esASM, esValor =-1;
+    char valorFloat[32];
+
+    while(tablaSimbolos){  
+        esID = strcmp(tablaSimbolos->data.nombre, nombreLimpio);
+        esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
+        esASM = strcmp(tablaSimbolos->data.nombreASM, valor);
+
+        if(strcmp(tablaSimbolos->data.tipo, "CONST_STR") == 0)
+        {
+            esValor = strcmp(valor, tablaSimbolos->data.valor.valor_str);
+        }
+
+        if(esID == 0 || esCTE == 0 || esASM == 0 || esValor == 0)
+        { 
+            lexema = tablaSimbolos;
+            return lexema;
+        }
+        tablaSimbolos = tablaSimbolos->next;
+    }
+    return NULL;
+    
 }
 
 int existeID(const char* id) //y hasta diria que es igual para existeCTE
@@ -815,7 +898,8 @@ char* insertarPolaca(char * cad)
 void insertarPolacaInt(int entero)
 {
 	char cad[20];
-	itoa(entero, cad, 10); 
+    //itoa(entero, cad, 10); 
+	my_itoa(entero, cad); 
 	insertarPolaca(cad);
 }
 
@@ -868,7 +952,8 @@ void escribirPosicionEnTodaLaPila(int cant, int celda)
 	while(cant > 0)
     {
         char cad[20];
-        itoa(celda, cad, 10);
+        //itoa(celda, cad, 10);
+        my_itoa(celda, cad); 
         strcpy(vectorPolaca[pedirPos()],cad);
         cant --;
 	}
@@ -890,7 +975,7 @@ char * insertarPolacaEnPosicion(const int posicion, const int valorCelda)
 {
     //Ponele que tenemos hasta 1M celdas.
     char aux[6];
-    return strcpy(vectorPolaca[posicion], itoa(valorCelda, aux, 10));
+    return strcpy(vectorPolaca[posicion], my_itoa(valorCelda, aux));//itoa(valorCelda, aux, 10));
 }
 
 void notCondicion(int cant) //aca le pasamos por parametro el cantidadCondiciones correspondiente a cada if
@@ -933,3 +1018,185 @@ void insertarExpresionEnContar()
     insertarPolaca("@cont");
     insertarPolaca("=");
 }
+
+
+
+/** funciones assembler **/
+
+void generarAssembler(){
+    FILE* archAssembler = fopen("final.asm","wt");
+    crearHeader(archAssembler);
+    crearSeccionData(archAssembler);
+    crearSeccionCode(archAssembler);
+
+    int i;
+    /*for(i=0; i<=posActual; i++){
+
+        if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vecPolaca[i])){
+            fprintf(archAssembler, "branch%d:\n\n", i);
+        }        
+
+        if(esValor(vecPolaca[i])){
+            t_simbolo *lexema = getLexema(vecPolaca[i]);
+            fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
+        }
+        else if(esComparacion(vecPolaca[i])){
+            fprintf(archAssembler, "fstp @ifI\n\n");
+        }
+        else if(esSalto(vecPolaca[i])){
+            char *tipoSalto = getSalto(vecPolaca[i]);
+            if(strcmp(tipoSalto, "jmp") != 0){
+                fprintf(archAssembler, "fstp @ifD\n\n");
+                fprintf(archAssembler, "fld @ifI\nfld @ifD\n");
+                fprintf(archAssembler, "fxch\nfcom\nfstsw AX\nsahf\n");
+            }
+            i++;
+            fprintf(archAssembler, "%s branch%s\n\n", tipoSalto, vecPolaca[i]);
+            guardarPosicionDeEtiqueta(vecPolaca[i]);
+        }
+        else if(esGet(vecPolaca[i])){
+            i++;
+            t_simbolo *lexema = getLexema(vecPolaca[i]);
+
+            if(strcmp(lexema->data.tipo, "CONST_REAL") == 0 || strcmp(lexema->data.tipo, "INT") == 0)
+            {
+                fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM);
+            }
+            else
+            {
+                fprintf(archAssembler, "getString %s\nNEWLINE\n", lexema->data.nombreASM);
+            }
+        }
+        else if(esDisplay(vecPolaca[i])){
+            i++;
+            t_simbolo *lexema = getLexema(vecPolaca[i]);
+
+            if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
+                fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
+            }
+            else{
+                fprintf(archAssembler, "displayFloat %s,2\nNEWLINE\n", lexema->data.nombreASM);
+            }
+        }
+        else if(esAsignacion(vecPolaca[i])){
+            i++;
+            fprintf(archAssembler, "fstp %s\n\n", vecPolaca[i]);
+        }
+        else if(esOperacion(vecPolaca[i])){
+            fprintf(archAssembler, "%s\n", getOperacion(vecPolaca[i]));
+        }
+    }     */ 
+
+    crearFooter(archAssembler);
+    fclose(archAssembler);
+}
+
+void crearHeader(FILE *archAssembler){
+    fprintf(archAssembler, "%s\n%s\n\n", "include number.asm", "include macros2.asm");
+    
+    fprintf(archAssembler, "%-30s%-30s\n", ".MODEL LARGE", "; Modelo de mem4oria");
+    fprintf(archAssembler, "%-30s%-30s\n", ".386", "; Tipo de procesador");
+    fprintf(archAssembler, "%-30s%-30s\n\n", ".STACK 200h", "; Bytes en el stack");
+}
+
+void crearSeccionData(FILE *archAssembler){
+    t_simbolo *aux;
+    t_simbolo *tablaSimbolos = tablaTS.primero;
+
+    fprintf(archAssembler, "%s\n\n", ".DATA");
+    while(tablaSimbolos){
+        aux = tablaSimbolos;
+        tablaSimbolos = tablaSimbolos->next;
+        
+        if(strcmp(aux->data.tipo, "INT") == 0){
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable int");
+        }
+        else if(strcmp(aux->data.tipo, "FLOAT") == 0){
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable float");
+        }
+        else if(strcmp(aux->data.tipo, "STRING") == 0){ 
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", "?", "; Variable string");
+        }
+        else if(strcmp(aux->data.tipo, "CONST_INT") == 0){ 
+            char valor[50];
+            sprintf(valor, "%d.0", aux->data.valor.valor_int);
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante int");
+        }
+        else if(strcmp(aux->data.tipo, "CONST_REAL") == 0){ 
+            char valor[50];
+            sprintf(valor, "%g", aux->data.valor.valor_double);
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante float");
+        }
+        else if(strcmp(aux->data.tipo, "CONST_STR") == 0){
+            char valor[50];
+            sprintf(valor, "%s, '$', %d dup (?)",aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
+            fprintf(archAssembler, "%-35s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", valor, "; Constante string");
+        }
+    }
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
+
+}
+
+void crearSeccionCode(FILE *archAssembler){
+    fprintf(archAssembler, "\n%s\n\n%s\n\n", ".CODE", "inicio:");
+    fprintf(archAssembler, "%-30s%-30s\n", "mov AX,@DATA", "; Inicializa el segmento de datos");
+    fprintf(archAssembler, "%-30s\n%-30s\n\n", "mov DS,AX", "mov ES,AX");
+}
+
+void crearFooter(FILE *archAssembler){
+    fprintf(archAssembler, "\n%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
+    fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
+}
+
+
+
+
+
+char *my_itoa(int num, char *str)
+{
+        if(str == NULL)
+        {
+                return NULL;
+        }
+        sprintf(str, "%d", num);
+        return str;
+}
+
+
+char* reemplazarChar(char* dest, const char* cad, const char viejo, const char nuevo)
+{
+    int i, longitud;
+    longitud = strlen(cad);
+
+    for(i=0; i<longitud; i++)
+    {
+        if(cad[i] == viejo)
+        {
+            dest[i] = nuevo;
+        }
+        else
+        {
+            dest[i] = cad[i];
+        }
+    }
+    dest[i] = '\0';
+    return dest;
+}
+
+
+char* limpiarString(char* dest, const char* cad)
+{
+    int i, longitud, j=0;
+    longitud = strlen(cad);
+    for(i=0; i<longitud; i++)
+    {
+        if(cad[i] != '"')
+        {
+            dest[j] = cad[i];
+            j++;
+        }
+    }
+    dest[j] = '\0';
+    return dest;
+} 
