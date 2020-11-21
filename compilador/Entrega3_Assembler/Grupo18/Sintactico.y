@@ -46,6 +46,8 @@ void guardarTS();
 void limpiarConstanteString();
 t_tabla tablaTS;
 
+char* reemplazarString(char*, const char*);
+
 char idvec[50][50];
 int cantid = 0, i=0, contadorString = 0, cant_aux=0;
 char vecAux[300], vecAsignacion[30][50];
@@ -562,8 +564,9 @@ entrada_salida:
             sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
-        insertarPolaca(vecAux);
-        insertarPolaca("GET");}
+        insertarPolaca("GET");
+        insertarPolaca(vecAux);        
+        }
 	| PUT ID {
         strcpy(vecAux, $2);
         if(!existeID(vecAux)) 
@@ -571,12 +574,14 @@ entrada_salida:
             sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
+        insertarPolaca("PUT");
         insertarPolaca(vecAux);
-        insertarPolaca("PUT");}
+    }
 	| PUT CONST_STR {
         strcpy(vecAux, $2);
-        insertarPolaca(vecAux);
         insertarPolaca("PUT");
+        insertarPolaca(vecAux);
+        
     }
     ;
 
@@ -690,8 +695,19 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
          //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
         if(strcmp(tipo, "CONST_STR") == 0)
         {
-            data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
+            contadorString++;
+            
+            data->valor.valor_str = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
             strcpy(data->valor.valor_str, valString);
+
+            char auxString[32];
+            strcpy(full, ""); 
+            strcpy(full, "S_");  // "S_"
+            reemplazarString(auxString, nombre);
+            strcat(full, auxString); // "S_<nombre>"  
+            char numero[10];
+            sprintf(numero, "_%d", contadorString);
+            strcat(full, numero); 
             
             if(esConstNombre == ES_CONST_NOMBRE)
             {
@@ -992,6 +1008,7 @@ void grabarPolaca()
     int i;
     for (i=0;i<posActual;i++)
 	    fprintf(pf,"Posicion: %d, Valor: %s \r",i,vectorPolaca[i]);
+    fclose(pf);
 }
 
 /* Esta función está pensada para cuando desapilamos el valor
@@ -1102,14 +1119,17 @@ void generarAssembler(){
             }
         }
         else if(esDisplay(vectorPolaca[i])){
+            printf("[generarAsembler] es Display:");
             i++;
             t_simbolo *lexema = getLexema(vectorPolaca[i]);
+            //printf("[generarAsembler] hola");
+
 
             if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
                 fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
             }
             else{
-                fprintf(archAssembler, "displayFloat %s,2\nNEWLINE\n", lexema->data.nombreASM);
+                fprintf(archAssembler, "displayFloat %s\nNEWLINE\n", lexema->data.nombreASM);
             }
         }
         else if(esAsignacion(vectorPolaca[i])){
@@ -1140,9 +1160,9 @@ void crearSeccionData(FILE *archAssembler){
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
-    printf("pruebita: %s\n", tablaSimbolos->data.tipo); //SE LLENA BIEN PERO RETURN BASURA
+    printf("[crearSeccionData] tsymbol: %s\n", tablaSimbolos->data.tipo); //SE LLENA BIEN PERO RETURN BASURA
     tablaSimbolos = tablaSimbolos->next;
-    printf("pruebita: %s\n", tablaSimbolos->data.tipo);
+    printf("[crearSeccionData] tsymbol: %s\n", tablaSimbolos->data.tipo);
     stdout->_ptr = stdout->_base;
     fprintf(archAssembler, "%s\n\n", ".DATA");
     printf("[crearSeccionData] Pre WHILE\n");
@@ -1367,7 +1387,7 @@ bool esGet(char * str)
 }
 
 bool esDisplay(const char * str){
-    int aux = strcmp(str, "DISPLAY");
+    int aux = strcmp(str, "PUT");
     return aux == 0;
 }
 
@@ -1412,4 +1432,24 @@ char * getOperacion(const char * operacion){
 void guardarPosicionDeEtiqueta(const char *posicion){
 	topeVectorEtiquetas++;
 	vectorEtiquetas[topeVectorEtiquetas] = atoi(posicion);
+}
+
+char* reemplazarString(char* dest, const char* cad)
+{
+    int i, longitud;
+    longitud = strlen(cad);
+
+    for(i=0; i<longitud; i++)
+    {
+        if((cad[i] >= 'a' && cad[i] <= 'z') || (cad[i] >='A' && cad[i] <= 'Z') || (cad[i] >= '0' && cad[i] <= '9'))
+        {
+            dest[i] = cad[i];
+        }
+        else
+        {
+            dest[i] = '_';
+        }
+    }
+    dest[i] = '\0';
+    return dest;
 }

@@ -1,25 +1,8 @@
-DIM <contador,promedio,actual,suma> AS <Integer,Float,Float,Float>
+DIM <nombre, nombre2> AS <Integer, String>
 
-CONST nombre=80;
-PUT "Prueba.txt LyC Tema 4!";
-PUT "Ingrese un valor float: ";
+nombre : 80;
+CONST nombre2 = "PEQL";
 
-GET actual;
-contador: 0;
-suma: 02.5+nombre;
-while (contador <= 92) {
-    contador: contador + 1;
-    actual: (contador/0.342) + (contador* contar (actual*contador ; [256,nombre*suma,52,4]));
-    suma: suma + actual;
-}
+PUT nombre2;
 
-PUT "La suma es: ";
-PUT suma;
-
-if (actual > 2 and actual <> 0) {
-    PUT "actual es > que 2 y != de 0";
-}
-Else {
-    if (actual < nombre)
-        PUT "no es mayor que 2";
-}
+PUT nombre;

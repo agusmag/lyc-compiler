@@ -70,7 +70,6 @@ END_LLAVE           "\}"
 PARENTESIS          "\("
 END_PARENTESIS      "\)"
 COMA                "\,"
-PUNTO               "\."
 PUNTO_Y_COMA        "\;"
 COMILLA_SIMPLE      "\'"
 CAR_COMILLAS        "\""
@@ -159,6 +158,8 @@ COMILLA_CIERRA      "\”"
 "\t"
 "\n\t"
 "\r\n"
+
+. {printf("%s", yytext); yyerror("ERROR: TOKEN NO RECONOCIDO", 0, 0, 0);}
 
 %%
 
