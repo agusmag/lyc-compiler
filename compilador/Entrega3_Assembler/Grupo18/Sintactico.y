@@ -46,9 +46,9 @@ void guardarTS();
 void limpiarConstanteString();
 t_tabla tablaTS;
 
-char idvec[32][50];
-int cantid = 0, i=0, contadorString = 0;
-char vecAux[20], vecAsignacion[30][50];
+char idvec[50][50];
+int cantid = 0, i=0, contadorString = 0, cant_aux=0;
+char vecAux[300], vecAsignacion[30][50];
 char* punt;
 
 /* POLACA */
@@ -104,10 +104,6 @@ char* limpiarString(char* dest, const char* cad);
 
 bool verificarAsignacion(const char* id);
 
-
-char idvec[50][50];
-int cantid = 0, i=0, cant_aux=0;
-char vecAux[300];
 char* punt;
 char pos[2];
 char* separador1;
