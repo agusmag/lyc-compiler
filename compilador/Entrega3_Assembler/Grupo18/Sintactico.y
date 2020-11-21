@@ -254,6 +254,8 @@ asignacion:
             yyerror(mensajes, @1.first_line, @1.first_column, @2.last_column);
         }
         insertarPolaca(vecAux);
+        esAsig = 0;
+        topeAsignacion = -1;
     }
     ;
 
@@ -639,10 +641,12 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
     if(tablaTS.primero == NULL)
     {
         tablaTS.primero = nuevo;
+        printf("tablaTS: %s\n", tablaTS.primero->data.tipo);
     }
     else
     {
         tabla->next = nuevo;
+        printf("tablaTS: %s\n", tabla->next->data.tipo);
     }
 
     return 0;
@@ -806,7 +810,7 @@ void guardarTS()
             sprintf(linea, "%-50s%-25s%-50s%-ld\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre));
         }
         fprintf(arch, "%s", linea);
-        free(aux);
+        //free(aux);
     }
     fclose(arch); 
 }
@@ -1054,7 +1058,7 @@ void generarAssembler(){
     printf("\n02 - Generar Seccion de Data\n");
     crearSeccionData(archAssembler);
 
-    printf("\n03 - Generar Seccion de Data\n");
+    printf("\n03 - Generar Seccion de Code\n");
     crearSeccionCode(archAssembler);
 
     printf("\n04 - Generar assembler antes del for\n");
@@ -1132,9 +1136,14 @@ void crearHeader(FILE *archAssembler){
 }
 
 void crearSeccionData(FILE *archAssembler){
+    
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
-stdout->_ptr = stdout->_base;
+
+    printf("pruebita: %s\n", tablaSimbolos->data.tipo); //SE LLENA BIEN PERO RETURN BASURA
+    tablaSimbolos = tablaSimbolos->next;
+    printf("pruebita: %s\n", tablaSimbolos->data.tipo);
+    stdout->_ptr = stdout->_base;
     fprintf(archAssembler, "%s\n\n", ".DATA");
     printf("[crearSeccionData] Pre WHILE\n");
     while(tablaSimbolos){
@@ -1144,7 +1153,7 @@ stdout->_ptr = stdout->_base;
         tablaSimbolos = tablaSimbolos->next;
     
         printf("[crearSeccionData] NombreASM: %s\n", aux->data.nombreASM);
-        //printf("[crearSeccionData] Tipo: %s\n", aux->data.tipo);
+        printf("[crearSeccionData] Tipo: %s\n", aux->data.tipo);
 
         if(strcmp(aux->data.tipo, "INTEGER") == 0){
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable int");
@@ -1244,6 +1253,9 @@ bool verificarAsignacion(const char* id)
     t_simbolo* lexemaI = getLexema(id);
     t_simbolo* lexemaD;
     int i;
+
+    //printf("lexemaI: %s\n",lexemaI->data.tipo);
+    //printf("lexemaD: %s\n",lexemaD->data.tipo);
 
     for(i=0; i<=topeAsignacion; i++)
     {
