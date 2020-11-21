@@ -75,17 +75,17 @@ void notCondicion(int);
 /* --- Assembler --- */
 int vectorEtiquetas[50], topeVectorEtiquetas = -1;
 void generarAssembler();
-/*
+
 void guardarPosicionDeEtiqueta(const char *);
 bool esPosicionDeEtiqueta(int);
 bool esEtiquetaWhile(const char *);
 
-*/
+
 void crearHeader(FILE *);
 void crearSeccionData(FILE *);
 void crearSeccionCode(FILE *);
 void crearFooter(FILE *);
-/*
+
 bool esValor(const char *);
 bool esComparacion(const char *);
 bool esSalto(const char *);
@@ -96,11 +96,12 @@ bool esAsignacion( char * str );
 bool esOperacion(const char *);
 char * getOperacion(const char *);
 
-*/
 
 char* my_itoa(int num, char *str);
 char* reemplazarChar(char* dest, const char* cad, const char viejo, const char nuevo);
 char* limpiarString(char* dest, const char* cad);
+char* obtenerID(char* cadena);
+
 
 bool verificarAsignacion(const char* id);
 
@@ -190,6 +191,7 @@ PROGRAMA:
     algoritmo {
         guardarTS();
         grabarPolaca();
+        printf("\nGrabar Polaca\n");
         generarAssembler();
         printf("\nCompilacion OK.\n");
     };
@@ -213,29 +215,31 @@ sentencia:
 
 est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
-        insertarTS(obtenerID($2), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
-        insertarPolacaDouble($4);
-        insertarPolaca($2);
-        insertarPolaca("=");
-    }
-    | CONST ID OP_ASIG_CONS CONST_INT {
         strcpy($<tipo_str>$, $2);
-        insertarTS(obtenerID($2), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
-        insertarPolacaInt($4);
-        insertarPolaca(obtenerID($2));
+        insertarTS(obtenerID($<tipo_str>$), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
+        insertarPolacaDouble($4);
         insertarPolaca("=");
+        insertarPolaca(obtenerID($2));
+    }
+    | CONST ID OP_ASIG_CONS CONST_INT {        
+        strcpy($<tipo_str>$, $2);
+        insertarTS(obtenerID($<tipo_str>$), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
+        insertarPolacaInt($4);
+        insertarPolaca("=");
+        insertarPolaca(obtenerID($2));
     }                               
-    | CONST ID OP_ASIG_CONS CONST_STR {
+    | CONST ID OP_ASIG_CONS CONST_STR {        
         insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
         insertarPolaca(obtenerID(yylval.tipo_str));
-        insertarPolaca($2);
         insertarPolaca("=");
+        insertarPolaca(obtenerID($2));
     }
     |  asignacion
     ;
 
 asignacion:
     ID OP_ASIG expresion {
+        insertarPolaca(":");
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
         if(!existeID(punt)) /*No existe: entonces no esta declarada*/
@@ -243,16 +247,13 @@ asignacion:
             sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
-         //Verifica que los tipos de datos sean compatibles
+        //Verifica que los tipos de datos sean compatibles
         if(!verificarAsignacion(punt))
         {
             sprintf(mensajes, "%s", "Error: se hacen asignaciones de distinto tipo de datos");
             yyerror(mensajes, @1.first_line, @1.first_column, @2.last_column);
         }
-        insertarPolaca("="); // Sería ":" pero para simplificar, usamos "=".
         insertarPolaca(vecAux);
-        //insertarPolaca(vecAux);
-        //insertarPolaca(":");
     }
     ;
 
@@ -649,6 +650,8 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
 
 t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
 {
+    stdout->_ptr = stdout->_base;
+
     char full[50] = "_";
     char aux[20];
 
@@ -669,6 +672,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         strcpy(data->nombre, nombre);
         data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombreASM, nombre);
+        printf("[crearDatos] data->Tipo %s\n", data->tipo);
         return data;
     }
     else
@@ -1042,39 +1046,47 @@ void insertarExpresionEnContar()
 /** funciones assembler **/
 
 void generarAssembler(){
-    FILE* archAssembler = fopen("final.asm","wt");
+    FILE* archAssembler = fopen("final.asm","w+t");
+
+    printf("\n01 - Generar header\n");
     crearHeader(archAssembler);
+
+    printf("\n02 - Generar Seccion de Data\n");
     crearSeccionData(archAssembler);
+
+    printf("\n03 - Generar Seccion de Data\n");
     crearSeccionCode(archAssembler);
 
-    int i;
-    /*for(i=0; i<=posActual; i++){
+    printf("\n04 - Generar assembler antes del for\n");
 
-        if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vecPolaca[i])){
+    int i;
+    for(i=0; i<=posActual; i++){
+
+        if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
             fprintf(archAssembler, "branch%d:\n\n", i);
         }        
 
-        if(esValor(vecPolaca[i])){
-            t_simbolo *lexema = getLexema(vecPolaca[i]);
+        if(esValor(vectorPolaca[i])){
+            t_simbolo *lexema = getLexema(vectorPolaca[i]);
             fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
         }
-        else if(esComparacion(vecPolaca[i])){
+        else if(esComparacion(vectorPolaca[i])){
             fprintf(archAssembler, "fstp @ifI\n\n");
         }
-        else if(esSalto(vecPolaca[i])){
-            char *tipoSalto = getSalto(vecPolaca[i]);
+        else if(esSalto(vectorPolaca[i])){
+            char *tipoSalto = getSalto(vectorPolaca[i]);
             if(strcmp(tipoSalto, "jmp") != 0){
                 fprintf(archAssembler, "fstp @ifD\n\n");
                 fprintf(archAssembler, "fld @ifI\nfld @ifD\n");
                 fprintf(archAssembler, "fxch\nfcom\nfstsw AX\nsahf\n");
             }
             i++;
-            fprintf(archAssembler, "%s branch%s\n\n", tipoSalto, vecPolaca[i]);
-            guardarPosicionDeEtiqueta(vecPolaca[i]);
+            fprintf(archAssembler, "%s branch%s\n\n", tipoSalto, vectorPolaca[i]);
+            guardarPosicionDeEtiqueta(vectorPolaca[i]);
         }
-        else if(esGet(vecPolaca[i])){
+        else if(esGet(vectorPolaca[i])){
             i++;
-            t_simbolo *lexema = getLexema(vecPolaca[i]);
+            t_simbolo *lexema = getLexema(vectorPolaca[i]);
 
             if(strcmp(lexema->data.tipo, "CONST_REAL") == 0 || strcmp(lexema->data.tipo, "INT") == 0)
             {
@@ -1085,9 +1097,9 @@ void generarAssembler(){
                 fprintf(archAssembler, "getString %s\nNEWLINE\n", lexema->data.nombreASM);
             }
         }
-        else if(esDisplay(vecPolaca[i])){
+        else if(esDisplay(vectorPolaca[i])){
             i++;
-            t_simbolo *lexema = getLexema(vecPolaca[i]);
+            t_simbolo *lexema = getLexema(vectorPolaca[i]);
 
             if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
                 fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
@@ -1096,14 +1108,16 @@ void generarAssembler(){
                 fprintf(archAssembler, "displayFloat %s,2\nNEWLINE\n", lexema->data.nombreASM);
             }
         }
-        else if(esAsignacion(vecPolaca[i])){
+        else if(esAsignacion(vectorPolaca[i])){
             i++;
-            fprintf(archAssembler, "fstp %s\n\n", vecPolaca[i]);
+            fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
         }
-        else if(esOperacion(vecPolaca[i])){
-            fprintf(archAssembler, "%s\n", getOperacion(vecPolaca[i]));
+        else if(esOperacion(vectorPolaca[i])){
+            fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
         }
-    }     */ 
+    }      
+
+    printf("\n05 - Antes del footer\n");
 
     crearFooter(archAssembler);
     fclose(archAssembler);
@@ -1120,13 +1134,19 @@ void crearHeader(FILE *archAssembler){
 void crearSeccionData(FILE *archAssembler){
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
-
+stdout->_ptr = stdout->_base;
     fprintf(archAssembler, "%s\n\n", ".DATA");
+    printf("[crearSeccionData] Pre WHILE\n");
     while(tablaSimbolos){
+        printf("[crearSeccionData]IN WHILE\n");
+        
         aux = tablaSimbolos;
         tablaSimbolos = tablaSimbolos->next;
-        
-        if(strcmp(aux->data.tipo, "INT") == 0){
+    
+        printf("[crearSeccionData] NombreASM: %s\n", aux->data.nombreASM);
+        //printf("[crearSeccionData] Tipo: %s\n", aux->data.tipo);
+
+        if(strcmp(aux->data.tipo, "INTEGER") == 0){
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable int");
         }
         else if(strcmp(aux->data.tipo, "FLOAT") == 0){
@@ -1234,4 +1254,150 @@ bool verificarAsignacion(const char* id)
         }
     }
     return true;
+}
+
+bool esCompatible(const char* tipo1, const char* tipo2)
+{
+    if(strcmp("INT", tipo1) == 0)
+    {
+        return (strcmp("INT", tipo2) == 0 || strcmp("CONST_INT", tipo2) == 0);
+    }
+    else if(strcmp("FLOAT", tipo1) == 0)
+    {
+        return (strcmp("FLOAT", tipo2) == 0 || strcmp("CONST_REAL", tipo2) == 0);
+    }
+    else if(strcmp("STRING", tipo1) == 0)
+    {
+        return (strcmp("STRING", tipo2) == 0 || strcmp("CONST_STR", tipo2) == 0);
+    }
+}
+
+bool esPosicionDeEtiqueta(int posicion){
+    int i;
+    for(i = 0; i <= topeVectorEtiquetas; i++){
+        if(posicion == vectorEtiquetas[i]){
+            return true;
+        }
+    }
+    return false;
+}
+
+bool esValor(const char * str){
+    //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
+    return existeID(str) == 1;
+} 
+
+bool esComparacion(const char * str){
+    int aux = strcmp(str, "CMP");
+    return aux == 0;
+}
+
+//La última comparación no es obligatoria, pero es para no perder de vista todos los saltos.
+bool esSalto(const char * str){
+    if(strcmp(str, "BNE") == 0){
+       return true; 
+    }
+    else if(strcmp(str, "BGT") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BLT") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BLE") == 0){
+       return true; 
+    }
+    else if(strcmp(str, "BGE") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BEQ") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BI") == 0){
+        return true;
+    }
+    return false;
+}
+
+
+bool esEtiquetaWhile(const char *str){
+    return strcmp(str, "ET") == 0;
+}
+
+//La última comparación no es obligatoria, pero es más fácil de ver a qué salto corresponde.
+char * getSalto(const char * salto){
+    if(strcmp(salto, "BNE") == 0){
+       return "jne"; 
+    }
+    else if(strcmp(salto, "BGT") == 0){
+        return "ja";
+    }
+    else if(strcmp(salto, "BLT") == 0){
+        return "jb";
+    }
+    else if(strcmp(salto, "BLE") == 0){
+       return "jbe"; 
+    }
+    else if(strcmp(salto, "BGE") == 0){
+        return "jae";
+    }
+    else if(strcmp(salto, "BEQ") == 0){
+        return "je";
+    }
+    else if(strcmp(salto, "BI") == 0){
+        return "jmp";
+    }
+}
+
+bool esGet(char * str)
+{
+    int aux = strcmp(str, "GET");
+    return aux == 0;
+}
+
+bool esDisplay(const char * str){
+    int aux = strcmp(str, "DISPLAY");
+    return aux == 0;
+}
+
+bool esAsignacion(char * str)
+{
+    int aux = strcmp(str, "=");
+    return aux == 0;
+}
+
+bool esOperacion(const char * str){
+    if(strcmp(str, "+") == 0){
+       return true; 
+    }
+    else if(strcmp(str, "-") == 0){
+        return true;
+    }
+    else if(strcmp(str, "*") == 0){
+        return true;
+    }
+    else if(strcmp(str, "/") == 0){
+        return true;
+    }        
+    return false;
+}
+
+char * getOperacion(const char * operacion){
+    if(strcmp(operacion, "+") == 0){
+       return "fadd"; 
+    }
+    else if(strcmp(operacion, "-") == 0){
+        return "fsub";
+    }
+    else if(strcmp(operacion, "*") == 0){
+        return "fmul";
+    }
+    else {
+        return "fdiv";
+    }
+}
+
+//Podríamos verificar de no introducir duplicados, pero creo que al cohete.
+void guardarPosicionDeEtiqueta(const char *posicion){
+	topeVectorEtiquetas++;
+	vectorEtiquetas[topeVectorEtiquetas] = atoi(posicion);
 }
