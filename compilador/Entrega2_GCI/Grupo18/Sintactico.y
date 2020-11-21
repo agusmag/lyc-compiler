@@ -170,29 +170,31 @@ sentencia:
 
 est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
+        insertarPolaca(obtenerID($2));
         insertarTS(obtenerID($2), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
         insertarPolacaDouble($4);
-        insertarPolaca($2);
         insertarPolaca("=");
     }
     | CONST ID OP_ASIG_CONS CONST_INT {
+        insertarPolaca(obtenerID($2));
         strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($2), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
         insertarPolacaInt($4);
-        insertarPolaca(obtenerID($2));
+        
         insertarPolaca("=");
     }                               
     | CONST ID OP_ASIG_CONS CONST_STR {
+        insertarPolaca(obtenerID($2));
         insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
         insertarPolaca(obtenerID(yylval.tipo_str));
-        insertarPolaca($2);
+        
         insertarPolaca("=");
     }
     |  asignacion
     ;
 
 asignacion:
-    ID OP_ASIG expresion {
+    ID OP_ASIG {
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
         if(!existeID(punt)) /*No existe: entonces no esta declarada*/
@@ -201,6 +203,7 @@ asignacion:
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
         insertarPolaca(vecAux);
+    } expresion {
         insertarPolaca(":");
     }
     ;
