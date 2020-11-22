@@ -1326,6 +1326,9 @@ void crearSeccionData(FILE *archAssembler){
             fprintf(archAssembler, "%-35s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", valor, "; Constante string");
         }
     }
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "?", "; Variable para almacenar el resultado de contar");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@valorAEvaluar", "dd", "?", "; Variable para almacenar el primer parametro de contar");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@calculoAux", "dd", "?", "; Variable para almacenar cada valor de la lista de expresiones de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
 

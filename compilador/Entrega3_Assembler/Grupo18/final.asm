@@ -25,6 +25,9 @@ S_La_suma_es____3                  db             "La suma es: ", '$', 12 dup (?
 _2             dd             2.0            ; Constante int
 S_actual_es___que_2_y____de_0__4   db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
 S_no_es_mayor_que_2__5             db             "no es mayor que 2", '$', 17 dup (?); Constante string
+@cont          dd             ?              ; Variable para almacenar el resultado de contar
+@valorAEvaluar dd             ?              ; Variable para almacenar el primer parametro de contar
+@calculoAux    dd             ?              ; Variable para almacenar cada valor de la lista de expresiones de contar
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -60,7 +63,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch105
+jae branch107
 
 fld contador
 fadd
@@ -68,88 +71,17 @@ fld contador
 fld contador
 fdiv
 fld contador
-fstp actual
-
-fld contador
-fmul
-fstp 256
-
-fstp @calculoAux
-
-fstp @ifI
-
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jne branch53
-
-fadd
-fstp nombre
+fld 0
+fstp @cont
 
 fmul
-fstp @calculoAux
-
-fstp @ifI
-
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jne branch68
-
-fadd
-fstp 52
-
-fstp @calculoAux
-
-fstp @ifI
-
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jne branch81
-
-fadd
-fstp 4
-
-fstp @calculoAux
-
-fstp @ifI
-
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jne branch94
-
-fadd
-fstp *
-
 fadd
 fld actual
 fld actual
 fadd
 jmp branch17
 
-branch105:
+branch107:
 
 displayString S_La_suma_es____3
 NEWLINE
@@ -166,7 +98,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jbe branch123
+jbe branch125
 
 fld actual
 fstp @ifI
@@ -179,13 +111,13 @@ fxch
 fcom
 fstsw AX
 sahf
-je branch123
+je branch125
 
 displayString S_actual_es___que_2_y____de_0__4
 NEWLINE
-jmp branch130
+jmp branch132
 
-branch123:
+branch125:
 
 fld actual
 fstp @ifI
@@ -199,11 +131,11 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch130
+jae branch132
 
 displayString S_no_es_mayor_que_2__5
 NEWLINE
-branch130:
+branch132:
 
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución
