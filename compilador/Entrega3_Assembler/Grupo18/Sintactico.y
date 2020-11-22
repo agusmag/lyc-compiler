@@ -19,6 +19,7 @@ typedef struct
         char *nombre;
         char *tipo;
         char *nombreASM;
+        bool esConst;
         union Valor{
                 int valor_int;
                 double valor_double;
@@ -227,7 +228,8 @@ est_asignacion:
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
     }
-    | CONST ID OP_ASIG_CONS CONST_INT {        
+    | CONST ID OP_ASIG_CONS CONST_INT 
+    {   
         strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($<tipo_str>$), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
         strcpy(idvec[cantid], obtenerID($2));
@@ -765,6 +767,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     if((strcmp(tipo, "STRING") == 0 || strcmp(tipo, "INTEGER") == 0 || strcmp(tipo, "FLOAT") == 0) && esConstNombre == 0)
     {
         //Al nombre lo dejo aca porque no lleva _
+        data->esConst = false;
         data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombre, nombre);
         data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
@@ -772,11 +775,16 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         return data;
     }
     else
-    { 
+    {   
+
         
         if(esConstNombre == ES_CONST_NOMBRE)
         {
+            printf("NOMBRE: %s\n", nombre);
             data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+            strcpy(data->nombre, nombre);
+            printf("CONST: %s\n", data->nombre);
+            data->esConst = true;
             strcpy(data->nombre, nombre);
         }
 
@@ -801,9 +809,6 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             
             if(esConstNombre == ES_CONST_NOMBRE)
             {
-                data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
-                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
-                strcpy(data->nombre, nombre);
                 strcpy(data->nombreASM, data->nombre); 
             }
             else
@@ -824,7 +829,11 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             if(esConstNombre == ES_CONST_NOMBRE)
             {
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
                 strcpy(data->nombre, nombre);
+                strcpy(data->nombreASM, nombre);
+                sprintf(aux, "%g", valDouble);
+                data->valor.valor_double = valDouble;
             }
             else
             {
@@ -849,8 +858,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
                 strcpy(data->nombre, nombre);
                 data->valor.valor_int = valInt;
-                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
-                strcpy(data->nombreASM, full);
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+                strcpy(data->nombreASM, nombre);
             }
             else
             {
@@ -1301,31 +1310,39 @@ void crearSeccionData(FILE *archAssembler){
         aux = tablaSimbolos;
         
     
-        if(strcmp(aux->data.tipo, "INTEGER") == 0){
+        if(strcmp(aux->data.tipo, "INTEGER") == 0)
+        {
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable int");
         }
-        else if(strcmp(aux->data.tipo, "FLOAT") == 0){
+        else if(strcmp(aux->data.tipo, "FLOAT") == 0)
+        {
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable float");
         }
-        else if(strcmp(aux->data.tipo, "STRING") == 0){ 
+        else if(strcmp(aux->data.tipo, "STRING") == 0)
+        { 
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", "?", "; Variable string");
         }
-        else if(strcmp(aux->data.tipo, "CONST_INT") == 0){ 
+        else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
+        { 
             char valor[50];
             sprintf(valor, "%d.0", aux->data.valor.valor_int);
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante int");
+            if(aux->data.esConst == false)
+                fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante int");
+            else
+                fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante con nombre int");
         }
-        else if(strcmp(aux->data.tipo, "CONST_REAL") == 0){ 
+        else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
+        { 
             char valor[50];
             sprintf(valor, "%g", aux->data.valor.valor_double);
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante float");
         }
-        else if(strcmp(aux->data.tipo, "CONST_STR") == 0){
+        else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
+        {
             char valor[50];
             sprintf(valor, "%s, '$', %d dup (?)",aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
             fprintf(archAssembler, "%-35s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", valor, "; Constante string");
         }
-
         tablaSimbolos = tablaSimbolos->next;
     }
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "?", "; Variable para almacenar el resultado de contar");

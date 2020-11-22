@@ -11,7 +11,7 @@ suma           dd             ?              ; Variable float
 actual         dd             ?              ; Variable float
 promedio       dd             ?              ; Variable float
 contador       dd             ?              ; Variable int 
-_              dd             80.0           ; Constante int
+nombre         dd             80.0           ; Constante con nombre int
 S_Prueba_txt_LyC_Tema_4___1        db             "Prueba.txt LyC Tema 4!", '$', 22 dup (?); Constante string
 S_Ingrese_un_valor_float____2      db             "Ingrese un valor float: ", '$', 24 dup (?); Constante string
 _0             dd             0.0            ; Constante int
@@ -49,7 +49,7 @@ NEWLINE
 getString actual
 NEWLINE
 fld contador
-fld _
+fld nombre
 fadd
 branch17:
 
@@ -123,7 +123,7 @@ branch125:
 fld actual
 fstp @ifI
 
-fld _
+fld nombre
 fstp @ifD
 
 fld @ifI
