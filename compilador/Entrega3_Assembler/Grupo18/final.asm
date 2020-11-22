@@ -23,9 +23,8 @@ _52            dd             52.0           ; Constante int
 _4             dd             4.0            ; Constante int
 S_La_suma_es____3                  db             "La suma es: ", '$', 12 dup (?); Constante string
 _2             dd             2.0            ; Constante int
-S_actual_es___que_2__4             db             "actual es = que 2", '$', 17 dup (?); Constante string
-S_actual_es___que_2_y____de_0__5   db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
-S_no_es_mayor_que_2__6             db             "no es mayor que 2", '$', 17 dup (?); Constante string
+S_actual_es___que_2_y____de_0__4   db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
+S_no_es_mayor_que_2__5             db             "no es mayor que 2", '$', 17 dup (?); Constante string
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -46,8 +45,8 @@ NEWLINE
 getString actual
 NEWLINE
 fld contador
+fld _
 fadd
-fld suma
 branch17:
 
 fld contador
@@ -92,7 +91,6 @@ jne branch53
 fadd
 fstp nombre
 
-fld suma
 fmul
 fstp @calculoAux
 
@@ -147,10 +145,8 @@ fstp *
 
 fadd
 fld actual
-fld suma
 fld actual
 fadd
-fld suma
 jmp branch17
 
 branch105:
@@ -170,11 +166,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jne branch116
-
-displayString S_actual_es___que_2__4
-NEWLINE
-branch116:
+jbe branch123
 
 fld actual
 fstp @ifI
@@ -187,11 +179,18 @@ fxch
 fcom
 fstsw AX
 sahf
-jbe branch130
+je branch123
+
+displayString S_actual_es___que_2_y____de_0__4
+NEWLINE
+jmp branch130
+
+branch123:
 
 fld actual
 fstp @ifI
 
+fld _
 fstp @ifD
 
 fld @ifI
@@ -200,30 +199,11 @@ fxch
 fcom
 fstsw AX
 sahf
-je branch130
+jae branch130
 
-displayString S_actual_es___que_2_y____de_0__5
+displayString S_no_es_mayor_que_2__5
 NEWLINE
-jmp branch137
-
 branch130:
-
-fld actual
-fstp @ifI
-
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jae branch137
-
-displayString S_no_es_mayor_que_2__6
-NEWLINE
-branch137:
 
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución

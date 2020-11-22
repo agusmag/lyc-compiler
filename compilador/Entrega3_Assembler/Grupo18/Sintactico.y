@@ -219,6 +219,8 @@ est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
         strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($<tipo_str>$), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
+        strcpy(idvec[cantid], obtenerID($2));
+        cantid = 0;
         insertarPolacaDouble($4);
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
@@ -226,12 +228,16 @@ est_asignacion:
     | CONST ID OP_ASIG_CONS CONST_INT {        
         strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($<tipo_str>$), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
+        strcpy(idvec[cantid], obtenerID($2));
+        cantid = 0;
         insertarPolacaInt($4);
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
     }                               
     | CONST ID OP_ASIG_CONS CONST_STR {        
         insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
+        strcpy(idvec[cantid], obtenerID($2));
+        cantid = 0;
         insertarPolaca(obtenerID(yylval.tipo_str));
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
@@ -240,17 +246,26 @@ est_asignacion:
     ;
 
 asignacion:
-    ID OP_ASIG { esAsig = 1; }expresion {
+    ID OP_ASIG 
+    { 
+        esAsig = 1; 
+    }
+    expresion 
+    {
         insertarPolaca(":");
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
-        if(!existeID(punt)) /*No existe: entonces no esta declarada*/
-        {
-            sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
-            yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
-        }
-        //Verifica que los tipos de datos sean compatibles
-        
+        // if(!existeID(punt)) /*No existe: entonces no esta declarada*/
+        // {
+        //     sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
+        //     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        // }
+        // //Verifica que los tipos de datos sean compatibles
+        // if(!verificarAsignacion(punt))
+        // {
+        //     sprintf(mensajes, "%s", "Error: se hacen asignaciones de distinto tipo de datos");
+        //     yyerror(mensajes, @1.first_line, @1.first_column, @2.last_column);
+        // }
         insertarPolaca(vecAux);
         esAsig = 0;
         topeAsignacion = -1;
@@ -501,6 +516,13 @@ factor:
     ID {
         strcpy(vecAux, $1);
         punt = strtok(vecAux," +-*/[](){}:=,\n");
+        // if(!existeID(punt))
+        // {
+        //     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
+        //     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        // }
+        if(esAsig == 1)
+            guardarAsignacion(punt);
         insertarPolaca(punt);
     }
     | CONST_INT  {
@@ -549,7 +571,7 @@ est_declaracion:
                 yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
             }
         }
-        cantid=0;
+        //cantid=0;
     }
     ;
 
@@ -560,7 +582,8 @@ lista_variables:
     ID {
         strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
         punt = strtok(vecAux, ">"); /*eliminamos extras*/
-        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
+        printf("%s\n",punt);
+        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/  
         cantid++;
     }
     | ID COMA lista_variables {
@@ -622,21 +645,21 @@ seleccion:
 entrada_salida:
 	GET ID {
         strcpy(vecAux, $2);
-        if(!existeID(vecAux)) 
-        {
-            sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
-            yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
-        }
+        // if(!existeID(vecAux)) 
+        // {
+        //     sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
+        //     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        // }
         insertarPolaca("GET");
         insertarPolaca(vecAux);        
         }
 	| PUT ID {
         strcpy(vecAux, $2);
-        if(!existeID(vecAux)) 
-        {
-            sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
-            yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
-        }
+        // if(!existeID(vecAux)) 
+        // {
+        //     sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", vecAux, "'");
+        //     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        // }
         insertarPolaca("PUT");
         insertarPolaca(vecAux);
     }
@@ -946,6 +969,29 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
         b1 = strcmp(idvec[j], id);
         //b2 = strcmp(tabla->data.nombre, nombreCTE);
         if(b1 == 0)
+        {
+                return 1;
+        }
+        j++;
+    }
+    return 0;
+}
+
+int existeCTE(const char* id)
+{
+    //tengo que ver el tema del _ en el nombre de las cte
+    t_simbolo *tabla = tablaTS.primero;
+    char nombreCTE[50] = "_";
+    strcat(nombreCTE, id);
+    int b1 = 0;
+    int b2 = 0;
+    int j =0;
+    
+    while(j<cant_aux)
+    {
+        //b1 = strcmp(idvec[j], id);
+        b2 = strcmp(tabla->data.nombre, nombreCTE);
+        if(b2 == 0)
         {
                 return 1;
         }
@@ -1334,9 +1380,10 @@ bool verificarAsignacion(const char* id)
 
     for(i=0; i<=topeAsignacion; i++)
     {
+        printf("vecAsignacion[i]: %s\n", vecAsignacion[i]);
         lexemaD = getLexema(vecAsignacion[i]);
-        //printf("lexemaI: %s lexema nombre: %s\n", lexemaI->data.tipo, lexemaI->data.nombre);
-        //printf("lexemaD: %s lexema nombre: %s\n", lexemaD->data.tipo, lexemaD->data.nombre);
+        printf("%s: %s\n", lexemaI->data.tipo, lexemaI->data.nombre);
+        printf("%s: %s\n", lexemaD->data.tipo, lexemaD->data.nombre);
         if(!esCompatible(lexemaI->data.tipo, lexemaD->data.tipo))
         {
             return false;
@@ -1353,7 +1400,6 @@ bool esCompatible(const char* tipo1, const char* tipo2)
     }
     else if(strcmp("FLOAT", tipo1) == 0)
     {
-        //printf("%s\n%s", tipo1, tipo2);
         return (strcmp("FLOAT", tipo2) == 0 || strcmp("CONST_REAL", tipo2) == 0 || strcmp("CONST_INT", tipo2) == 0 || strcmp("INTEGER", tipo2) == 0);
     }
     else if(strcmp("STRING", tipo1) == 0)
@@ -1516,12 +1562,12 @@ bool verificarComparacion()
 {
     int i;
     t_simbolo* lex;
-    printf("tope: %d",topeAsignacion);
     if(topeAsignacion >= 0)
         lex = getLexema(vecAsignacion[0]);
-
+    printf("%s\n", lex);
     for(i=1; i<=topeAsignacion; i++)
     {
+
         t_simbolo* lex2 = getLexema(vecAsignacion[i]);
         if(!esCompatible(lex->data.tipo, lex2->data.tipo))
         {
@@ -1533,6 +1579,7 @@ bool verificarComparacion()
 
 void guardarAsignacion(const char* id)
 {
+    printf("[GuardarAsignacion]: %s\n", id);
     topeAsignacion++;
     strcpy(vecAsignacion[topeAsignacion], id);
 }
