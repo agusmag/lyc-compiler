@@ -105,7 +105,7 @@ char* limpiarString(char* dest, const char* cad);
 char* obtenerID(char* cadena);
 
 
-bool verificarAsignacion(const char* id);
+//bool verificarAsignacion(const char* id);
 
 char* punt;
 char pos[2];
@@ -240,7 +240,7 @@ est_asignacion:
     ;
 
 asignacion:
-    ID OP_ASIG expresion {
+    ID OP_ASIG { esAsig = 1; }expresion {
         insertarPolaca(":");
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
@@ -250,11 +250,7 @@ asignacion:
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
         }
         //Verifica que los tipos de datos sean compatibles
-        if(!verificarAsignacion(punt))
-        {
-            sprintf(mensajes, "%s", "Error: se hacen asignaciones de distinto tipo de datos");
-            yyerror(mensajes, @1.first_line, @1.first_column, @2.last_column);
-        }
+        
         insertarPolaca(vecAux);
         esAsig = 0;
         topeAsignacion = -1;
@@ -1339,6 +1335,8 @@ bool verificarAsignacion(const char* id)
     for(i=0; i<=topeAsignacion; i++)
     {
         lexemaD = getLexema(vecAsignacion[i]);
+        //printf("lexemaI: %s lexema nombre: %s\n", lexemaI->data.tipo, lexemaI->data.nombre);
+        //printf("lexemaD: %s lexema nombre: %s\n", lexemaD->data.tipo, lexemaD->data.nombre);
         if(!esCompatible(lexemaI->data.tipo, lexemaD->data.tipo))
         {
             return false;
@@ -1349,13 +1347,14 @@ bool verificarAsignacion(const char* id)
 
 bool esCompatible(const char* tipo1, const char* tipo2)
 {
-    if(strcmp("INT", tipo1) == 0)
+    if(strcmp("INTEGER", tipo1) == 0)
     {
-        return (strcmp("INT", tipo2) == 0 || strcmp("CONST_INT", tipo2) == 0);
+        return (strcmp("INTEGER", tipo2) == 0 || strcmp("CONST_INT", tipo2) == 0);
     }
     else if(strcmp("FLOAT", tipo1) == 0)
     {
-        return (strcmp("FLOAT", tipo2) == 0 || strcmp("CONST_REAL", tipo2) == 0);
+        //printf("%s\n%s", tipo1, tipo2);
+        return (strcmp("FLOAT", tipo2) == 0 || strcmp("CONST_REAL", tipo2) == 0 || strcmp("CONST_INT", tipo2) == 0 || strcmp("INTEGER", tipo2) == 0);
     }
     else if(strcmp("STRING", tipo1) == 0)
     {
@@ -1517,6 +1516,7 @@ bool verificarComparacion()
 {
     int i;
     t_simbolo* lex;
+    printf("tope: %d",topeAsignacion);
     if(topeAsignacion >= 0)
         lex = getLexema(vecAsignacion[0]);
 
