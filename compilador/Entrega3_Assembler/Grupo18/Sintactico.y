@@ -582,7 +582,6 @@ lista_variables:
     ID {
         strcpy(vecAux, $1); /*tomamos el nombre de la variable*/
         punt = strtok(vecAux, ">"); /*eliminamos extras*/
-        printf("%s\n",punt);
         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/  
         cantid++;
     }
@@ -1579,7 +1578,6 @@ bool verificarComparacion()
 
 void guardarAsignacion(const char* id)
 {
-    printf("[GuardarAsignacion]: %s\n", id);
     topeAsignacion++;
     strcpy(vecAsignacion[topeAsignacion], id);
 }
