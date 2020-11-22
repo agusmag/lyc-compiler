@@ -1293,13 +1293,13 @@ void crearSeccionData(FILE *archAssembler){
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
-    tablaSimbolos = tablaSimbolos->next;
+    //tablaSimbolos = tablaSimbolos->next;
     stdout->_ptr = stdout->_base;
     fprintf(archAssembler, "%s\n\n", ".DATA");
     while(tablaSimbolos){
         
         aux = tablaSimbolos;
-        tablaSimbolos = tablaSimbolos->next;
+        
     
         if(strcmp(aux->data.tipo, "INTEGER") == 0){
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable int");
@@ -1325,6 +1325,8 @@ void crearSeccionData(FILE *archAssembler){
             sprintf(valor, "%s, '$', %d dup (?)",aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
             fprintf(archAssembler, "%-35s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", valor, "; Constante string");
         }
+
+        tablaSimbolos = tablaSimbolos->next;
     }
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "?", "; Variable para almacenar el resultado de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@valorAEvaluar", "dd", "?", "; Variable para almacenar el primer parametro de contar");

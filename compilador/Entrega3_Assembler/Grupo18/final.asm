@@ -7,6 +7,7 @@ include macros2.asm
 
 .DATA
 
+suma           dd             ?              ; Variable float
 actual         dd             ?              ; Variable float
 promedio       dd             ?              ; Variable float
 contador       dd             ?              ; Variable int 
