@@ -743,6 +743,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     }
     else
     { 
+        
         if(esConstNombre == ES_CONST_NOMBRE)
         {
             data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
@@ -756,9 +757,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             
             data->valor.valor_str = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
             strcpy(data->valor.valor_str, valString);
-
             
-
             char auxString[32];
             strcpy(full, ""); 
             strcpy(full, "S");  // "S_"
@@ -775,17 +774,15 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
                 data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
                 strcpy(data->nombre, nombre);
-                strcpy(data->nombreASM, data->nombre);               
+                strcpy(data->nombreASM, data->nombre); 
             }
             else
             {
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
-
-                strcat(full, valString);
+                //strcat(full, valString); Comenté esto porque rompia.
                 strcpy(data->nombre, full);
                 data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
-                strcpy(data->nombreASM, data->nombre);    
-                printf("[crearDatos] End else\n");
+                strcpy(data->nombreASM, data->nombre);     
             }
             
         }
@@ -822,8 +819,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
                 strcpy(data->nombre, nombre);
                 data->valor.valor_int = valInt;
-            data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
-            strcpy(data->nombreASM, full);
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
+                strcpy(data->nombreASM, full);
             }
             else
             {
@@ -832,8 +829,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
                 data->nombre = (char*)malloc(sizeof(char) * strlen(full));
                 strcpy(data->nombre, full);
                 data->valor.valor_int = valInt;
-            data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
-            strcpy(data->nombreASM, full);
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
+                strcpy(data->nombreASM, full);
             }
         }
         return data;

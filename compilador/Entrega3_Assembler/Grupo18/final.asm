@@ -11,8 +11,8 @@ actual         dd             ?              ; Variable float
 promedio       dd             ?              ; Variable float
 contador       dd             ?              ; Variable int 
 _              dd             80.0           ; Constante int
-S_Prueba_txt_LyC_Tema_4___1"Prueba.txt LyC Tema 4!"db             "Prueba.txt LyC Tema 4!", '$', 22 dup (?); Constante string
-S_Ingrese_un_valor_float____2"Ingrese un valor float: "db             "Ingrese un valor float: ", '$', 24 dup (?); Constante string
+S_Prueba_txt_LyC_Tema_4___1        db             "Prueba.txt LyC Tema 4!", '$', 22 dup (?); Constante string
+S_Ingrese_un_valor_float____2      db             "Ingrese un valor float: ", '$', 24 dup (?); Constante string
 _0             dd             0.0            ; Constante int
 _2_5           dd             2.5            ; Constante float
 _92            dd             92.0           ; Constante int
@@ -21,11 +21,11 @@ _0_342         dd             0.342          ; Constante float
 _256           dd             256.0          ; Constante int
 _52            dd             52.0           ; Constante int
 _4             dd             4.0            ; Constante int
-S_La_suma_es____3"La suma es: "    db             "La suma es: ", '$', 12 dup (?); Constante string
+S_La_suma_es____3                  db             "La suma es: ", '$', 12 dup (?); Constante string
 _2             dd             2.0            ; Constante int
-S_actual_es___que_2__4"actual es = que 2"db             "actual es = que 2", '$', 17 dup (?); Constante string
-S_actual_es___que_2_y____de_0__5"actual es > que 2 y != de 0"db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
-S_no_es_mayor_que_2__6"no es mayor que 2"db             "no es mayor que 2", '$', 17 dup (?); Constante string
+S_actual_es___que_2__4             db             "actual es = que 2", '$', 17 dup (?); Constante string
+S_actual_es___que_2_y____de_0__5   db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
+S_no_es_mayor_que_2__6             db             "no es mayor que 2", '$', 17 dup (?); Constante string
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -39,9 +39,9 @@ mov ES,AX
 
 fstp nombre
 
-displayString S_Prueba_txt_LyC_Tema_4___1"Prueba.txt LyC Tema 4!"
+displayString S_Prueba_txt_LyC_Tema_4___1
 NEWLINE
-displayString S_Ingrese_un_valor_float____2"Ingrese un valor float: "
+displayString S_Ingrese_un_valor_float____2
 NEWLINE
 getString actual
 NEWLINE
@@ -155,7 +155,7 @@ jmp branch17
 
 branch105:
 
-displayString S_La_suma_es____3"La suma es: "
+displayString S_La_suma_es____3
 NEWLINE
 displayFloat suma
 NEWLINE
@@ -172,7 +172,7 @@ fstsw AX
 sahf
 jne branch116
 
-displayString S_actual_es___que_2__4"actual es = que 2"
+displayString S_actual_es___que_2__4
 NEWLINE
 branch116:
 
@@ -202,7 +202,7 @@ fstsw AX
 sahf
 je branch130
 
-displayString S_actual_es___que_2_y____de_0__5"actual es > que 2 y != de 0"
+displayString S_actual_es___que_2_y____de_0__5
 NEWLINE
 jmp branch137
 
@@ -221,7 +221,7 @@ fstsw AX
 sahf
 jae branch137
 
-displayString S_no_es_mayor_que_2__6"no es mayor que 2"
+displayString S_no_es_mayor_que_2__6
 NEWLINE
 branch137:
 
