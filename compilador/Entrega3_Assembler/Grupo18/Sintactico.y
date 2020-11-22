@@ -331,9 +331,19 @@ condicion:
     ;
 
 comparacion:
-    expresion OP_LEQ expresion
+    expresion OP_LEQ
     {
         insertarPolaca("CMP");
+    } 
+    expresion
+    {
+        if(!verificarComparacion())
+        {
+            sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+        }
+        esComp = 0;
+        topeAsignacion = -1;
         insertarPolaca("BGE");
         if(hayOr)
         {
@@ -343,8 +353,19 @@ comparacion:
         guardarPos(); 
         cantidadCondiciones++;
     }
-    | expresion  OP_MOQ expresion {
+    | expresion OP_MOQ
+    {
         insertarPolaca("CMP");
+    }
+    expresion 
+    {
+        if(!verificarComparacion())
+        {
+            sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+        }
+        esComp = 0;
+        topeAsignacion = -1;
         insertarPolaca("BLT");
         if(hayOr)
         {
@@ -354,9 +375,19 @@ comparacion:
         guardarPos(); 
         cantidadCondiciones++;
     }
-    | expresion OP_EQQ expresion
+    | expresion OP_EQQ 
     {
         insertarPolaca("CMP");
+    }
+    expresion
+    {
+        if(!verificarComparacion())
+        {
+            sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+        }
+        esComp = 0;
+        topeAsignacion = -1;
         insertarPolaca("BNE");
         if(hayOr)
         {
@@ -366,9 +397,18 @@ comparacion:
         guardarPos(); 
         cantidadCondiciones++;
     } 
-    |expresion OP_DIFF expresion
+    |expresion OP_DIFF
     {
         insertarPolaca("CMP");
+    } expresion
+    {
+        if(!verificarComparacion())
+        {
+            sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+        }
+        esComp = 0;
+        topeAsignacion = -1;
         insertarPolaca("BEQ");
         if(hayOr)
         {
@@ -379,9 +419,19 @@ comparacion:
         cantidadCondiciones++;
     }
     |
-    expresion OP_LESS expresion
+    expresion OP_LESS
     {
         insertarPolaca("CMP");
+    } 
+    expresion
+    {
+        if(!verificarComparacion())
+        {
+            sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+        }
+        esComp = 0;
+        topeAsignacion = -1;
         insertarPolaca("BGE");
         if(hayOr)
         {
@@ -392,9 +442,19 @@ comparacion:
         cantidadCondiciones++;
     }
     |
-    expresion OP_MORE expresion
+    expresion OP_MORE
     {
         insertarPolaca("CMP");
+    } 
+    expresion
+    {
+        if(!verificarComparacion())
+        {
+            sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+        }
+        esComp = 0;
+        topeAsignacion = -1;
         insertarPolaca("BLE");
         if(hayOr)
         {
@@ -1447,4 +1507,22 @@ char* reemplazarString(char* dest, const char* cad)
     }
     dest[i] = '\0';
     return dest;
+}
+
+bool verificarComparacion()
+{
+    int i;
+    t_simbolo* lex;
+    if(topeAsignacion >= 0)
+        lex = getLexema(vecAsignacion[0]);
+
+    for(i=1; i<=topeAsignacion; i++)
+    {
+        t_simbolo* lex2 = getLexema(vecAsignacion[i]);
+        if(!esCompatible(lex->data.tipo, lex2->data.tipo))
+        {
+            return false;
+        }
+    }
+    return true;
 }
