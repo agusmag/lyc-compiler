@@ -1,0 +1,8 @@
+DIM <nombre, nombre2> AS <Integer, String>
+
+nombre : 80;
+CONST nombre2 = "PEQL";
+
+PUT nombre2;
+
+PUT nombre;
