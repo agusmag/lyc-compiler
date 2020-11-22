@@ -96,6 +96,8 @@ bool esGet( char * str );
 bool esDisplay(const char * str);
 bool esAsignacion( char * str );
 bool esOperacion(const char *);
+bool esContar(const char *);
+bool esEndContar(const char *);
 char * getOperacion(const char *);
 
 
@@ -545,7 +547,10 @@ factor:
         insertarPolaca(vecAux);
     }
     | PARENTESIS expresion END_PARENTESIS
-    | CONTAR PARENTESIS
+    | CONTAR {
+        insertarPolaca("CONTAR");
+    }
+    PARENTESIS
     {
         insertarPolaca("0");
         insertarPolaca("@cont");
@@ -554,7 +559,7 @@ factor:
     {
         insertarPolaca("@valorAEvaluar");
         insertarPolaca("=");
-    } PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+    } PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS { insertarPolaca("ENDCONTAR"); }
     ;
 
 est_declaracion:
@@ -1246,6 +1251,27 @@ void generarAssembler(){
         else if(esOperacion(vectorPolaca[i])){
             fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
         }
+        else if(esContar(vectorPolaca[i])){ // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca 
+            //inicializo mi variable interna @cont
+            i++;
+            fprintf(archAssembler, "fld %s\n", "0");
+            i++;
+            fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
+            //fin de inicializacion de @cont
+            while(!esEndContar(vectorPolaca[i])) {
+                //aca se tiene que evaluar cada expresion de la lista. En la lista todavia tenemos la vieja estructura de la polaca de operando operando operador
+                
+                /* if(esValor(vectorPolaca[i])) {
+                    t_simbolo *lexema = getLexema(vectorPolaca[i]);
+                    fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
+                }
+                else if(esOperacion(vectorPolaca[i])) {
+                    fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
+                } */
+
+                i++; 
+            }
+        }
     }      
 
     printf("\n05 - Antes del footer\n");
@@ -1497,6 +1523,16 @@ bool esDisplay(const char * str){
 bool esAsignacion(char * str)
 {
     int aux = strcmp(str, "=");
+    return aux == 0;
+}
+
+bool esContar(const char * str){
+    int aux = strcmp(str, "CONTAR");
+    return aux == 0;
+}
+
+bool esEndContar(const char * str){
+    int aux = strcmp(str, "ENDCONTAR");
     return aux == 0;
 }
 
