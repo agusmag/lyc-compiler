@@ -1523,3 +1523,23 @@ bool verificarComparacion()
     }
     return true;
 }
+
+void guardarAsignacion(const char* id)
+{
+    topeAsignacion++;
+    strcpy(vecAsignacion[topeAsignacion], id);
+}
+
+void guardarAsignacionInt(const int id)
+{
+    char aux[32];
+    sprintf(aux, "%d", id);
+    guardarAsignacion(aux);
+}
+
+void guardarAsignacionDouble(const double id)
+{
+    char aux[32];
+    sprintf(aux, "%g", id);
+    guardarAsignacion(aux);
+}
