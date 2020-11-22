@@ -259,17 +259,17 @@ asignacion:
         insertarPolaca(":");
         strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
         punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
-        // if(!existeID(punt)) /*No existe: entonces no esta declarada*/
-        // {
-        //     sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
-        //     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
-        // }
-        // //Verifica que los tipos de datos sean compatibles
-        // if(!verificarAsignacion(punt))
-        // {
-        //     sprintf(mensajes, "%s", "Error: se hacen asignaciones de distinto tipo de datos");
-        //     yyerror(mensajes, @1.first_line, @1.first_column, @2.last_column);
-        // }
+        if(!existeID(punt)) /*No existe: entonces no esta declarada*/
+        {
+            sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
+            yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+        }
+        //Verifica que los tipos de datos sean compatibles
+        if(!verificarAsignacion(punt))
+        {
+            sprintf(mensajes, "%s", "Error: se hacen asignaciones de distinto tipo de datos");
+            yyerror(mensajes, @1.first_line, @1.first_column, @2.last_column);
+        }
         insertarPolaca(vecAux);
         esAsig = 0;
         topeAsignacion = -1;
@@ -1436,6 +1436,7 @@ bool verificarAsignacion(const char* id)
             return false;
         }
     }
+    
     return true;
 }
 

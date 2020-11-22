@@ -1,0 +1,1878 @@
+Terminals unused in grammar
+
+   CAR_COMILLAS
+   PUNTO
+   COMENTARIO_SIMPLE
+   COMILLA_ABRE
+   COMILLA_CIERRA
+   LISTA_CONTAR
+
+
+Gramática
+
+    0 $accept: PROGRAMA $end
+
+    1 PROGRAMA: algoritmo
+
+    2 algoritmo: bloque
+
+    3 bloque: bloque sentencia
+    4       | sentencia
+
+    5 $@1: /* vacío */
+
+    6 sentencia: $@1 ciclo
+    7          | est_declaracion
+    8          | est_asignacion PUNTO_Y_COMA
+
+    9 $@2: /* vacío */
+
+   10 sentencia: $@2 seleccion
+   11          | entrada_salida PUNTO_Y_COMA
+
+   12 est_asignacion: CONST ID OP_ASIG_CONS CONST_REAL
+   13               | CONST ID OP_ASIG_CONS CONST_INT
+   14               | CONST ID OP_ASIG_CONS CONST_STR
+   15               | asignacion
+
+   16 $@3: /* vacío */
+
+   17 asignacion: ID OP_ASIG $@3 expresion
+
+   18 $@4: /* vacío */
+
+   19 ciclo: WHILE $@4 PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+
+   20 condicion: comparacion
+   21          | comparacion OP_AND comparacion
+
+   22 $@5: /* vacío */
+
+   23 condicion: comparacion $@5 OP_OR comparacion
+   24          | OP_NOT comparacion
+   25          | PARENTESIS comparacion END_PARENTESIS OP_AND PARENTESIS comparacion END_PARENTESIS
+
+   26 $@6: /* vacío */
+
+   27 condicion: PARENTESIS comparacion END_PARENTESIS $@6 OP_OR PARENTESIS comparacion END_PARENTESIS
+   28          | OP_NOT PARENTESIS comparacion END_PARENTESIS
+
+   29 $@7: /* vacío */
+
+   30 comparacion: expresion OP_LEQ $@7 expresion
+
+   31 $@8: /* vacío */
+
+   32 comparacion: expresion OP_MOQ $@8 expresion
+
+   33 $@9: /* vacío */
+
+   34 comparacion: expresion OP_EQQ $@9 expresion
+
+   35 $@10: /* vacío */
+
+   36 comparacion: expresion OP_DIFF $@10 expresion
+
+   37 $@11: /* vacío */
+
+   38 comparacion: expresion OP_LESS $@11 expresion
+
+   39 $@12: /* vacío */
+
+   40 comparacion: expresion OP_MORE $@12 expresion
+
+   41 lista: expresion
+
+   42 $@13: /* vacío */
+
+   43 lista: expresion COMA $@13 lista
+
+   44 expresion: expresion OP_SUM termino
+   45          | expresion OP_RES termino
+   46          | termino
+
+   47 termino: termino OP_MUL factor
+   48        | termino OP_DIV factor
+   49        | factor
+
+   50 factor: ID
+   51       | CONST_INT
+   52       | CONST_REAL
+   53       | CONST_STR
+   54       | PARENTESIS expresion END_PARENTESIS
+
+   55 $@14: /* vacío */
+
+   56 $@15: /* vacío */
+
+   57 $@16: /* vacío */
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+
+   59 est_declaracion: DIM est_variables AS est_tipos
+
+   60 est_variables: OP_LESS lista_variables OP_MORE
+
+   61 lista_variables: ID
+   62                | ID COMA lista_variables
+
+   63 lista_tipos: tipo
+   64            | tipo COMA lista_tipos
+
+   65 tipo: INTEGER
+   66     | FLOAT
+   67     | CONST_STR
+
+   68 est_tipos: OP_LESS lista_tipos OP_MORE
+
+   69 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+
+   70 $@17: /* vacío */
+
+   71 $@18: /* vacío */
+
+   72 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE
+   73          | IF PARENTESIS condicion END_PARENTESIS sentencia
+
+   74 entrada_salida: GET ID
+   75               | PUT ID
+   76               | PUT CONST_STR
+
+
+Terminales con las reglas donde aparecen
+
+$end (0) 0
+error (256)
+DIM (258) 59
+OP_LESS (259) 38 60 68
+OP_MORE (260) 40 60 68
+OP_DIFF (261) 36
+OP_SUM (262) 44
+OP_MUL (263) 47
+OP_RES (264) 45
+OP_DIV (265) 48
+OP_AND (266) 21 25
+OP_OR (267) 23 27
+OP_EQQ (268) 34
+OP_MOQ (269) 32
+OP_NOT (270) 24 28
+OP_ASIG (271) 17
+OP_ASIG_CONS (272) 12 13 14
+ID (273) 12 13 14 17 50 61 62 74 75
+CONST (274) 12 13 14
+CONST_REAL (275) 12 52
+COMA (276) 43 62 64
+CONST_INT (277) 13 51
+AS (278) 59
+FLOAT (279) 66
+INTEGER (280) 65
+PUT (281) 75 76
+CAR_COMILLAS (282)
+CONST_STR (283) 14 53 67 76
+PUNTO_Y_COMA (284) 8 11 58
+PUNTO (285)
+GET (286) 74
+WHILE (287) 19
+PARENTESIS (288) 19 25 27 28 54 58 69 72 73
+END_PARENTESIS (289) 19 25 27 28 54 58 69 72 73
+OP_LEQ (290) 30
+LLAVE (291) 19 69 72
+END_LLAVE (292) 19 69 72
+COMENTARIO_SIMPLE (293)
+IF (294) 69 72 73
+ELSE (295) 72
+CORCHETE (296) 58
+END_CORCHETE (297) 58
+CONTAR (298) 58
+COMILLA_ABRE (299)
+COMILLA_CIERRA (300)
+LISTA_CONTAR (301)
+
+
+No terminales con las reglas donde aparecen
+
+$accept (47)
+    en la izquierda: 0
+PROGRAMA (48)
+    en la izquierda: 1, en la derecha: 0
+algoritmo (49)
+    en la izquierda: 2, en la derecha: 1
+bloque (50)
+    en la izquierda: 3 4, en la derecha: 2 3 19 69 72
+sentencia (51)
+    en la izquierda: 6 7 8 10 11, en la derecha: 3 4 73
+$@1 (52)
+    en la izquierda: 5, en la derecha: 6
+$@2 (53)
+    en la izquierda: 9, en la derecha: 10
+est_asignacion (54)
+    en la izquierda: 12 13 14 15, en la derecha: 8
+asignacion (55)
+    en la izquierda: 17, en la derecha: 15
+$@3 (56)
+    en la izquierda: 16, en la derecha: 17
+ciclo (57)
+    en la izquierda: 19, en la derecha: 6
+$@4 (58)
+    en la izquierda: 18, en la derecha: 19
+condicion (59)
+    en la izquierda: 20 21 23 24 25 27 28, en la derecha: 19 69 72
+    73
+$@5 (60)
+    en la izquierda: 22, en la derecha: 23
+$@6 (61)
+    en la izquierda: 26, en la derecha: 27
+comparacion (62)
+    en la izquierda: 30 32 34 36 38 40, en la derecha: 20 21 23 24
+    25 27 28
+$@7 (63)
+    en la izquierda: 29, en la derecha: 30
+$@8 (64)
+    en la izquierda: 31, en la derecha: 32
+$@9 (65)
+    en la izquierda: 33, en la derecha: 34
+$@10 (66)
+    en la izquierda: 35, en la derecha: 36
+$@11 (67)
+    en la izquierda: 37, en la derecha: 38
+$@12 (68)
+    en la izquierda: 39, en la derecha: 40
+lista (69)
+    en la izquierda: 41 43, en la derecha: 43 58
+$@13 (70)
+    en la izquierda: 42, en la derecha: 43
+expresion (71)
+    en la izquierda: 44 45 46, en la derecha: 17 30 32 34 36 38 40
+    41 43 44 45 54 58
+termino (72)
+    en la izquierda: 47 48 49, en la derecha: 44 45 46 47 48
+factor (73)
+    en la izquierda: 50 51 52 53 54 58, en la derecha: 47 48 49
+$@14 (74)
+    en la izquierda: 55, en la derecha: 58
+$@15 (75)
+    en la izquierda: 56, en la derecha: 58
+$@16 (76)
+    en la izquierda: 57, en la derecha: 58
+est_declaracion (77)
+    en la izquierda: 59, en la derecha: 7
+est_variables (78)
+    en la izquierda: 60, en la derecha: 59
+lista_variables (79)
+    en la izquierda: 61 62, en la derecha: 60 62
+lista_tipos (80)
+    en la izquierda: 63 64, en la derecha: 64 68
+tipo (81)
+    en la izquierda: 65 66 67, en la derecha: 63 64
+est_tipos (82)
+    en la izquierda: 68, en la derecha: 59
+seleccion (83)
+    en la izquierda: 69 72 73, en la derecha: 10
+$@17 (84)
+    en la izquierda: 70, en la derecha: 72
+$@18 (85)
+    en la izquierda: 71, en la derecha: 72
+entrada_salida (86)
+    en la izquierda: 74 75 76, en la derecha: 11
+
+
+estado 0
+
+    0 $accept: . PROGRAMA $end
+
+    DIM    desplazar e ir al estado 1
+    ID     desplazar e ir al estado 2
+    CONST  desplazar e ir al estado 3
+    PUT    desplazar e ir al estado 4
+    GET    desplazar e ir al estado 5
+
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 5 ($@1)
+
+    PROGRAMA         ir al estado 6
+    algoritmo        ir al estado 7
+    bloque           ir al estado 8
+    sentencia        ir al estado 9
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 1
+
+   59 est_declaracion: DIM . est_variables AS est_tipos
+
+    OP_LESS  desplazar e ir al estado 16
+
+    est_variables  ir al estado 17
+
+
+estado 2
+
+   17 asignacion: ID . OP_ASIG $@3 expresion
+
+    OP_ASIG  desplazar e ir al estado 18
+
+
+estado 3
+
+   12 est_asignacion: CONST . ID OP_ASIG_CONS CONST_REAL
+   13               | CONST . ID OP_ASIG_CONS CONST_INT
+   14               | CONST . ID OP_ASIG_CONS CONST_STR
+
+    ID  desplazar e ir al estado 19
+
+
+estado 4
+
+   75 entrada_salida: PUT . ID
+   76               | PUT . CONST_STR
+
+    ID         desplazar e ir al estado 20
+    CONST_STR  desplazar e ir al estado 21
+
+
+estado 5
+
+   74 entrada_salida: GET . ID
+
+    ID  desplazar e ir al estado 22
+
+
+estado 6
+
+    0 $accept: PROGRAMA . $end
+
+    $end  desplazar e ir al estado 23
+
+
+estado 7
+
+    1 PROGRAMA: algoritmo .
+
+    $default  reduce usando la regla 1 (PROGRAMA)
+
+
+estado 8
+
+    2 algoritmo: bloque .
+    3 bloque: bloque . sentencia
+
+    DIM    desplazar e ir al estado 1
+    ID     desplazar e ir al estado 2
+    CONST  desplazar e ir al estado 3
+    PUT    desplazar e ir al estado 4
+    GET    desplazar e ir al estado 5
+
+    WHILE     reduce usando la regla 5 ($@1)
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 2 (algoritmo)
+
+    sentencia        ir al estado 24
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 9
+
+    4 bloque: sentencia .
+
+    $default  reduce usando la regla 4 (bloque)
+
+
+estado 10
+
+    6 sentencia: $@1 . ciclo
+
+    WHILE  desplazar e ir al estado 25
+
+    ciclo  ir al estado 26
+
+
+estado 11
+
+   10 sentencia: $@2 . seleccion
+
+    IF  desplazar e ir al estado 27
+
+    seleccion  ir al estado 28
+
+
+estado 12
+
+    8 sentencia: est_asignacion . PUNTO_Y_COMA
+
+    PUNTO_Y_COMA  desplazar e ir al estado 29
+
+
+estado 13
+
+   15 est_asignacion: asignacion .
+
+    $default  reduce usando la regla 15 (est_asignacion)
+
+
+estado 14
+
+    7 sentencia: est_declaracion .
+
+    $default  reduce usando la regla 7 (sentencia)
+
+
+estado 15
+
+   11 sentencia: entrada_salida . PUNTO_Y_COMA
+
+    PUNTO_Y_COMA  desplazar e ir al estado 30
+
+
+estado 16
+
+   60 est_variables: OP_LESS . lista_variables OP_MORE
+
+    ID  desplazar e ir al estado 31
+
+    lista_variables  ir al estado 32
+
+
+estado 17
+
+   59 est_declaracion: DIM est_variables . AS est_tipos
+
+    AS  desplazar e ir al estado 33
+
+
+estado 18
+
+   17 asignacion: ID OP_ASIG . $@3 expresion
+
+    $default  reduce usando la regla 16 ($@3)
+
+    $@3  ir al estado 34
+
+
+estado 19
+
+   12 est_asignacion: CONST ID . OP_ASIG_CONS CONST_REAL
+   13               | CONST ID . OP_ASIG_CONS CONST_INT
+   14               | CONST ID . OP_ASIG_CONS CONST_STR
+
+    OP_ASIG_CONS  desplazar e ir al estado 35
+
+
+estado 20
+
+   75 entrada_salida: PUT ID .
+
+    $default  reduce usando la regla 75 (entrada_salida)
+
+
+estado 21
+
+   76 entrada_salida: PUT CONST_STR .
+
+    $default  reduce usando la regla 76 (entrada_salida)
+
+
+estado 22
+
+   74 entrada_salida: GET ID .
+
+    $default  reduce usando la regla 74 (entrada_salida)
+
+
+estado 23
+
+    0 $accept: PROGRAMA $end .
+
+    $default  aceptar
+
+
+estado 24
+
+    3 bloque: bloque sentencia .
+
+    $default  reduce usando la regla 3 (bloque)
+
+
+estado 25
+
+   19 ciclo: WHILE . $@4 PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+
+    $default  reduce usando la regla 18 ($@4)
+
+    $@4  ir al estado 36
+
+
+estado 26
+
+    6 sentencia: $@1 ciclo .
+
+    $default  reduce usando la regla 6 (sentencia)
+
+
+estado 27
+
+   69 seleccion: IF . PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+   72          | IF . PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE
+   73          | IF . PARENTESIS condicion END_PARENTESIS sentencia
+
+    PARENTESIS  desplazar e ir al estado 37
+
+
+estado 28
+
+   10 sentencia: $@2 seleccion .
+
+    $default  reduce usando la regla 10 (sentencia)
+
+
+estado 29
+
+    8 sentencia: est_asignacion PUNTO_Y_COMA .
+
+    $default  reduce usando la regla 8 (sentencia)
+
+
+estado 30
+
+   11 sentencia: entrada_salida PUNTO_Y_COMA .
+
+    $default  reduce usando la regla 11 (sentencia)
+
+
+estado 31
+
+   61 lista_variables: ID .
+   62                | ID . COMA lista_variables
+
+    COMA  desplazar e ir al estado 38
+
+    $default  reduce usando la regla 61 (lista_variables)
+
+
+estado 32
+
+   60 est_variables: OP_LESS lista_variables . OP_MORE
+
+    OP_MORE  desplazar e ir al estado 39
+
+
+estado 33
+
+   59 est_declaracion: DIM est_variables AS . est_tipos
+
+    OP_LESS  desplazar e ir al estado 40
+
+    est_tipos  ir al estado 41
+
+
+estado 34
+
+   17 asignacion: ID OP_ASIG $@3 . expresion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 48
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 35
+
+   12 est_asignacion: CONST ID OP_ASIG_CONS . CONST_REAL
+   13               | CONST ID OP_ASIG_CONS . CONST_INT
+   14               | CONST ID OP_ASIG_CONS . CONST_STR
+
+    CONST_REAL  desplazar e ir al estado 51
+    CONST_INT   desplazar e ir al estado 52
+    CONST_STR   desplazar e ir al estado 53
+
+
+estado 36
+
+   19 ciclo: WHILE $@4 . PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE
+
+    PARENTESIS  desplazar e ir al estado 54
+
+
+estado 37
+
+   69 seleccion: IF PARENTESIS . condicion END_PARENTESIS LLAVE bloque END_LLAVE
+   72          | IF PARENTESIS . condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE
+   73          | IF PARENTESIS . condicion END_PARENTESIS sentencia
+
+    OP_NOT      desplazar e ir al estado 55
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 56
+    CONTAR      desplazar e ir al estado 47
+
+    condicion    ir al estado 57
+    comparacion  ir al estado 58
+    expresion    ir al estado 59
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 38
+
+   62 lista_variables: ID COMA . lista_variables
+
+    ID  desplazar e ir al estado 31
+
+    lista_variables  ir al estado 60
+
+
+estado 39
+
+   60 est_variables: OP_LESS lista_variables OP_MORE .
+
+    $default  reduce usando la regla 60 (est_variables)
+
+
+estado 40
+
+   68 est_tipos: OP_LESS . lista_tipos OP_MORE
+
+    FLOAT      desplazar e ir al estado 61
+    INTEGER    desplazar e ir al estado 62
+    CONST_STR  desplazar e ir al estado 63
+
+    lista_tipos  ir al estado 64
+    tipo         ir al estado 65
+
+
+estado 41
+
+   59 est_declaracion: DIM est_variables AS est_tipos .
+
+    $default  reduce usando la regla 59 (est_declaracion)
+
+
+estado 42
+
+   50 factor: ID .
+
+    $default  reduce usando la regla 50 (factor)
+
+
+estado 43
+
+   52 factor: CONST_REAL .
+
+    $default  reduce usando la regla 52 (factor)
+
+
+estado 44
+
+   51 factor: CONST_INT .
+
+    $default  reduce usando la regla 51 (factor)
+
+
+estado 45
+
+   53 factor: CONST_STR .
+
+    $default  reduce usando la regla 53 (factor)
+
+
+estado 46
+
+   54 factor: PARENTESIS . expresion END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 66
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 47
+
+   58 factor: CONTAR . $@14 PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+
+    $default  reduce usando la regla 55 ($@14)
+
+    $@14  ir al estado 67
+
+
+estado 48
+
+   17 asignacion: ID OP_ASIG $@3 expresion .
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 17 (asignacion)
+
+
+estado 49
+
+   46 expresion: termino .
+   47 termino: termino . OP_MUL factor
+   48        | termino . OP_DIV factor
+
+    OP_MUL  desplazar e ir al estado 70
+    OP_DIV  desplazar e ir al estado 71
+
+    $default  reduce usando la regla 46 (expresion)
+
+
+estado 50
+
+   49 termino: factor .
+
+    $default  reduce usando la regla 49 (termino)
+
+
+estado 51
+
+   12 est_asignacion: CONST ID OP_ASIG_CONS CONST_REAL .
+
+    $default  reduce usando la regla 12 (est_asignacion)
+
+
+estado 52
+
+   13 est_asignacion: CONST ID OP_ASIG_CONS CONST_INT .
+
+    $default  reduce usando la regla 13 (est_asignacion)
+
+
+estado 53
+
+   14 est_asignacion: CONST ID OP_ASIG_CONS CONST_STR .
+
+    $default  reduce usando la regla 14 (est_asignacion)
+
+
+estado 54
+
+   19 ciclo: WHILE $@4 PARENTESIS . condicion END_PARENTESIS LLAVE bloque END_LLAVE
+
+    OP_NOT      desplazar e ir al estado 55
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 56
+    CONTAR      desplazar e ir al estado 47
+
+    condicion    ir al estado 72
+    comparacion  ir al estado 58
+    expresion    ir al estado 59
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 55
+
+   24 condicion: OP_NOT . comparacion
+   28          | OP_NOT . PARENTESIS comparacion END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 73
+    CONTAR      desplazar e ir al estado 47
+
+    comparacion  ir al estado 74
+    expresion    ir al estado 59
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 56
+
+   25 condicion: PARENTESIS . comparacion END_PARENTESIS OP_AND PARENTESIS comparacion END_PARENTESIS
+   27          | PARENTESIS . comparacion END_PARENTESIS $@6 OP_OR PARENTESIS comparacion END_PARENTESIS
+   54 factor: PARENTESIS . expresion END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    comparacion  ir al estado 75
+    expresion    ir al estado 76
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 57
+
+   69 seleccion: IF PARENTESIS condicion . END_PARENTESIS LLAVE bloque END_LLAVE
+   72          | IF PARENTESIS condicion . END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE
+   73          | IF PARENTESIS condicion . END_PARENTESIS sentencia
+
+    END_PARENTESIS  desplazar e ir al estado 77
+
+
+estado 58
+
+   20 condicion: comparacion .
+   21          | comparacion . OP_AND comparacion
+   23          | comparacion . $@5 OP_OR comparacion
+
+    OP_AND  desplazar e ir al estado 78
+
+    OP_OR     reduce usando la regla 22 ($@5)
+    $default  reduce usando la regla 20 (condicion)
+
+    $@5  ir al estado 79
+
+
+estado 59
+
+   30 comparacion: expresion . OP_LEQ $@7 expresion
+   32            | expresion . OP_MOQ $@8 expresion
+   34            | expresion . OP_EQQ $@9 expresion
+   36            | expresion . OP_DIFF $@10 expresion
+   38            | expresion . OP_LESS $@11 expresion
+   40            | expresion . OP_MORE $@12 expresion
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_LESS  desplazar e ir al estado 80
+    OP_MORE  desplazar e ir al estado 81
+    OP_DIFF  desplazar e ir al estado 82
+    OP_SUM   desplazar e ir al estado 68
+    OP_RES   desplazar e ir al estado 69
+    OP_EQQ   desplazar e ir al estado 83
+    OP_MOQ   desplazar e ir al estado 84
+    OP_LEQ   desplazar e ir al estado 85
+
+
+estado 60
+
+   62 lista_variables: ID COMA lista_variables .
+
+    $default  reduce usando la regla 62 (lista_variables)
+
+
+estado 61
+
+   66 tipo: FLOAT .
+
+    $default  reduce usando la regla 66 (tipo)
+
+
+estado 62
+
+   65 tipo: INTEGER .
+
+    $default  reduce usando la regla 65 (tipo)
+
+
+estado 63
+
+   67 tipo: CONST_STR .
+
+    $default  reduce usando la regla 67 (tipo)
+
+
+estado 64
+
+   68 est_tipos: OP_LESS lista_tipos . OP_MORE
+
+    OP_MORE  desplazar e ir al estado 86
+
+
+estado 65
+
+   63 lista_tipos: tipo .
+   64            | tipo . COMA lista_tipos
+
+    COMA  desplazar e ir al estado 87
+
+    $default  reduce usando la regla 63 (lista_tipos)
+
+
+estado 66
+
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+   54 factor: PARENTESIS expresion . END_PARENTESIS
+
+    OP_SUM          desplazar e ir al estado 68
+    OP_RES          desplazar e ir al estado 69
+    END_PARENTESIS  desplazar e ir al estado 88
+
+
+estado 67
+
+   58 factor: CONTAR $@14 . PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+
+    PARENTESIS  desplazar e ir al estado 89
+
+
+estado 68
+
+   44 expresion: expresion OP_SUM . termino
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    termino  ir al estado 90
+    factor   ir al estado 50
+
+
+estado 69
+
+   45 expresion: expresion OP_RES . termino
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    termino  ir al estado 91
+    factor   ir al estado 50
+
+
+estado 70
+
+   47 termino: termino OP_MUL . factor
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    factor  ir al estado 92
+
+
+estado 71
+
+   48 termino: termino OP_DIV . factor
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    factor  ir al estado 93
+
+
+estado 72
+
+   19 ciclo: WHILE $@4 PARENTESIS condicion . END_PARENTESIS LLAVE bloque END_LLAVE
+
+    END_PARENTESIS  desplazar e ir al estado 94
+
+
+estado 73
+
+   28 condicion: OP_NOT PARENTESIS . comparacion END_PARENTESIS
+   54 factor: PARENTESIS . expresion END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    comparacion  ir al estado 95
+    expresion    ir al estado 76
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 74
+
+   24 condicion: OP_NOT comparacion .
+
+    $default  reduce usando la regla 24 (condicion)
+
+
+estado 75
+
+   25 condicion: PARENTESIS comparacion . END_PARENTESIS OP_AND PARENTESIS comparacion END_PARENTESIS
+   27          | PARENTESIS comparacion . END_PARENTESIS $@6 OP_OR PARENTESIS comparacion END_PARENTESIS
+
+    END_PARENTESIS  desplazar e ir al estado 96
+
+
+estado 76
+
+   30 comparacion: expresion . OP_LEQ $@7 expresion
+   32            | expresion . OP_MOQ $@8 expresion
+   34            | expresion . OP_EQQ $@9 expresion
+   36            | expresion . OP_DIFF $@10 expresion
+   38            | expresion . OP_LESS $@11 expresion
+   40            | expresion . OP_MORE $@12 expresion
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+   54 factor: PARENTESIS expresion . END_PARENTESIS
+
+    OP_LESS         desplazar e ir al estado 80
+    OP_MORE         desplazar e ir al estado 81
+    OP_DIFF         desplazar e ir al estado 82
+    OP_SUM          desplazar e ir al estado 68
+    OP_RES          desplazar e ir al estado 69
+    OP_EQQ          desplazar e ir al estado 83
+    OP_MOQ          desplazar e ir al estado 84
+    END_PARENTESIS  desplazar e ir al estado 88
+    OP_LEQ          desplazar e ir al estado 85
+
+
+estado 77
+
+   69 seleccion: IF PARENTESIS condicion END_PARENTESIS . LLAVE bloque END_LLAVE
+   72          | IF PARENTESIS condicion END_PARENTESIS . LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE
+   73          | IF PARENTESIS condicion END_PARENTESIS . sentencia
+
+    DIM    desplazar e ir al estado 1
+    ID     desplazar e ir al estado 2
+    CONST  desplazar e ir al estado 3
+    PUT    desplazar e ir al estado 4
+    GET    desplazar e ir al estado 5
+    LLAVE  desplazar e ir al estado 97
+
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 5 ($@1)
+
+    sentencia        ir al estado 98
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 78
+
+   21 condicion: comparacion OP_AND . comparacion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    comparacion  ir al estado 99
+    expresion    ir al estado 59
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 79
+
+   23 condicion: comparacion $@5 . OP_OR comparacion
+
+    OP_OR  desplazar e ir al estado 100
+
+
+estado 80
+
+   38 comparacion: expresion OP_LESS . $@11 expresion
+
+    $default  reduce usando la regla 37 ($@11)
+
+    $@11  ir al estado 101
+
+
+estado 81
+
+   40 comparacion: expresion OP_MORE . $@12 expresion
+
+    $default  reduce usando la regla 39 ($@12)
+
+    $@12  ir al estado 102
+
+
+estado 82
+
+   36 comparacion: expresion OP_DIFF . $@10 expresion
+
+    $default  reduce usando la regla 35 ($@10)
+
+    $@10  ir al estado 103
+
+
+estado 83
+
+   34 comparacion: expresion OP_EQQ . $@9 expresion
+
+    $default  reduce usando la regla 33 ($@9)
+
+    $@9  ir al estado 104
+
+
+estado 84
+
+   32 comparacion: expresion OP_MOQ . $@8 expresion
+
+    $default  reduce usando la regla 31 ($@8)
+
+    $@8  ir al estado 105
+
+
+estado 85
+
+   30 comparacion: expresion OP_LEQ . $@7 expresion
+
+    $default  reduce usando la regla 29 ($@7)
+
+    $@7  ir al estado 106
+
+
+estado 86
+
+   68 est_tipos: OP_LESS lista_tipos OP_MORE .
+
+    $default  reduce usando la regla 68 (est_tipos)
+
+
+estado 87
+
+   64 lista_tipos: tipo COMA . lista_tipos
+
+    FLOAT      desplazar e ir al estado 61
+    INTEGER    desplazar e ir al estado 62
+    CONST_STR  desplazar e ir al estado 63
+
+    lista_tipos  ir al estado 107
+    tipo         ir al estado 65
+
+
+estado 88
+
+   54 factor: PARENTESIS expresion END_PARENTESIS .
+
+    $default  reduce usando la regla 54 (factor)
+
+
+estado 89
+
+   58 factor: CONTAR $@14 PARENTESIS . $@15 expresion $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+
+    $default  reduce usando la regla 56 ($@15)
+
+    $@15  ir al estado 108
+
+
+estado 90
+
+   44 expresion: expresion OP_SUM termino .
+   47 termino: termino . OP_MUL factor
+   48        | termino . OP_DIV factor
+
+    OP_MUL  desplazar e ir al estado 70
+    OP_DIV  desplazar e ir al estado 71
+
+    $default  reduce usando la regla 44 (expresion)
+
+
+estado 91
+
+   45 expresion: expresion OP_RES termino .
+   47 termino: termino . OP_MUL factor
+   48        | termino . OP_DIV factor
+
+    OP_MUL  desplazar e ir al estado 70
+    OP_DIV  desplazar e ir al estado 71
+
+    $default  reduce usando la regla 45 (expresion)
+
+
+estado 92
+
+   47 termino: termino OP_MUL factor .
+
+    $default  reduce usando la regla 47 (termino)
+
+
+estado 93
+
+   48 termino: termino OP_DIV factor .
+
+    $default  reduce usando la regla 48 (termino)
+
+
+estado 94
+
+   19 ciclo: WHILE $@4 PARENTESIS condicion END_PARENTESIS . LLAVE bloque END_LLAVE
+
+    LLAVE  desplazar e ir al estado 109
+
+
+estado 95
+
+   28 condicion: OP_NOT PARENTESIS comparacion . END_PARENTESIS
+
+    END_PARENTESIS  desplazar e ir al estado 110
+
+
+estado 96
+
+   25 condicion: PARENTESIS comparacion END_PARENTESIS . OP_AND PARENTESIS comparacion END_PARENTESIS
+   27          | PARENTESIS comparacion END_PARENTESIS . $@6 OP_OR PARENTESIS comparacion END_PARENTESIS
+
+    OP_AND  desplazar e ir al estado 111
+
+    $default  reduce usando la regla 26 ($@6)
+
+    $@6  ir al estado 112
+
+
+estado 97
+
+   69 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE . bloque END_LLAVE
+   72          | IF PARENTESIS condicion END_PARENTESIS LLAVE . bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE
+
+    DIM    desplazar e ir al estado 1
+    ID     desplazar e ir al estado 2
+    CONST  desplazar e ir al estado 3
+    PUT    desplazar e ir al estado 4
+    GET    desplazar e ir al estado 5
+
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 5 ($@1)
+
+    bloque           ir al estado 113
+    sentencia        ir al estado 9
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 98
+
+   73 seleccion: IF PARENTESIS condicion END_PARENTESIS sentencia .
+
+    $default  reduce usando la regla 73 (seleccion)
+
+
+estado 99
+
+   21 condicion: comparacion OP_AND comparacion .
+
+    $default  reduce usando la regla 21 (condicion)
+
+
+estado 100
+
+   23 condicion: comparacion $@5 OP_OR . comparacion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    comparacion  ir al estado 114
+    expresion    ir al estado 59
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 101
+
+   38 comparacion: expresion OP_LESS $@11 . expresion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 115
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 102
+
+   40 comparacion: expresion OP_MORE $@12 . expresion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 116
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 103
+
+   36 comparacion: expresion OP_DIFF $@10 . expresion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 117
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 104
+
+   34 comparacion: expresion OP_EQQ $@9 . expresion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 118
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 105
+
+   32 comparacion: expresion OP_MOQ $@8 . expresion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 119
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 106
+
+   30 comparacion: expresion OP_LEQ $@7 . expresion
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 120
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 107
+
+   64 lista_tipos: tipo COMA lista_tipos .
+
+    $default  reduce usando la regla 64 (lista_tipos)
+
+
+estado 108
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 . expresion $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    expresion  ir al estado 121
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 109
+
+   19 ciclo: WHILE $@4 PARENTESIS condicion END_PARENTESIS LLAVE . bloque END_LLAVE
+
+    DIM    desplazar e ir al estado 1
+    ID     desplazar e ir al estado 2
+    CONST  desplazar e ir al estado 3
+    PUT    desplazar e ir al estado 4
+    GET    desplazar e ir al estado 5
+
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 5 ($@1)
+
+    bloque           ir al estado 122
+    sentencia        ir al estado 9
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 110
+
+   28 condicion: OP_NOT PARENTESIS comparacion END_PARENTESIS .
+
+    $default  reduce usando la regla 28 (condicion)
+
+
+estado 111
+
+   25 condicion: PARENTESIS comparacion END_PARENTESIS OP_AND . PARENTESIS comparacion END_PARENTESIS
+
+    PARENTESIS  desplazar e ir al estado 123
+
+
+estado 112
+
+   27 condicion: PARENTESIS comparacion END_PARENTESIS $@6 . OP_OR PARENTESIS comparacion END_PARENTESIS
+
+    OP_OR  desplazar e ir al estado 124
+
+
+estado 113
+
+    3 bloque: bloque . sentencia
+   69 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque . END_LLAVE
+   72          | IF PARENTESIS condicion END_PARENTESIS LLAVE bloque . END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE
+
+    DIM        desplazar e ir al estado 1
+    ID         desplazar e ir al estado 2
+    CONST      desplazar e ir al estado 3
+    PUT        desplazar e ir al estado 4
+    GET        desplazar e ir al estado 5
+    END_LLAVE  desplazar e ir al estado 125
+
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 5 ($@1)
+
+    sentencia        ir al estado 24
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 114
+
+   23 condicion: comparacion $@5 OP_OR comparacion .
+
+    $default  reduce usando la regla 23 (condicion)
+
+
+estado 115
+
+   38 comparacion: expresion OP_LESS $@11 expresion .
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 38 (comparacion)
+
+
+estado 116
+
+   40 comparacion: expresion OP_MORE $@12 expresion .
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 40 (comparacion)
+
+
+estado 117
+
+   36 comparacion: expresion OP_DIFF $@10 expresion .
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 36 (comparacion)
+
+
+estado 118
+
+   34 comparacion: expresion OP_EQQ $@9 expresion .
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 34 (comparacion)
+
+
+estado 119
+
+   32 comparacion: expresion OP_MOQ $@8 expresion .
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 32 (comparacion)
+
+
+estado 120
+
+   30 comparacion: expresion OP_LEQ $@7 expresion .
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 30 (comparacion)
+
+
+estado 121
+
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion . $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+
+    $default  reduce usando la regla 57 ($@16)
+
+    $@16  ir al estado 126
+
+
+estado 122
+
+    3 bloque: bloque . sentencia
+   19 ciclo: WHILE $@4 PARENTESIS condicion END_PARENTESIS LLAVE bloque . END_LLAVE
+
+    DIM        desplazar e ir al estado 1
+    ID         desplazar e ir al estado 2
+    CONST      desplazar e ir al estado 3
+    PUT        desplazar e ir al estado 4
+    GET        desplazar e ir al estado 5
+    END_LLAVE  desplazar e ir al estado 127
+
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 5 ($@1)
+
+    sentencia        ir al estado 24
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 123
+
+   25 condicion: PARENTESIS comparacion END_PARENTESIS OP_AND PARENTESIS . comparacion END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    comparacion  ir al estado 128
+    expresion    ir al estado 59
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 124
+
+   27 condicion: PARENTESIS comparacion END_PARENTESIS $@6 OP_OR . PARENTESIS comparacion END_PARENTESIS
+
+    PARENTESIS  desplazar e ir al estado 129
+
+
+estado 125
+
+   69 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE .
+   72          | IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE . ELSE $@17 LLAVE bloque $@18 END_LLAVE
+
+    ELSE  desplazar e ir al estado 130
+
+    $default  reduce usando la regla 69 (seleccion)
+
+
+estado 126
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion $@16 . PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS
+
+    PUNTO_Y_COMA  desplazar e ir al estado 131
+
+
+estado 127
+
+   19 ciclo: WHILE $@4 PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE .
+
+    $default  reduce usando la regla 19 (ciclo)
+
+
+estado 128
+
+   25 condicion: PARENTESIS comparacion END_PARENTESIS OP_AND PARENTESIS comparacion . END_PARENTESIS
+
+    END_PARENTESIS  desplazar e ir al estado 132
+
+
+estado 129
+
+   27 condicion: PARENTESIS comparacion END_PARENTESIS $@6 OP_OR PARENTESIS . comparacion END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    comparacion  ir al estado 133
+    expresion    ir al estado 59
+    termino      ir al estado 49
+    factor       ir al estado 50
+
+
+estado 130
+
+   72 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE . $@17 LLAVE bloque $@18 END_LLAVE
+
+    $default  reduce usando la regla 70 ($@17)
+
+    $@17  ir al estado 134
+
+
+estado 131
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA . CORCHETE lista END_CORCHETE END_PARENTESIS
+
+    CORCHETE  desplazar e ir al estado 135
+
+
+estado 132
+
+   25 condicion: PARENTESIS comparacion END_PARENTESIS OP_AND PARENTESIS comparacion END_PARENTESIS .
+
+    $default  reduce usando la regla 25 (condicion)
+
+
+estado 133
+
+   27 condicion: PARENTESIS comparacion END_PARENTESIS $@6 OP_OR PARENTESIS comparacion . END_PARENTESIS
+
+    END_PARENTESIS  desplazar e ir al estado 136
+
+
+estado 134
+
+   72 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 . LLAVE bloque $@18 END_LLAVE
+
+    LLAVE  desplazar e ir al estado 137
+
+
+estado 135
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA CORCHETE . lista END_CORCHETE END_PARENTESIS
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    lista      ir al estado 138
+    expresion  ir al estado 139
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 136
+
+   27 condicion: PARENTESIS comparacion END_PARENTESIS $@6 OP_OR PARENTESIS comparacion END_PARENTESIS .
+
+    $default  reduce usando la regla 27 (condicion)
+
+
+estado 137
+
+   72 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE . bloque $@18 END_LLAVE
+
+    DIM    desplazar e ir al estado 1
+    ID     desplazar e ir al estado 2
+    CONST  desplazar e ir al estado 3
+    PUT    desplazar e ir al estado 4
+    GET    desplazar e ir al estado 5
+
+    IF        reduce usando la regla 9 ($@2)
+    $default  reduce usando la regla 5 ($@1)
+
+    bloque           ir al estado 140
+    sentencia        ir al estado 9
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    entrada_salida   ir al estado 15
+
+
+estado 138
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA CORCHETE lista . END_CORCHETE END_PARENTESIS
+
+    END_CORCHETE  desplazar e ir al estado 141
+
+
+estado 139
+
+   41 lista: expresion .
+   43      | expresion . COMA $@13 lista
+   44 expresion: expresion . OP_SUM termino
+   45          | expresion . OP_RES termino
+
+    OP_SUM  desplazar e ir al estado 68
+    OP_RES  desplazar e ir al estado 69
+    COMA    desplazar e ir al estado 142
+
+    $default  reduce usando la regla 41 (lista)
+
+
+estado 140
+
+    3 bloque: bloque . sentencia
+   72 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque . $@18 END_LLAVE
+
+    DIM    desplazar e ir al estado 1
+    ID     desplazar e ir al estado 2
+    CONST  desplazar e ir al estado 3
+    PUT    desplazar e ir al estado 4
+    GET    desplazar e ir al estado 5
+
+    END_LLAVE  reduce usando la regla 71 ($@18)
+    IF         reduce usando la regla 9 ($@2)
+    $default   reduce usando la regla 5 ($@1)
+
+    sentencia        ir al estado 24
+    $@1              ir al estado 10
+    $@2              ir al estado 11
+    est_asignacion   ir al estado 12
+    asignacion       ir al estado 13
+    est_declaracion  ir al estado 14
+    $@18             ir al estado 143
+    entrada_salida   ir al estado 15
+
+
+estado 141
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE . END_PARENTESIS
+
+    END_PARENTESIS  desplazar e ir al estado 144
+
+
+estado 142
+
+   43 lista: expresion COMA . $@13 lista
+
+    $default  reduce usando la regla 42 ($@13)
+
+    $@13  ir al estado 145
+
+
+estado 143
+
+   72 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 . END_LLAVE
+
+    END_LLAVE  desplazar e ir al estado 146
+
+
+estado 144
+
+   58 factor: CONTAR $@14 PARENTESIS $@15 expresion $@16 PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS .
+
+    $default  reduce usando la regla 58 (factor)
+
+
+estado 145
+
+   43 lista: expresion COMA $@13 . lista
+
+    ID          desplazar e ir al estado 42
+    CONST_REAL  desplazar e ir al estado 43
+    CONST_INT   desplazar e ir al estado 44
+    CONST_STR   desplazar e ir al estado 45
+    PARENTESIS  desplazar e ir al estado 46
+    CONTAR      desplazar e ir al estado 47
+
+    lista      ir al estado 147
+    expresion  ir al estado 139
+    termino    ir al estado 49
+    factor     ir al estado 50
+
+
+estado 146
+
+   72 seleccion: IF PARENTESIS condicion END_PARENTESIS LLAVE bloque END_LLAVE ELSE $@17 LLAVE bloque $@18 END_LLAVE .
+
+    $default  reduce usando la regla 72 (seleccion)
+
+
+estado 147
+
+   43 lista: expresion COMA $@13 lista .
+
+    $default  reduce usando la regla 43 (lista)
