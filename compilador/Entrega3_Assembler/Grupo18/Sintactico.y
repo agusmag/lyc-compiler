@@ -646,12 +646,10 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
     if(tablaTS.primero == NULL)
     {
         tablaTS.primero = nuevo;
-        printf("tablaTS: %s\n", tablaTS.primero->data.tipo);
     }
     else
     {
         tabla->next = nuevo;
-        printf("tablaTS: %s\n", tabla->next->data.tipo);
     }
 
     return 0;
@@ -661,7 +659,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
 {
     stdout->_ptr = stdout->_base;
 
-    char full[50] = "_";
+    char full[100] = "_";
     char aux[20];
 
     t_data *data = (t_data*)calloc(1, sizeof(t_data));
@@ -681,7 +679,6 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         strcpy(data->nombre, nombre);
         data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombreASM, nombre);
-        printf("[crearDatos] data->Tipo %s\n", data->tipo);
         return data;
     }
     else
@@ -700,31 +697,37 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             data->valor.valor_str = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
             strcpy(data->valor.valor_str, valString);
 
+            
+
             char auxString[32];
             strcpy(full, ""); 
-            strcpy(full, "S_");  // "S_"
+            strcpy(full, "S");  // "S_"
             reemplazarString(auxString, nombre);
+            
             strcat(full, auxString); // "S_<nombre>"  
             char numero[10];
             sprintf(numero, "_%d", contadorString);
-            strcat(full, numero); 
+            strcat(full, numero);
+            
             
             if(esConstNombre == ES_CONST_NOMBRE)
             {
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
                 data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
                 strcpy(data->nombre, nombre);
-                strcpy(data->nombreASM, data->nombre);  
+                strcpy(data->nombreASM, data->nombre);               
             }
             else
             {
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
+
                 strcat(full, valString);
                 strcpy(data->nombre, full);
                 data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
                 strcpy(data->nombreASM, data->nombre);    
+                printf("[crearDatos] End else\n");
             }
-
+            
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
@@ -1119,7 +1122,6 @@ void generarAssembler(){
             }
         }
         else if(esDisplay(vectorPolaca[i])){
-            printf("[generarAsembler] es Display:");
             i++;
             t_simbolo *lexema = getLexema(vectorPolaca[i]);
             //printf("[generarAsembler] hola");
@@ -1160,21 +1162,14 @@ void crearSeccionData(FILE *archAssembler){
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
-    printf("[crearSeccionData] tsymbol: %s\n", tablaSimbolos->data.tipo); //SE LLENA BIEN PERO RETURN BASURA
     tablaSimbolos = tablaSimbolos->next;
-    printf("[crearSeccionData] tsymbol: %s\n", tablaSimbolos->data.tipo);
     stdout->_ptr = stdout->_base;
     fprintf(archAssembler, "%s\n\n", ".DATA");
-    printf("[crearSeccionData] Pre WHILE\n");
     while(tablaSimbolos){
-        printf("[crearSeccionData]IN WHILE\n");
         
         aux = tablaSimbolos;
         tablaSimbolos = tablaSimbolos->next;
     
-        printf("[crearSeccionData] NombreASM: %s\n", aux->data.nombreASM);
-        printf("[crearSeccionData] Tipo: %s\n", aux->data.tipo);
-
         if(strcmp(aux->data.tipo, "INTEGER") == 0){
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable int");
         }

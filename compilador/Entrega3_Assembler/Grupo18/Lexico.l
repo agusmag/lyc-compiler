@@ -15,7 +15,7 @@
 #define ERROR_STR 5
 #define ERROR_INT 7
 #define ERROR_REAL 9
-#define DEBUG_MODE 1 /*1 para YES, 0 para NO*/
+#define DEBUG_MODE 0 /*1 para YES, 0 para NO*/
 #define ES_CONST_NOMBRE 1
 #define NO_ES_CONST_NOMBRE 0
 
