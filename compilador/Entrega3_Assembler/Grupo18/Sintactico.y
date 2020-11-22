@@ -503,20 +503,27 @@ termino:
 
 factor:
     ID {
-        $<tipo_str>$ = $1;
         strcpy(vecAux, $1);
-        insertarPolaca(vecAux);
+        punt = strtok(vecAux," +-*/[](){}:=,\n");
+        insertarPolaca(punt);
     }
     | CONST_INT  {
         $<tipo_int>$ = $1;
+        if(esAsig == 1)
+            guardarAsignacionInt($<tipo_int>$);
         insertarPolacaInt($<tipo_int>$);
     }
     | CONST_REAL {
         $<tipo_double>$ = $1;
+        if(esAsig == 1)
+            guardarAsignacionInt($<tipo_int>$);
         insertarPolacaDouble($<tipo_double>$);
     }	 
     | CONST_STR {
+        $<tipo_str>$ = $1;
         strcpy(vecAux, $1);
+        if(esAsig == 1)
+            guardarAsignacion($<tipo_str>$);
         insertarPolaca(vecAux);
     }
     | PARENTESIS expresion END_PARENTESIS
