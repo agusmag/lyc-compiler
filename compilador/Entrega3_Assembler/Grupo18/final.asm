@@ -26,7 +26,8 @@ S_La_suma_es____3                  db             "La suma es: ", '$', 12 dup (?
 _2             dd             2.0            ; Constante int
 S_actual_es___que_2_y____de_0__4   db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
 S_no_es_mayor_que_2__5             db             "no es mayor que 2", '$', 17 dup (?); Constante string
-@cont          dd             ?              ; Variable para almacenar el resultado de contar
+@cont          dd             0              ; Variable para almacenar el resultado de contar
+@1             dd             1              ; constante para sumar a @cont la cantidad 
 @valorAEvaluar dd             ?              ; Variable para almacenar el primer parametro de contar
 @calculoAux    dd             ?              ; Variable para almacenar cada valor de la lista de expresiones de contar
 @ifI           dd             ?              ; Variable para condición izquierda
@@ -83,7 +84,8 @@ fmul
 fstp @ValorAEvaluar
 fld _256
 fstp @CalculoAux
-fstp @CalculoAux
+fstp @ifI
+
 fstp @ValorAEvaluar
 fstp @ifD
 
@@ -96,14 +98,15 @@ sahf
 jne branch51
 
 fld @cont
-fld _1
+fld @1
 fadd
-fld @cont
+fstp @cont
 fld nombre
 fld suma
 fmul
 fstp @CalculoAux
-fstp @CalculoAux
+fstp @ifI
+
 fstp @ValorAEvaluar
 fstp @ifD
 
@@ -116,12 +119,13 @@ sahf
 jne branch66
 
 fld @cont
-fld _1
+fld @1
 fadd
-fld @cont
+fstp @cont
 fld _52
 fstp @CalculoAux
-fstp @CalculoAux
+fstp @ifI
+
 fstp @ValorAEvaluar
 fstp @ifD
 
@@ -134,12 +138,13 @@ sahf
 jne branch79
 
 fld @cont
-fld _1
+fld @1
 fadd
-fld @cont
+fstp @cont
 fld _4
 fstp @CalculoAux
-fstp @CalculoAux
+fstp @ifI
+
 fstp @ValorAEvaluar
 fstp @ifD
 
@@ -152,9 +157,9 @@ sahf
 jne branch92
 
 fld @cont
-fld _1
+fld @1
 fadd
-fld @cont
+fstp @cont
 fmul
 fadd
 fstp actual

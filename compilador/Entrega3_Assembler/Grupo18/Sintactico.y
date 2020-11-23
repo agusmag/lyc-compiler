@@ -1279,15 +1279,18 @@ void generarAssembler(){
                 fprintf(archAssembler, "displayFloat %s,2\nNEWLINE\n", lexema->data.nombreASM);
             }
         }
-        else if(esAsignacion(vectorPolaca[i])){
+        else if(esAsignacion(vectorPolaca[i]))
+        {
             i++;
             printf("entre aca con: %s\n", vectorPolaca[i]);
             fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
         }
-        else if(esOperacion(vectorPolaca[i])){
+        else if(esOperacion(vectorPolaca[i]))
+        {
             fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
         }
-        else if(esContar(vectorPolaca[i])){ // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca 
+        else if(esContar(vectorPolaca[i])) // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca
+        {  
             i++;
             while(!esEndContar(vectorPolaca[i])) 
             {
@@ -1298,7 +1301,18 @@ void generarAssembler(){
                 }
                 else if(esCalculoAux(vectorPolaca[i])) {
                     fprintf(archAssembler, "fstp @CalculoAux\n");
+                    i++;
                 }
+                else if(esComparacion(vectorPolaca[i]))
+                {
+                    fprintf(archAssembler, "fstp @ifI\n\n");
+                }
+                else if(esAsignacion(vectorPolaca[i]))
+                {
+                    //i++;
+                    //printf("entre aca con: %s\n", vectorPolaca[i]);
+                    fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
+                 }
                 else if(esValor(vectorPolaca[i])) {
                     t_simbolo *lexema = getLexema(vectorPolaca[i]);
                     fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
