@@ -53,6 +53,7 @@ char* reemplazarString(char*, const char*);
 char idvec[50][50];
 int cantid = 0, i=0, contadorString = 0, cant_aux=0;
 char vecAux[300], vecAsignacion[30][50];
+int contadorDouble = 0;
 char* punt;
 
 /* POLACA */
@@ -100,7 +101,12 @@ bool esAsignacion( char * str );
 bool esOperacion(const char *);
 bool esContar(const char *);
 bool esEndContar(const char *);
+bool esValorAEvaluar(const char *);
+bool esCalculoAux(const char *);
+bool esCont(const char *);
 char * getOperacion(const char *);
+bool esValorCte(const char * str);
+int existeCTE(const char* id);
 
 
 char* my_itoa(int num, char *str);
@@ -371,7 +377,7 @@ comparacion:
         }
         esComp = 0;
         topeAsignacion = -1;
-        insertarPolaca("BGE");
+        insertarPolaca("BGT");
         if(hayOr)
         {
             insertarPolacaEnPosicion(pedirPos(), posActual +1);
@@ -568,13 +574,13 @@ factor:
     }
     PARENTESIS
     {
-        insertarPolaca("0");
-        insertarPolaca("@cont");
+        /* insertarPolaca("0");
         insertarPolaca("=");
+        insertarPolaca("@cont"); */
     } expresion
     {
-        insertarPolaca("@valorAEvaluar");
         insertarPolaca("=");
+        insertarPolaca("@valorAEvaluar");
     } PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS { insertarPolaca("ENDCONTAR"); }
     ;
 
@@ -851,7 +857,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
-
+            contadorDouble++;
+            
             data->valor.valor_double = valDouble;
 
             if(esConstNombre == ES_CONST_NOMBRE)
@@ -866,7 +873,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             else
             {
                 char dest[32];
-                sprintf(aux, "%g", valDouble);
+                sprintf(aux, "float_%d", contadorDouble);
                 strcat(full, aux);
                 data->nombre = (char*)malloc(sizeof(char) * strlen(full));
                 strcpy(data->nombre, full);
@@ -964,6 +971,7 @@ void crearTablaTS()
 }
 
 t_simbolo * getLexema(const char *valor){
+
     t_simbolo *lexema;
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
@@ -995,26 +1003,30 @@ t_simbolo * getLexema(const char *valor){
     
 }
 
-int existeID(const char* id) //y hasta diria que es igual para existeCTE
+int existeID(const char* id)
 {
-    //tengo que ver el tema del _ en el nombre de las cte
     t_simbolo *tabla = tablaTS.primero;
-    char nombreCTE[50] = "_";
+    char valor[32];
+    char nombreCTE[32] = "_";
     strcat(nombreCTE, id);
-    int b1 = 0;
-    int b2 = 0;
-    int j =0;
-    
-    while(j<cant_aux)
-    {
-        b1 = strcmp(idvec[j], id);
-        //printf("[existeID] idvec[%d] %s\n",j, idvec[j]);
-        //b2 = strcmp(tabla->data.nombre, nombreCTE);
-        if(b1 == 0)
+    int b1, b2, b3, b4 = -1;
+ 
+    while(tabla)
+    {   
+        b1 = strcmp(tabla->data.nombre, id);
+        b2 = strcmp(tabla->data.nombre, nombreCTE);
+        b3 = strcmp(tabla->data.nombreASM, id);
+ 
+        if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
         {
-                return 1;
+            b4 = strcmp(tabla->data.valor.valor_str, id);
         }
-        j++;
+ 
+        if(b1 == 0 || b2 == 0 || b3 == 0 || b4 == 0)
+        {
+            return 1;
+        }
+        tabla = tabla->next;
     }
     return 0;
 }
@@ -1022,22 +1034,37 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
 int existeCTE(const char* id)
 {
     //tengo que ver el tema del _ en el nombre de las cte
+    double auxDouble;
+    char* ptr;
+    char aux[20];
+    char dest[32];
     t_simbolo *tabla = tablaTS.primero;
-    char nombreCTE[50] = "_";
+    char valor[32];
+    char nombreCTE[32] = "_";
+    char nombreCTEDouble[32] = "_";
     strcat(nombreCTE, id);
-    int b1 = 0;
-    int b2 = 0;
-    int j =0;
-    
-    while(j<cant_aux)
-    {
-        //b1 = strcmp(idvec[j], id);
+    printf("", nombreCTE);
+    int b1, b2, b3, b4, b5, b6 = -1;
+
+    while(tabla)
+    {   
+        
+        b1 = strcmp(tabla->data.nombre, id);
         b2 = strcmp(tabla->data.nombre, nombreCTE);
-        if(b2 == 0)
+        b3 = strcmp(tabla->data.nombreASM, id);
+        b5 = strcmp(tabla->data.nombreASM, nombreCTE);
+        b6 = strcmp(tabla->data.nombreASM, nombreCTEDouble);
+
+        if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
         {
-                return 1;
+            b4 = strcmp(tabla->data.valor.valor_str, id);
         }
-        j++;
+
+        if(b1 == 0 || b2 == 0 || b3 == 0 || b4 == 0 || b5 == 0)
+        {
+            return 1;
+        }
+        tabla = tabla->next;
     }
     return 0;
 }
@@ -1099,9 +1126,10 @@ void insertarPolacaInt(int entero)
 //Inserta un double en la notación polaca. Lo pasamos a string para que pueda ser almacenado en el array de Polaca.
 void insertarPolacaDouble(double real)
 {
-	char cad[20];
-	sprintf(cad,"%.10f", real);
-	insertarPolaca(cad);
+	char aux[50] = "_";
+    sprintf(aux, "_float_%d", contadorDouble);
+    printf("Insertar Polaca: %s\n", aux);
+	insertarPolaca(aux);
 }
 
 void avanzarPolaca()
@@ -1199,18 +1227,18 @@ void notCondicion(int cant) //aca le pasamos por parametro el cantidadCondicione
 
 void insertarExpresionEnContar()
 {
-    insertarPolaca("@calculoAux");
     insertarPolaca("=");
     insertarPolaca("@calculoAux");
-    insertarPolaca("@valorAEvaluar");
+    insertarPolaca("@calculoAux");
     insertarPolaca("CMP");
+    insertarPolaca("@valorAEvaluar");
     insertarPolaca("BNE");
     insertarPolacaInt(posActual + 6);
     insertarPolaca("@cont");
     insertarPolaca("1");
     insertarPolaca("+");
-    insertarPolaca("@cont");
     insertarPolaca("=");
+    insertarPolaca("@cont");
 }
 
 
@@ -1233,12 +1261,19 @@ void generarAssembler(){
 
     int i;
     for(i=0; i<=posActual; i++){
+        //printf("Lo que hay en el vector %s\n", vectorPolaca[i]);
 
         if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
             fprintf(archAssembler, "branch%d:\n\n", i);
         }        
 
         if(esValor(vectorPolaca[i])){
+            t_simbolo *lexema = getLexema(vectorPolaca[i]);
+            if(i != 2)
+                fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
+        }
+        else if(esValorCte(vectorPolaca[i])){
+            printf("esValorCte\n");
             t_simbolo *lexema = getLexema(vectorPolaca[i]);
             fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
         }
@@ -1260,7 +1295,8 @@ void generarAssembler(){
             i++;
             t_simbolo *lexema = getLexema(vectorPolaca[i]);
 
-            if(strcmp(lexema->data.tipo, "CONST_REAL") == 0 || strcmp(lexema->data.tipo, "INT") == 0)
+            printf("EL TIPO DE DATO ES %s\n", lexema->data.tipo);
+            if(strcmp(lexema->data.tipo, "FLOAT") == 0 || strcmp(lexema->data.tipo, "INT") == 0)
             {
                 fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM);
             }
@@ -1276,39 +1312,91 @@ void generarAssembler(){
 
 
             if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
+                
                 fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
             }
             else{
-                fprintf(archAssembler, "displayFloat %s\nNEWLINE\n", lexema->data.nombreASM);
+                fprintf(archAssembler, "displayFloat %s,2\nNEWLINE\n", lexema->data.nombreASM);
             }
         }
-        else if(esAsignacion(vectorPolaca[i])){
+        else if(esAsignacion(vectorPolaca[i]))
+        {
             i++;
+            printf("entre aca con: %s\n", vectorPolaca[i]);
             fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
         }
-        else if(esOperacion(vectorPolaca[i])){
+        else if(esOperacion(vectorPolaca[i]))
+        {
             fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
         }
-        else if(esContar(vectorPolaca[i])){ // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca 
-            //inicializo mi variable interna @cont
+        else if(esContar(vectorPolaca[i])) // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca
+        {  
+            int evaluar = 0; // el valor a evaluar en el CONTAR se comporta de dos formas distintas, la primera vez es cuando se guarda el valor que quiero evaluar, y las otras son para hacer las comparaciones. Esta bandera ayuda a diferenciar ambos procesos cuando entre en el elsif "esValorAEvaluar"
             i++;
-            fprintf(archAssembler, "fld %s\n", "0");
-            i++;
-            fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
-            //fin de inicializacion de @cont
-            while(!esEndContar(vectorPolaca[i])) {
+            while(!esEndContar(vectorPolaca[i])) 
+            {
                 //aca se tiene que evaluar cada expresion de la lista. En la lista todavia tenemos la vieja estructura de la polaca de operando operando operador
-                
-                /* if(esValor(vectorPolaca[i])) {
+                //printf("contenido del contar: %s\n",vectorPolaca[i]);
+                if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
+                    fprintf(archAssembler, "branch%d:\n\n", i);
+                }
+
+
+                if(esValorAEvaluar(vectorPolaca[i])) {
+                    if(evaluar == 0) {
+                        fprintf(archAssembler, "fstp @ValorAEvaluar\n");
+                        evaluar = 1;
+                    }
+                    else {
+                        fprintf(archAssembler, "fld @ValorAEvaluar\n");
+                    }
+                }
+                else if(esCalculoAux(vectorPolaca[i])) {
+                    fprintf(archAssembler, "fstp @CalculoAux\n");
+                    fprintf(archAssembler, "fld @CalculoAux\n");
+                    i++;
+                }
+                else if(esComparacion(vectorPolaca[i]))
+                {
+                    fprintf(archAssembler, "fstp @ifI\n\n");
+                }
+                else if(esAsignacion(vectorPolaca[i]))
+                {
+                    //i++;
+                    //printf("entre aca con: %s\n", vectorPolaca[i]);
+                    fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
+                 }
+                else if(esValor(vectorPolaca[i])) {
                     t_simbolo *lexema = getLexema(vectorPolaca[i]);
                     fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
                 }
+                else if(esCont(vectorPolaca[i])) {
+                    fprintf(archAssembler, "fld @cont\n");
+                    fprintf(archAssembler, "fld @1\n");
+                    fprintf(archAssembler, "fadd\n");
+                    fprintf(archAssembler, "fstp @cont\n");
+                    i = i+4; //avanzamos 3 posiciones de la polaca para saltear la suma: @cont + 1
+                }
                 else if(esOperacion(vectorPolaca[i])) {
                     fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
-                } */
-
+                }
+                else if(esSalto(vectorPolaca[i])) {
+                    char *tipoSalto = getSalto(vectorPolaca[i]);
+                    if(strcmp(tipoSalto, "jmp") != 0) {
+                        fprintf(archAssembler, "fstp @ifD\n\n");
+                        fprintf(archAssembler, "fld @ifI\nfld @ifD\n");
+                        fprintf(archAssembler, "fxch\nfcom\nfstsw AX\nsahf\n");
+                    }
+                    i++;
+                    fprintf(archAssembler, "%s branch%s\n\n", tipoSalto, vectorPolaca[i]);
+                    guardarPosicionDeEtiqueta(vectorPolaca[i]);
+                }
                 i++; 
             }
+            if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
+                fprintf(archAssembler, "branch%d:\n\n", i);
+            }
+            fprintf(archAssembler, "fld @cont\n");
         }
     }      
 
@@ -1374,7 +1462,8 @@ void crearSeccionData(FILE *archAssembler){
         }
         tablaSimbolos = tablaSimbolos->next;
     }
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "?", "; Variable para almacenar el resultado de contar");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "0", "; Variable para almacenar el resultado de contar");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@1", "dd", "1", "; constante para sumar a @cont la cantidad ");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@valorAEvaluar", "dd", "?", "; Variable para almacenar el primer parametro de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@calculoAux", "dd", "?", "; Variable para almacenar cada valor de la lista de expresiones de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
@@ -1498,7 +1587,14 @@ bool esPosicionDeEtiqueta(int posicion){
 
 bool esValor(const char * str){
     //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
+    printf("esValor: %s\n", str);
     return existeID(str) == 1;
+}
+
+bool esValorCte(const char * str){
+    //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
+    //printf("esValorCte: %s\n", str);
+    return existeCTE(str) == 1;
 } 
 
 bool esComparacion(const char * str){
@@ -1575,7 +1671,7 @@ bool esDisplay(const char * str){
 
 bool esAsignacion(char * str)
 {
-    int aux = strcmp(str, "=");
+    int aux = strcmp(str, ":");
     return aux == 0;
 }
 
@@ -1586,6 +1682,21 @@ bool esContar(const char * str){
 
 bool esEndContar(const char * str){
     int aux = strcmp(str, "ENDCONTAR");
+    return aux == 0;
+}
+
+bool esValorAEvaluar(const char * str){
+    int aux = strcmp(str, "@valorAEvaluar");
+    return aux == 0;
+}
+
+bool esCalculoAux(const char * str){
+    int aux = strcmp(str, "@calculoAux");
+    return aux == 0;
+}
+
+bool esCont(const char * str){
+    int aux = strcmp(str, "@cont");
     return aux == 0;
 }
 
