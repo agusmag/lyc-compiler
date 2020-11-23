@@ -1313,6 +1313,7 @@ void generarAssembler(){
                 }
                 else if(esCalculoAux(vectorPolaca[i])) {
                     fprintf(archAssembler, "fstp @CalculoAux\n");
+                    fprintf(archAssembler, "fld @CalculoAux\n");
                     i++;
                 }
                 else if(esComparacion(vectorPolaca[i]))
@@ -1352,6 +1353,10 @@ void generarAssembler(){
                 }
                 i++; 
             }
+            if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
+                fprintf(archAssembler, "branch%d:\n\n", i);
+            }
+            fprintf(archAssembler, "fld @cont\n");
         }
     }      
 
