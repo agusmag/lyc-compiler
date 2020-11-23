@@ -25,8 +25,8 @@ S_no_es_mayor_que_2__5             db             "no es mayor que 2", '$', 17 d
 @cont          dd             ?              ; Variable para almacenar el resultado de contar
 @valorAEvaluar dd             ?              ; Variable para almacenar el primer parametro de contar
 @calculoAux    dd             ?              ; Variable para almacenar cada valor de la lista de expresiones de contar
-@ifI           dd             ?              ; Variable para condici?n izquierda
-@ifD           dd             ?              ; Variable para condici?n derecha
+@ifI           dd             ?              ; Variable para condición izquierda
+@ifD           dd             ?              ; Variable para condición derecha
 
 .CODE
 
@@ -41,8 +41,6 @@ NEWLINE
 displayString S_Ingrese_un_valor_float____2
 NEWLINE
 GetFloat actual
-NEWLINE
-displayFloat actual,2
 NEWLINE
 fld _0
 fstp contador
@@ -65,7 +63,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch35
+ja branch35
 
 fld contador
 fld _1
@@ -138,7 +136,7 @@ NEWLINE
 branch60:
 
 
-mov AX,4C00h                  ; Indica que debe finalizar la ejecuci?n
+mov AX,4C00h                  ; Indica que debe finalizar la ejecución
 int 21h
 
 END inicio

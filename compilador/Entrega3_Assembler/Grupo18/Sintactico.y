@@ -363,7 +363,7 @@ comparacion:
         }
         esComp = 0;
         topeAsignacion = -1;
-        insertarPolaca("BGE");
+        insertarPolaca("BGT");
         if(hayOr)
         {
             insertarPolacaEnPosicion(pedirPos(), posActual +1);
