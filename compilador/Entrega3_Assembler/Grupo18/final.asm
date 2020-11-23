@@ -15,10 +15,10 @@ nombre         dd             80.0           ; Constante con nombre int
 S_Prueba_txt_LyC_Tema_4___1        db             "Prueba.txt LyC Tema 4!", '$', 22 dup (?); Constante string
 S_Ingrese_un_valor_float____2      db             "Ingrese un valor float: ", '$', 24 dup (?); Constante string
 _0             dd             0.0            ; Constante int
-_2_5           dd             2.5            ; Constante float
+_float_1       dd             2.5            ; Constante float
 _92            dd             92.0           ; Constante int
 _1             dd             1.0            ; Constante int
-_0_342         dd             0.342          ; Constante float
+_float_2       dd             0.342          ; Constante float
 _256           dd             256.0          ; Constante int
 _52            dd             52.0           ; Constante int
 _4             dd             4.0            ; Constante int
@@ -50,6 +50,7 @@ NEWLINE
 fld _0
 fstp contador
 
+fld _float_1
 fld nombre
 fadd
 fstp suma
@@ -76,6 +77,7 @@ fadd
 fstp contador
 
 fld contador
+fld _float_2
 fdiv
 fld contador
 fld actual
@@ -86,7 +88,7 @@ fld _256
 fstp @CalculoAux
 fstp @ifI
 
-fstp @ValorAEvaluar
+fld @ValorAEvaluar
 fstp @ifD
 
 fld @ifI
@@ -101,13 +103,15 @@ fld @cont
 fld @1
 fadd
 fstp @cont
+branch51:
+
 fld nombre
 fld suma
 fmul
 fstp @CalculoAux
 fstp @ifI
 
-fstp @ValorAEvaluar
+fld @ValorAEvaluar
 fstp @ifD
 
 fld @ifI
@@ -122,11 +126,13 @@ fld @cont
 fld @1
 fadd
 fstp @cont
+branch66:
+
 fld _52
 fstp @CalculoAux
 fstp @ifI
 
-fstp @ValorAEvaluar
+fld @ValorAEvaluar
 fstp @ifD
 
 fld @ifI
@@ -141,11 +147,13 @@ fld @cont
 fld @1
 fadd
 fstp @cont
+branch79:
+
 fld _4
 fstp @CalculoAux
 fstp @ifI
 
-fstp @ValorAEvaluar
+fld @ValorAEvaluar
 fstp @ifD
 
 fld @ifI

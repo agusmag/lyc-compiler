@@ -52,6 +52,7 @@ char* reemplazarString(char*, const char*);
 char idvec[50][50];
 int cantid = 0, i=0, contadorString = 0, cant_aux=0;
 char vecAux[300], vecAsignacion[30][50];
+int contadorDouble = 0;
 char* punt;
 
 /* POLACA */
@@ -828,7 +829,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
-
+            contadorDouble++;
+            
             data->valor.valor_double = valDouble;
 
             if(esConstNombre == ES_CONST_NOMBRE)
@@ -843,7 +845,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             else
             {
                 char dest[32];
-                sprintf(aux, "%g", valDouble);
+                sprintf(aux, "float_%d", contadorDouble);
                 strcat(full, aux);
                 data->nombre = (char*)malloc(sizeof(char) * strlen(full));
                 strcpy(data->nombre, full);
@@ -1004,18 +1006,26 @@ int existeID(const char* id)
 int existeCTE(const char* id)
 {
     //tengo que ver el tema del _ en el nombre de las cte
+    double auxDouble;
+    char* ptr;
+    char aux[20];
+    char dest[32];
     t_simbolo *tabla = tablaTS.primero;
     char valor[32];
     char nombreCTE[32] = "_";
+    char nombreCTEDouble[32] = "_";
     strcat(nombreCTE, id);
-    int b1, b2, b3, b4, b5 = -1;
+    printf("", nombreCTE);
+    int b1, b2, b3, b4, b5, b6 = -1;
 
     while(tabla)
     {   
+        
         b1 = strcmp(tabla->data.nombre, id);
         b2 = strcmp(tabla->data.nombre, nombreCTE);
         b3 = strcmp(tabla->data.nombreASM, id);
         b5 = strcmp(tabla->data.nombreASM, nombreCTE);
+        b6 = strcmp(tabla->data.nombreASM, nombreCTEDouble);
 
         if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
         {
@@ -1088,9 +1098,10 @@ void insertarPolacaInt(int entero)
 //Inserta un double en la notación polaca. Lo pasamos a string para que pueda ser almacenado en el array de Polaca.
 void insertarPolacaDouble(double real)
 {
-	char cad[20];
-	sprintf(cad,"%.10f", real);
-	insertarPolaca(cad);
+	char aux[50] = "_";
+    sprintf(aux, "_float_%d", contadorDouble);
+    printf("Insertar Polaca: %s\n", aux);
+	insertarPolaca(aux);
 }
 
 void avanzarPolaca()
@@ -1234,6 +1245,7 @@ void generarAssembler(){
                 fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
         }
         else if(esValorCte(vectorPolaca[i])){
+            printf("esValorCte\n");
             t_simbolo *lexema = getLexema(vectorPolaca[i]);
             fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
         }
@@ -1545,11 +1557,13 @@ bool esPosicionDeEtiqueta(int posicion){
 
 bool esValor(const char * str){
     //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
+    printf("esValor: %s\n", str);
     return existeID(str) == 1;
 }
 
 bool esValorCte(const char * str){
     //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
+    //printf("esValorCte: %s\n", str);
     return existeCTE(str) == 1;
 } 
 

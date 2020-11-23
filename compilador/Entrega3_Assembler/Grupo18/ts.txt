@@ -7,10 +7,10 @@ nombre                                            CONST_INT                80   
 S_Prueba_txt_LyC_Tema_4___1                       CONST_STR                "Prueba.txt LyC Tema 4!"                          27
 S_Ingrese_un_valor_float____2                     CONST_STR                "Ingrese un valor float: "                        29
 _0                                                CONST_INT                0                                                 2
-_2.5                                              CONST_REAL               2.500000                                          4
+_float_1                                          CONST_REAL               2.500000                                          8
 _92                                               CONST_INT                92                                                3
 _1                                                CONST_INT                1                                                 2
-_0.342                                            CONST_REAL               0.342000                                          6
+_float_2                                          CONST_REAL               0.342000                                          8
 _256                                              CONST_INT                256                                               4
 _52                                               CONST_INT                52                                                3
 _4                                                CONST_INT                4                                                 2
