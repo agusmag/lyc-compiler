@@ -1,1 +1,1 @@
-Final.exe prueba2.txt
+Final.exe prueba.txt

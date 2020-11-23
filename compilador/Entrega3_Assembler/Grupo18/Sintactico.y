@@ -224,8 +224,9 @@ est_asignacion:
 	CONST ID OP_ASIG_CONS CONST_REAL { 
         strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($<tipo_str>$), "CONST_REAL", "", 0, $4, ES_CONST_NOMBRE);
-        strcpy(idvec[cantid], obtenerID($2));
-        cantid = 0;
+        cant_aux++;
+        strcpy(idvec[cant_aux], obtenerID($2));
+        //cantid = 0;
         insertarPolacaDouble($4);
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
@@ -234,8 +235,9 @@ est_asignacion:
     {   
         strcpy($<tipo_str>$, $2);
         insertarTS(obtenerID($<tipo_str>$), "CONST_INT", "", $4, 0, ES_CONST_NOMBRE);
-        strcpy(idvec[cantid], obtenerID($2));
-        cantid = 0;
+        cant_aux++;
+        strcpy(idvec[cant_aux], obtenerID($2));
+        //cantid = 0;
         insertarPolacaInt($4);
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
@@ -243,8 +245,9 @@ est_asignacion:
     | CONST ID OP_ASIG_CONS CONST_STR {  
         printf("[est_asignacion] antes de InsertarTS\n");      
         insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
-        strcpy(idvec[cantid], obtenerID($2));
-        cantid = 0;
+        cant_aux++;
+        strcpy(idvec[cant_aux], obtenerID($2));        
+        //cantid = 0;
         printf("[est_asignacion] %s\n", idvec[cantid]);
         insertarPolaca(obtenerID(yylval.tipo_str));
         insertarPolaca("=");
@@ -262,8 +265,9 @@ asignacion:
     {
         insertarPolaca(":");
         strcpy(vecAux, $1); //en $1 esta el valor de ID
-        punt = strtok(vecAux," +-*/[](){}:=,\n"); //porque puede venir de cualquier lado, pero ver si funciona solo con el =
         
+        punt = strtok(vecAux," +-*/[](){}:=,\n"); //porque puede venir de cualquier lado, pero ver si funciona solo con el =
+        printf("[asignacion] vecAux %s, punt: %s\n",vecAux,punt);
         if(!existeID(punt)) //No existe: entonces no esta declarada
         {
             sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
@@ -577,11 +581,12 @@ factor:
 est_declaracion:
 	DIM est_variables AS est_tipos {  
         for(i=0;i<cant_aux;i++) /*vamos agregando todos los ids que leyo*/
-        {
+        {            
             separador1 = strtok(idvec[i],";");
             strcpy(nombre,separador1);
             separador1 = strtok(NULL, ";");
 
+            printf("[est_declaracion] nombre: %s\n", nombre);
             if(insertarTS(nombre, separador1, "", 0, 0, NO_ES_CONST_NOMBRE) != 0) //no lo guarda porque ya existe
             {
                 sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
@@ -817,9 +822,9 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             char auxString[32];
             strcpy(full, "");
             strcpy(full, "S_");  // "S_"
-            reemplazarString(auxString, nombre);
+            //reemplazarString(auxString, nombre);
             
-            strcat(full, auxString +1); // "S_<nombre>"  
+            strcat(full,"string"); // "S_<nombre>"  
             char numero[10];
             sprintf(numero, "_%d", contadorString);
             strcat(full, numero);
@@ -1003,6 +1008,7 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
     while(j<cant_aux)
     {
         b1 = strcmp(idvec[j], id);
+        //printf("[existeID] idvec[%d] %s\n",j, idvec[j]);
         //b2 = strcmp(tabla->data.nombre, nombreCTE);
         if(b1 == 0)
         {
@@ -1620,21 +1626,29 @@ void guardarPosicionDeEtiqueta(const char *posicion){
 	vectorEtiquetas[topeVectorEtiquetas] = atoi(posicion);
 }
 
+/*
 char* reemplazarString(char* dest, const char* cad)
 {
+    
     int i, longitud;
     longitud = strlen(cad);
 
     for(i=0; i<longitud-1; i++)
     {
+        
         if((cad[i] >= 'a' && cad[i] <= 'z') || (cad[i] >='A' && cad[i] <= 'Z') || (cad[i] >= '0' && cad[i] <= '9'))
         {
             dest[i] = cad[i];
         }
+
+        if (cad[i] == ' '){
+             dest[i] = '_';
+        }
+
     }
     dest[i] = '\0';
     return dest;
-}
+}*/
 
 bool verificarComparacion()
 {
