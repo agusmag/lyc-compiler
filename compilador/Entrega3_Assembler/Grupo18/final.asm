@@ -73,7 +73,7 @@ fld contador
 fdiv
 fld contador
 fld 0
-fstp @cont
+fstp =
 
 fmul
 fadd

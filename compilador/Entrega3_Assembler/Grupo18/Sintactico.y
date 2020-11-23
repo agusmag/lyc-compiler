@@ -99,8 +99,6 @@ bool esAsignacion( char * str );
 bool esOperacion(const char *);
 bool esContar(const char *);
 bool esEndContar(const char *);
-bool esValorAEvaluar(const char *);
-bool esCalculoAux(const char *);
 char * getOperacion(const char *);
 
 
@@ -556,13 +554,13 @@ factor:
     }
     PARENTESIS
     {
-        /* insertarPolaca("0");
+        insertarPolaca("0");
+        insertarPolaca("=");
         insertarPolaca("@cont");
-        insertarPolaca("="); */
     } expresion
     {
-        insertarPolaca("@valorAEvaluar");
         insertarPolaca("=");
+        insertarPolaca("@valorAEvaluar");
     } PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS { insertarPolaca("ENDCONTAR"); }
     ;
 
@@ -1172,18 +1170,18 @@ void notCondicion(int cant) //aca le pasamos por parametro el cantidadCondicione
 
 void insertarExpresionEnContar()
 {
-    insertarPolaca("@calculoAux");
     insertarPolaca("=");
     insertarPolaca("@calculoAux");
-    insertarPolaca("@valorAEvaluar");
+    insertarPolaca("@calculoAux");
     insertarPolaca("CMP");
+    insertarPolaca("@valorAEvaluar");
     insertarPolaca("BNE");
     insertarPolacaInt(posActual + 6);
     insertarPolaca("@cont");
     insertarPolaca("1");
     insertarPolaca("+");
-    insertarPolaca("@cont");
     insertarPolaca("=");
+    insertarPolaca("@cont");
 }
 
 
@@ -1263,35 +1261,23 @@ void generarAssembler(){
             fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
         }
         else if(esContar(vectorPolaca[i])){ // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca 
+            //inicializo mi variable interna @cont
             i++;
-            while(!esEndContar(vectorPolaca[i])) 
-            {
+            fprintf(archAssembler, "fld %s\n", "0");
+            i++;
+            fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
+            //fin de inicializacion de @cont
+            while(!esEndContar(vectorPolaca[i])) {
                 //aca se tiene que evaluar cada expresion de la lista. En la lista todavia tenemos la vieja estructura de la polaca de operando operando operador
-                printf("contenido del vector: %s\n",vectorPolaca[i]);
-                if(esValorAEvaluar(vectorPolaca[i])) {
-                    //fprintf(archAssembler, "%fld\n", "@ValorAEvaluar");
-                }
-                else if(esCalculoAux(vectorPolaca[i])) {
-                    //fprintf(archAssembler, "%fld\n", "@CalculoAux");
-                }
-                else if(esValor(vectorPolaca[i])) {
+                
+                /* if(esValor(vectorPolaca[i])) {
                     t_simbolo *lexema = getLexema(vectorPolaca[i]);
                     fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
                 }
                 else if(esOperacion(vectorPolaca[i])) {
                     fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
-                }
-                else if(esSalto(vectorPolaca[i])) {
-                    char *tipoSalto = getSalto(vectorPolaca[i]);
-                    if(strcmp(tipoSalto, "jmp") != 0) {
-                        fprintf(archAssembler, "fstp @ifD\n\n");
-                        fprintf(archAssembler, "fld @ifI\nfld @ifD\n");
-                        fprintf(archAssembler, "fxch\nfcom\nfstsw AX\nsahf\n");
-                    }
-                    i++;
-                    fprintf(archAssembler, "%s branch%s\n\n", tipoSalto, vectorPolaca[i]);
-                    guardarPosicionDeEtiqueta(vectorPolaca[i]);
-                }
+                } */
+
                 i++; 
             }
         }
@@ -1359,8 +1345,7 @@ void crearSeccionData(FILE *archAssembler){
         }
         tablaSimbolos = tablaSimbolos->next;
     }
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "0", "; Variable para almacenar el resultado de contar");
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@1", "dd", "1", "; Variable para sumar en CONTAR");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "?", "; Variable para almacenar el resultado de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@valorAEvaluar", "dd", "?", "; Variable para almacenar el primer parametro de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@calculoAux", "dd", "?", "; Variable para almacenar cada valor de la lista de expresiones de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
@@ -1570,16 +1555,6 @@ bool esContar(const char * str){
 
 bool esEndContar(const char * str){
     int aux = strcmp(str, "ENDCONTAR");
-    return aux == 0;
-}
-
-bool esValorAEvaluar(const char * str){
-    int aux = strcmp(str, "@valorAEvaluar");
-    return aux == 0;
-}
-
-bool esCalculoAux(const char * str){
-    int aux = strcmp(str, "@calculoAux");
     return aux == 0;
 }
 
