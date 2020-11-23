@@ -1,2 +1,1 @@
-Final.exe prueba.txt
-pause
+Final.exe prueba2.txt

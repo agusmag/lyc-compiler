@@ -1,5 +1,9 @@
-DIM <nombre, nombre3> AS <Integer, String>
+DIM <numeroI01, numeroF01> AS <Integer, Float>
 
-nombre : 80;
-CONST nombre2 = 54.7;
-nombre3 : "Hola";
+numeroI01 : 12;
+
+numeroF01 : 90.6;
+ 
+CONST palabra = "prueba";
+
+PUT "prueba3";

@@ -9,6 +9,7 @@
 #define YYERROR_VERBOSE 1
 #define ES_CONST_NOMBRE 1
 #define NO_ES_CONST_NOMBRE 0
+
 FILE  *yyin;
 
 //char vecAux[35];
@@ -194,6 +195,7 @@ char* tipo_cmp;
 
 PROGRAMA:
     algoritmo {
+        debug_print_b("\nInicio\n");
         guardarTS();
         grabarPolaca();
         printf("\nGrabar Polaca\n");
@@ -238,10 +240,12 @@ est_asignacion:
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
     }                               
-    | CONST ID OP_ASIG_CONS CONST_STR {        
+    | CONST ID OP_ASIG_CONS CONST_STR {  
+        printf("[est_asignacion] antes de InsertarTS\n");      
         insertarTS(obtenerID($2), "CONST_STR", yylval.tipo_str, 0, 0, ES_CONST_NOMBRE);
         strcpy(idvec[cantid], obtenerID($2));
         cantid = 0;
+        printf("[est_asignacion] %s\n", idvec[cantid]);
         insertarPolaca(obtenerID(yylval.tipo_str));
         insertarPolaca("=");
         insertarPolaca(obtenerID($2));
@@ -257,13 +261,17 @@ asignacion:
     expresion 
     {
         insertarPolaca(":");
-        strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
-        punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
-        if(!existeID(punt)) /*No existe: entonces no esta declarada*/
+        strcpy(vecAux, $1); //en $1 esta el valor de ID
+        punt = strtok(vecAux," +-*/[](){}:=,\n"); //porque puede venir de cualquier lado, pero ver si funciona solo con el =
+        
+        if(!existeID(punt)) //No existe: entonces no esta declarada
         {
             sprintf(mensajes, "%s%s%s", "Error: Variable no declarada '", punt, "'");
             yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
-        }
+        }    
+        
+        debug_print_b("[asignacion] 00 - verificarAsignacion");
+        
         //Verifica que los tipos de datos sean compatibles
         if(!verificarAsignacion(punt))
         {
@@ -518,6 +526,7 @@ termino:
 
 factor:
     ID {
+        debug_print_b("[factor] 00 - entrada a factor");
         strcpy(vecAux, $1);
         punt = strtok(vecAux," +-*/[](){}:=,\n");
         // if(!existeID(punt))
@@ -538,10 +547,11 @@ factor:
     | CONST_REAL {
         $<tipo_double>$ = $1;
         if(esAsig == 1)
-            guardarAsignacionInt($<tipo_int>$);
+            guardarAsignacionDouble($<tipo_double>$);
         insertarPolacaDouble($<tipo_double>$);
     }	 
     | CONST_STR {
+        debug_print_b("[factor] 01 - Asigno un string");
         $<tipo_str>$ = $1;
         strcpy(vecAux, $1);
         if(esAsig == 1)
@@ -699,6 +709,7 @@ int main(int argc, char *argv[])
 
 int insertarTS(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
 {
+    printf("[insertarTS] 00 - InsertarTS\n");
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[50] = "_";
     strcat(nombreCTE, nombre);
@@ -707,18 +718,22 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
     {
         if(strcmp(tabla->data.nombre, nombre) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
         {
+            printf("[insertarTS] 01 - Ya existe elemento\n");
             return 1;
         }
         
         if(tabla->next == NULL)
         {
+            printf("[insertarTS] 02 - Fin de la tabla\n");
             break;
         }
+        printf("[insertarTS] 03 - Avanzo busqueda al proximo registro\n");
         tabla = tabla->next;
     }
 
     t_data *data = (t_data*)malloc(sizeof(t_data));
     data = crearDatos(nombre, tipo, valString, valInt, valDouble, esConstNombre);
+    printf("[insertarTS] 04 - Data.tipo %s\n", data->tipo);
 
     if(data == NULL)
     {
@@ -749,7 +764,8 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
 
 t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble, int esConstNombre)
 {
-    stdout->_ptr = stdout->_base;
+    printf("[crearDatos] 00 - crearDatos\n");
+    stdout->_ptr = stdout->_base; // Limpieza del stdout
 
     char full[100] = "_";
     char aux[20];
@@ -757,11 +773,13 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     t_data *data = (t_data*)calloc(1, sizeof(t_data));
     if(data == NULL)
     {
+        printf("[crearDatos] 01 - fallo la creacion de datos (calloc)\n");
         return NULL;
     }
 
     data->tipo = (char*)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
+    printf("[crearDatos] 02 - data->tipo: %s \n", data->tipo);
 
     //Si es una variable
     if((strcmp(tipo, "STRING") == 0 || strcmp(tipo, "INTEGER") == 0 || strcmp(tipo, "FLOAT") == 0) && esConstNombre == 0)
@@ -776,16 +794,15 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     }
     else
     {   
-
+        printf("[crearDatos] 03 - El valor a asignar no es una variable\n");
         
         if(esConstNombre == ES_CONST_NOMBRE)
         {
-            printf("NOMBRE: %s\n", nombre);
+            printf("[crearDatos] 04 - nombre: %s\n", nombre);
             data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
             strcpy(data->nombre, nombre);
-            printf("CONST: %s\n", data->nombre);
             data->esConst = true;
-            strcpy(data->nombre, nombre);
+            printf("[crearDatos] 04.2 - data->nombre: %s\n", data->nombre);
         }
 
          //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
@@ -795,24 +812,30 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             
             data->valor.valor_str = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
             strcpy(data->valor.valor_str, valString);
-            
+            printf("[crearDatos] 05 - data->valor.valor_str: %s\n", data->valor.valor_str);
+
             char auxString[32];
-            strcpy(full, ""); 
-            strcpy(full, "S");  // "S_"
+            strcpy(full, "");
+            strcpy(full, "S_");  // "S_"
             reemplazarString(auxString, nombre);
             
-            strcat(full, auxString); // "S_<nombre>"  
+            strcat(full, auxString +1); // "S_<nombre>"  
             char numero[10];
             sprintf(numero, "_%d", contadorString);
             strcat(full, numero);
             
-            
+            printf("[crearDatos] 06 - full: %s\n", full);
+
             if(esConstNombre == ES_CONST_NOMBRE)
-            {
+            {                
+                printf("[crearDatos] 07 - True");
+                data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
                 strcpy(data->nombreASM, data->nombre); 
+                printf("[crearDatos] 08 - data->nombreASM %s\n",data->nombreASM);
             }
             else
             {
+                printf("[crearDatos] 09 - False");
                 data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
                 //strcat(full, valString); Comenté esto porque rompia.
                 strcpy(data->nombre, full);
@@ -1422,13 +1445,14 @@ bool verificarAsignacion(const char* id)
     t_simbolo* lexemaD;
     int i;
 
-    //printf("lexemaI: %s\n",lexemaI->data.tipo);
+    printf("lexemaI: %s\n",lexemaI->data.tipo);
     //printf("lexemaD: %s\n",lexemaD->data.tipo);
 
     for(i=0; i<=topeAsignacion; i++)
     {
         printf("vecAsignacion[i]: %s\n", vecAsignacion[i]);
         lexemaD = getLexema(vecAsignacion[i]);
+        printf("lexemaD: %s\n",lexemaD->data.tipo);
         printf("%s: %s\n", lexemaI->data.tipo, lexemaI->data.nombre);
         printf("%s: %s\n", lexemaD->data.tipo, lexemaD->data.nombre);
         if(!esCompatible(lexemaI->data.tipo, lexemaD->data.tipo))
@@ -1601,15 +1625,11 @@ char* reemplazarString(char* dest, const char* cad)
     int i, longitud;
     longitud = strlen(cad);
 
-    for(i=0; i<longitud; i++)
+    for(i=0; i<longitud-1; i++)
     {
         if((cad[i] >= 'a' && cad[i] <= 'z') || (cad[i] >='A' && cad[i] <= 'Z') || (cad[i] >= '0' && cad[i] <= '9'))
         {
             dest[i] = cad[i];
-        }
-        else
-        {
-            dest[i] = '_';
         }
     }
     dest[i] = '\0';

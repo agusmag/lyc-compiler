@@ -15,7 +15,8 @@
 #define ERROR_STR 5
 #define ERROR_INT 7
 #define ERROR_REAL 9
-#define DEBUG_MODE 0 /*1 para YES, 0 para NO*/
+#define DEBUG_MODE 1 /*1 para YES, 0 para NO*/
+#define DEBUG_MODE_B 1 /*1 para YES, 0 para NO*/
 #define ES_CONST_NOMBRE 1
 #define NO_ES_CONST_NOMBRE 0
 
@@ -206,6 +207,14 @@ void debug_print(char* tipo, char *mensaje)
 {
     if (DEBUG_MODE == 1)
         printf("\nLEX: %s [%s]\n", mensaje, tipo);    
+
+    return;
+}
+
+void debug_print_b(char *mensaje)
+{
+    if (DEBUG_MODE_B == 1)
+        printf("\nBISON: %s\n", mensaje);    
 
     return;
 }

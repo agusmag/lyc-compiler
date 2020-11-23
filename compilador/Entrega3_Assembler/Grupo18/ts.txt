@@ -1,20 +1,7 @@
 NOMBRE                                            TIPODATO                 VALOR                                             LONGITUD                      
-suma                                              FLOAT                    --                                                4
-actual                                            FLOAT                    --                                                6
-promedio                                          FLOAT                    --                                                8
-contador                                          INTEGER                  --                                                8
-nombre                                            CONST_INT                80                                                6
-S_Prueba_txt_LyC_Tema_4___1                       CONST_STR                "Prueba.txt LyC Tema 4!"                          27
-S_Ingrese_un_valor_float____2                     CONST_STR                "Ingrese un valor float: "                        29
-_0                                                CONST_INT                0                                                 2
-_2.5                                              CONST_REAL               2.500000                                          4
-_92                                               CONST_INT                92                                                3
-_1                                                CONST_INT                1                                                 2
-_0.342                                            CONST_REAL               0.342000                                          6
-_256                                              CONST_INT                256                                               4
-_52                                               CONST_INT                52                                                3
-_4                                                CONST_INT                4                                                 2
-S_La_suma_es____3                                 CONST_STR                "La suma es: "                                    17
-_2                                                CONST_INT                2                                                 2
-S_actual_es___que_2_y____de_0__4                  CONST_STR                "actual es > que 2 y != de 0"                     32
-S_no_es_mayor_que_2__5                            CONST_STR                "no es mayor que 2"                               22
+numeroF01                                         FLOAT                    --                                                9
+numeroI01                                         INTEGER                  --                                                9
+_12                                               CONST_INT                12                                                3
+_90.6                                             CONST_REAL               90.600000                                         5
+palabra                                           CONST_STR                "prueba"                                          8
+S_prueba3_2                                       CONST_STR                "prueba3"                                         11
