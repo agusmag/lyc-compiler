@@ -1222,7 +1222,7 @@ void generarAssembler(){
 
     int i;
     for(i=0; i<=posActual; i++){
-        printf("Lo que hay en el vector %s\n", vectorPolaca[i]);
+        //printf("Lo que hay en el vector %s\n", vectorPolaca[i]);
 
         if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
             fprintf(archAssembler, "branch%d:\n\n", i);
@@ -1292,7 +1292,7 @@ void generarAssembler(){
             while(!esEndContar(vectorPolaca[i])) 
             {
                 //aca se tiene que evaluar cada expresion de la lista. En la lista todavia tenemos la vieja estructura de la polaca de operando operando operador
-                printf("contenido del vector: %s\n",vectorPolaca[i]);
+                //printf("contenido del contar: %s\n",vectorPolaca[i]);
                 if(esValorAEvaluar(vectorPolaca[i])) {
                     fprintf(archAssembler, "fstp @ValorAEvaluar\n");
                 }
@@ -1305,6 +1305,10 @@ void generarAssembler(){
                 }
                 else if(esCont(vectorPolaca[i])) {
                     fprintf(archAssembler, "fld @cont\n");
+                    fprintf(archAssembler, "fld @1\n");
+                    fprintf(archAssembler, "fadd\n");
+                    fprintf(archAssembler, "fstp @cont\n");
+                    i = i+4; //avanzamos 3 posiciones de la polaca para saltear la suma: @cont + 1
                 }
                 else if(esOperacion(vectorPolaca[i])) {
                     fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
@@ -1387,7 +1391,8 @@ void crearSeccionData(FILE *archAssembler){
         }
         tablaSimbolos = tablaSimbolos->next;
     }
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "?", "; Variable para almacenar el resultado de contar");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "0", "; Variable para almacenar el resultado de contar");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@1", "dd", "1", "; constante para sumar a @cont la cantidad ");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@valorAEvaluar", "dd", "?", "; Variable para almacenar el primer parametro de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@calculoAux", "dd", "?", "; Variable para almacenar cada valor de la lista de expresiones de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
