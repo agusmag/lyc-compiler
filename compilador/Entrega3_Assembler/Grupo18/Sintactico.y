@@ -1545,6 +1545,7 @@ bool verificarAsignacion(const char* id)
 
     for(i=0; i<=topeAsignacion; i++)
     {
+        //stdout->_ptr = stdout->_base;
         printf("vecAsignacion[i]: %s\n", vecAsignacion[i]);
         lexemaD = getLexema(vecAsignacion[i]);
         printf("lexemaD: %s\n",lexemaD->data.tipo);
@@ -1796,6 +1797,6 @@ void guardarAsignacionInt(const int id)
 void guardarAsignacionDouble(const double id)
 {
     char aux[32];
-    sprintf(aux, "%g", id);
+    sprintf(aux, "_float_%d", contadorDouble);
     guardarAsignacion(aux);
 }
