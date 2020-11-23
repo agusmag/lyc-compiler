@@ -18,6 +18,10 @@ _0             dd             0.0            ; Constante int
 _2_5           dd             2.5            ; Constante float
 _92            dd             92.0           ; Constante int
 _1             dd             1.0            ; Constante int
+_0_342         dd             0.342          ; Constante float
+_256           dd             256.0          ; Constante int
+_52            dd             52.0           ; Constante int
+_4             dd             4.0            ; Constante int
 S_La_suma_es____3                  db             "La suma es: ", '$', 12 dup (?); Constante string
 _2             dd             2.0            ; Constante int
 S_actual_es___que_2_y____de_0__4   db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
@@ -63,12 +67,97 @@ fxch
 fcom
 fstsw AX
 sahf
-ja branch35
+ja branch104
 
 fld contador
 fld _1
 fadd
 fstp contador
+
+fld contador
+fdiv
+fld contador
+fld actual
+fld contador
+fmul
+fstp @ValorAEvaluar
+fld _256
+fstp @CalculoAux
+fstp @CalculoAux
+fstp @ValorAEvaluar
+fstp @ifD
+
+fld @ifI
+fld @ifD
+fxch
+fcom
+fstsw AX
+sahf
+jne branch51
+
+fld @cont
+fld _1
+fadd
+fld @cont
+fld nombre
+fld suma
+fmul
+fstp @CalculoAux
+fstp @CalculoAux
+fstp @ValorAEvaluar
+fstp @ifD
+
+fld @ifI
+fld @ifD
+fxch
+fcom
+fstsw AX
+sahf
+jne branch66
+
+fld @cont
+fld _1
+fadd
+fld @cont
+fld _52
+fstp @CalculoAux
+fstp @CalculoAux
+fstp @ValorAEvaluar
+fstp @ifD
+
+fld @ifI
+fld @ifD
+fxch
+fcom
+fstsw AX
+sahf
+jne branch79
+
+fld @cont
+fld _1
+fadd
+fld @cont
+fld _4
+fstp @CalculoAux
+fstp @CalculoAux
+fstp @ValorAEvaluar
+fstp @ifD
+
+fld @ifI
+fld @ifD
+fxch
+fcom
+fstsw AX
+sahf
+jne branch92
+
+fld @cont
+fld _1
+fadd
+fld @cont
+fmul
+fadd
+fstp actual
 
 fld suma
 fld actual
@@ -77,7 +166,7 @@ fstp suma
 
 jmp branch17
 
-branch35:
+branch104:
 
 displayString S_La_suma_es____3
 NEWLINE
@@ -95,7 +184,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jbe branch53
+jbe branch122
 
 fld actual
 fstp @ifI
@@ -109,13 +198,13 @@ fxch
 fcom
 fstsw AX
 sahf
-je branch53
+je branch122
 
 displayString S_actual_es___que_2_y____de_0__4
 NEWLINE
-jmp branch60
+jmp branch129
 
-branch53:
+branch122:
 
 fld actual
 fstp @ifI
@@ -129,11 +218,11 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch60
+jae branch129
 
 displayString S_no_es_mayor_que_2__5
 NEWLINE
-branch60:
+branch129:
 
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución
