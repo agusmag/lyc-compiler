@@ -101,6 +101,7 @@ bool esContar(const char *);
 bool esEndContar(const char *);
 bool esValorAEvaluar(const char *);
 bool esCalculoAux(const char *);
+bool esCont(const char *);
 char * getOperacion(const char *);
 
 
@@ -938,6 +939,7 @@ void crearTablaTS()
 }
 
 t_simbolo * getLexema(const char *valor){
+
     t_simbolo *lexema;
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
@@ -969,25 +971,30 @@ t_simbolo * getLexema(const char *valor){
     
 }
 
-int existeID(const char* id) //y hasta diria que es igual para existeCTE
+int existeID(const char* id)
 {
-    //tengo que ver el tema del _ en el nombre de las cte
     t_simbolo *tabla = tablaTS.primero;
-    char nombreCTE[50] = "_";
+    char valor[32];
+    char nombreCTE[32] = "_";
     strcat(nombreCTE, id);
-    int b1 = 0;
-    int b2 = 0;
-    int j =0;
-    
-    while(j<cant_aux)
-    {
-        b1 = strcmp(idvec[j], id);
-        //b2 = strcmp(tabla->data.nombre, nombreCTE);
-        if(b1 == 0)
+    int b1, b2, b3, b4 = -1;
+ 
+    while(tabla)
+    {   
+        b1 = strcmp(tabla->data.nombre, id);
+        b2 = strcmp(tabla->data.nombre, nombreCTE);
+        b3 = strcmp(tabla->data.nombreASM, id);
+ 
+        if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
         {
-                return 1;
+            b4 = strcmp(tabla->data.valor.valor_str, id);
         }
-        j++;
+ 
+        if(b1 == 0 || b2 == 0 || b3 == 0 || b4 == 0)
+        {
+            return 1;
+        }
+        tabla = tabla->next;
     }
     return 0;
 }
@@ -1005,7 +1012,7 @@ int existeCTE(const char* id)
     while(j<cant_aux)
     {
         //b1 = strcmp(idvec[j], id);
-        b2 = strcmp(tabla->data.nombre, nombreCTE);
+        b2 = strcmp(tabla->data.nombreASM, nombreCTE);
         if(b2 == 0)
         {
                 return 1;
@@ -1206,7 +1213,7 @@ void generarAssembler(){
 
     int i;
     for(i=0; i<=posActual; i++){
-
+    
         if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
             fprintf(archAssembler, "branch%d:\n\n", i);
         }        
@@ -1277,6 +1284,9 @@ void generarAssembler(){
                 else if(esValor(vectorPolaca[i])) {
                     t_simbolo *lexema = getLexema(vectorPolaca[i]);
                     fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
+                }
+                else if(esCont(vectorPolaca[i])) {
+                    fprintf(archAssembler, "fld @cont\n");
                 }
                 else if(esOperacion(vectorPolaca[i])) {
                     fprintf(archAssembler, "%s\n", getOperacion(vectorPolaca[i]));
@@ -1481,7 +1491,9 @@ bool esPosicionDeEtiqueta(int posicion){
 
 bool esValor(const char * str){
     //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
-    return existeID(str) == 1;
+    if(existeCTE(str) == 1 || existeID(str) == 1 )
+        return true;
+    return false;
 } 
 
 bool esComparacion(const char * str){
@@ -1579,6 +1591,11 @@ bool esValorAEvaluar(const char * str){
 
 bool esCalculoAux(const char * str){
     int aux = strcmp(str, "@calculoAux");
+    return aux == 0;
+}
+
+bool esCont(const char * str){
+    int aux = strcmp(str, "@cont");
     return aux == 0;
 }
 
