@@ -1291,13 +1291,25 @@ void generarAssembler(){
         }
         else if(esContar(vectorPolaca[i])) // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca
         {  
+            int evaluar = 0; // el valor a evaluar en el CONTAR se comporta de dos formas distintas, la primera vez es cuando se guarda el valor que quiero evaluar, y las otras son para hacer las comparaciones. Esta bandera ayuda a diferenciar ambos procesos cuando entre en el elsif "esValorAEvaluar"
             i++;
             while(!esEndContar(vectorPolaca[i])) 
             {
                 //aca se tiene que evaluar cada expresion de la lista. En la lista todavia tenemos la vieja estructura de la polaca de operando operando operador
                 //printf("contenido del contar: %s\n",vectorPolaca[i]);
+                if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
+                    fprintf(archAssembler, "branch%d:\n\n", i);
+                }
+
+
                 if(esValorAEvaluar(vectorPolaca[i])) {
-                    fprintf(archAssembler, "fstp @ValorAEvaluar\n");
+                    if(evaluar == 0) {
+                        fprintf(archAssembler, "fstp @ValorAEvaluar\n");
+                        evaluar = 1;
+                    }
+                    else {
+                        fprintf(archAssembler, "fld @ValorAEvaluar\n");
+                    }
                 }
                 else if(esCalculoAux(vectorPolaca[i])) {
                     fprintf(archAssembler, "fstp @CalculoAux\n");
