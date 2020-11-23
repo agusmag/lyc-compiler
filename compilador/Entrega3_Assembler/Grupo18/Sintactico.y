@@ -103,6 +103,8 @@ bool esValorAEvaluar(const char *);
 bool esCalculoAux(const char *);
 bool esCont(const char *);
 char * getOperacion(const char *);
+bool esValorCte(const char * str);
+int existeCTE(const char* id);
 
 
 char* my_itoa(int num, char *str);
@@ -362,7 +364,7 @@ comparacion:
         }
         esComp = 0;
         topeAsignacion = -1;
-        insertarPolaca("BGE");
+        insertarPolaca("BGT");
         if(hayOr)
         {
             insertarPolacaEnPosicion(pedirPos(), posActual +1);
@@ -1003,21 +1005,28 @@ int existeCTE(const char* id)
 {
     //tengo que ver el tema del _ en el nombre de las cte
     t_simbolo *tabla = tablaTS.primero;
-    char nombreCTE[50] = "_";
+    char valor[32];
+    char nombreCTE[32] = "_";
     strcat(nombreCTE, id);
-    int b1 = 0;
-    int b2 = 0;
-    int j =0;
-    
-    while(j<cant_aux)
-    {
-        //b1 = strcmp(idvec[j], id);
-        b2 = strcmp(tabla->data.nombreASM, nombreCTE);
-        if(b2 == 0)
+    int b1, b2, b3, b4, b5 = -1;
+
+    while(tabla)
+    {   
+        b1 = strcmp(tabla->data.nombre, id);
+        b2 = strcmp(tabla->data.nombre, nombreCTE);
+        b3 = strcmp(tabla->data.nombreASM, id);
+        b5 = strcmp(tabla->data.nombreASM, nombreCTE);
+
+        if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
         {
-                return 1;
+            b4 = strcmp(tabla->data.valor.valor_str, id);
         }
-        j++;
+
+        if(b1 == 0 || b2 == 0 || b3 == 0 || b4 == 0 || b5 == 0)
+        {
+            return 1;
+        }
+        tabla = tabla->next;
     }
     return 0;
 }
@@ -1213,12 +1222,18 @@ void generarAssembler(){
 
     int i;
     for(i=0; i<=posActual; i++){
-    
+        printf("Lo que hay en el vector %s\n", vectorPolaca[i]);
+
         if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vectorPolaca[i])){
             fprintf(archAssembler, "branch%d:\n\n", i);
         }        
 
         if(esValor(vectorPolaca[i])){
+            t_simbolo *lexema = getLexema(vectorPolaca[i]);
+            if(i != 2)
+                fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
+        }
+        else if(esValorCte(vectorPolaca[i])){
             t_simbolo *lexema = getLexema(vectorPolaca[i]);
             fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
         }
@@ -1240,7 +1255,8 @@ void generarAssembler(){
             i++;
             t_simbolo *lexema = getLexema(vectorPolaca[i]);
 
-            if(strcmp(lexema->data.tipo, "CONST_REAL") == 0 || strcmp(lexema->data.tipo, "INT") == 0)
+            printf("EL TIPO DE DATO ES %s\n", lexema->data.tipo);
+            if(strcmp(lexema->data.tipo, "FLOAT") == 0 || strcmp(lexema->data.tipo, "INT") == 0)
             {
                 fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM);
             }
@@ -1256,14 +1272,16 @@ void generarAssembler(){
 
 
             if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
+                
                 fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
             }
             else{
-                fprintf(archAssembler, "displayFloat %s\nNEWLINE\n", lexema->data.nombreASM);
+                fprintf(archAssembler, "displayFloat %s,2\nNEWLINE\n", lexema->data.nombreASM);
             }
         }
         else if(esAsignacion(vectorPolaca[i])){
             i++;
+            printf("entre aca con: %s\n", vectorPolaca[i]);
             fprintf(archAssembler, "fstp %s\n\n", vectorPolaca[i]);
         }
         else if(esOperacion(vectorPolaca[i])){
@@ -1491,9 +1509,12 @@ bool esPosicionDeEtiqueta(int posicion){
 
 bool esValor(const char * str){
     //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
-    if(existeCTE(str) == 1 || existeID(str) == 1 )
-        return true;
-    return false;
+    return existeID(str) == 1;
+}
+
+bool esValorCte(const char * str){
+    //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
+    return existeCTE(str) == 1;
 } 
 
 bool esComparacion(const char * str){
@@ -1570,7 +1591,7 @@ bool esDisplay(const char * str){
 
 bool esAsignacion(char * str)
 {
-    int aux = strcmp(str, "=");
+    int aux = strcmp(str, ":");
     return aux == 0;
 }
 
