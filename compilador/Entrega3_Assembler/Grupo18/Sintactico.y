@@ -555,12 +555,12 @@ factor:
     PARENTESIS
     {
         insertarPolaca("0");
-        insertarPolaca("@cont");
         insertarPolaca("=");
+        insertarPolaca("@cont");
     } expresion
     {
-        insertarPolaca("@valorAEvaluar");
         insertarPolaca("=");
+        insertarPolaca("@valorAEvaluar");
     } PUNTO_Y_COMA CORCHETE lista END_CORCHETE END_PARENTESIS { insertarPolaca("ENDCONTAR"); }
     ;
 
@@ -1170,18 +1170,18 @@ void notCondicion(int cant) //aca le pasamos por parametro el cantidadCondicione
 
 void insertarExpresionEnContar()
 {
-    insertarPolaca("@calculoAux");
     insertarPolaca("=");
     insertarPolaca("@calculoAux");
-    insertarPolaca("@valorAEvaluar");
+    insertarPolaca("@calculoAux");
     insertarPolaca("CMP");
+    insertarPolaca("@valorAEvaluar");
     insertarPolaca("BNE");
     insertarPolacaInt(posActual + 6);
     insertarPolaca("@cont");
     insertarPolaca("1");
     insertarPolaca("+");
-    insertarPolaca("@cont");
     insertarPolaca("=");
+    insertarPolaca("@cont");
 }
 
 
