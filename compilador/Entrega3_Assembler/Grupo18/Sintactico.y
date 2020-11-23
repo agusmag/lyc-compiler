@@ -1331,6 +1331,8 @@ void generarAssembler(){
         }
         else if(esContar(vectorPolaca[i])) // para encontrar el bloque perteneciente al metodo CONTAR, se agregaron las etiquetas CONTAR y ENDCONTAR en la polaca
         {  
+            fprintf(archAssembler, "fld @0\n");
+            fprintf(archAssembler, "fstp @cont\n");
             int evaluar = 0; // el valor a evaluar en el CONTAR se comporta de dos formas distintas, la primera vez es cuando se guarda el valor que quiero evaluar, y las otras son para hacer las comparaciones. Esta bandera ayuda a diferenciar ambos procesos cuando entre en el elsif "esValorAEvaluar"
             i++;
             while(!esEndContar(vectorPolaca[i])) 
@@ -1462,8 +1464,9 @@ void crearSeccionData(FILE *archAssembler){
         }
         tablaSimbolos = tablaSimbolos->next;
     }
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "0", "; Variable para almacenar el resultado de contar");
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@1", "dd", "1", "; constante para sumar a @cont la cantidad ");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@cont", "dd", "0.0", "; Variable para almacenar el resultado de contar");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@1", "dd", "1.0", "; constante para sumar a @cont la cantidad ");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@0", "dd", "0.0", "; constante para sumar a @cont la cantidad ");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@valorAEvaluar", "dd", "?", "; Variable para almacenar el primer parametro de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@calculoAux", "dd", "?", "; Variable para almacenar cada valor de la lista de expresiones de contar");
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
