@@ -18,10 +18,6 @@ _0             dd             0.0            ; Constante int
 _2_5           dd             2.5            ; Constante float
 _92            dd             92.0           ; Constante int
 _1             dd             1.0            ; Constante int
-_0_342         dd             0.342          ; Constante float
-_256           dd             256.0          ; Constante int
-_52            dd             52.0           ; Constante int
-_4             dd             4.0            ; Constante int
 S_La_suma_es____3                  db             "La suma es: ", '$', 12 dup (?); Constante string
 _2             dd             2.0            ; Constante int
 S_actual_es___que_2_y____de_0__4   db             "actual es > que 2 y != de 0", '$', 27 dup (?); Constante string
@@ -29,8 +25,8 @@ S_no_es_mayor_que_2__5             db             "no es mayor que 2", '$', 17 d
 @cont          dd             ?              ; Variable para almacenar el resultado de contar
 @valorAEvaluar dd             ?              ; Variable para almacenar el primer parametro de contar
 @calculoAux    dd             ?              ; Variable para almacenar cada valor de la lista de expresiones de contar
-@ifI           dd             ?              ; Variable para condición izquierda
-@ifD           dd             ?              ; Variable para condición derecha
+@ifI           dd             ?              ; Variable para condici?n izquierda
+@ifD           dd             ?              ; Variable para condici?n derecha
 
 .CODE
 
@@ -40,22 +36,27 @@ mov AX,@DATA                  ; Inicializa el segmento de datos
 mov DS,AX                     
 mov ES,AX                     
 
-fstp nombre
-
 displayString S_Prueba_txt_LyC_Tema_4___1
 NEWLINE
 displayString S_Ingrese_un_valor_float____2
 NEWLINE
-getString actual
+GetFloat actual
 NEWLINE
-fld contador
+displayFloat actual,2
+NEWLINE
+fld _0
+fstp contador
+
 fld nombre
 fadd
+fstp suma
+
 branch17:
 
 fld contador
 fstp @ifI
 
+fld _92
 fstp @ifD
 
 fld @ifI
@@ -64,33 +65,30 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch107
+jae branch35
 
 fld contador
+fld _1
 fadd
-fld contador
-fld contador
-fdiv
-fld contador
-fld 0
-fstp =
+fstp contador
 
-fmul
-fadd
-fld actual
+fld suma
 fld actual
 fadd
+fstp suma
+
 jmp branch17
 
-branch107:
+branch35:
 
 displayString S_La_suma_es____3
 NEWLINE
-displayFloat suma
+displayFloat suma,2
 NEWLINE
 fld actual
 fstp @ifI
 
+fld _2
 fstp @ifD
 
 fld @ifI
@@ -99,11 +97,12 @@ fxch
 fcom
 fstsw AX
 sahf
-jbe branch125
+jbe branch53
 
 fld actual
 fstp @ifI
 
+fld _0
 fstp @ifD
 
 fld @ifI
@@ -112,13 +111,13 @@ fxch
 fcom
 fstsw AX
 sahf
-je branch125
+je branch53
 
 displayString S_actual_es___que_2_y____de_0__4
 NEWLINE
-jmp branch132
+jmp branch60
 
-branch125:
+branch53:
 
 fld actual
 fstp @ifI
@@ -132,14 +131,14 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch132
+jae branch60
 
 displayString S_no_es_mayor_que_2__5
 NEWLINE
-branch132:
+branch60:
 
 
-mov AX,4C00h                  ; Indica que debe finalizar la ejecución
+mov AX,4C00h                  ; Indica que debe finalizar la ejecuci?n
 int 21h
 
 END inicio
