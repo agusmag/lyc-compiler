@@ -1,9 +1,0 @@
-DIM <numeroI01, numeroF01> AS <Integer, Float>
-
-numeroI01 : 12;
-
-numeroF01 : 90.6;
- 
-CONST palabra = "prueba";
-
-PUT "prueba3";
